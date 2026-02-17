@@ -11,8 +11,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class SDMEconomyCurrencyRegistry {
 
@@ -41,6 +43,14 @@ public class SDMEconomyCurrencyRegistry {
 
     public static IExternalCurrency getCurrency(ResourceLocation id) {
         return CURRENCIES.get(id);
+    }
+
+    public static Collection<IExternalCurrency> getCurrencies() {
+        return CURRENCIES.values();
+    }
+
+    public static void forEachCurrencies(BiConsumer<ResourceLocation, IExternalCurrency> iterator) {
+        CURRENCIES.forEach(iterator);
     }
 
     public static void reload() {

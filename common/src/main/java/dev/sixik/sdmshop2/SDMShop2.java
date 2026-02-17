@@ -4,7 +4,6 @@ import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.platform.Platform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
-import dev.sixik.sdmshop2.tests.economy.EconomyTest;
 
 public final class SDMShop2 {
     public static final String MOD_ID = "sdmshop2";

@@ -5,7 +5,6 @@ import dev.architectury.event.events.common.PlayerEvent;
 import dev.sixik.sdmshop2.libs.sdmeconomy.BankAccount;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyCurrencyRegistry;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyService;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 
