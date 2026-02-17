@@ -22,6 +22,11 @@ public class SDMEconomyCurrencyRegistry {
 
     private static final Map<ResourceLocation, IExternalCurrency> CURRENCIES = new HashMap<>();
 
+    /**
+     * Регистрирует валюту которая имеет физическую валюту.
+     * @param id ID Типа
+     * @param type Сериализатор
+     */
     public static void registerType(ResourceLocation id, ICurrencyType<?> type) {
         TYPES.put(id, type);
     }
@@ -42,6 +47,10 @@ public class SDMEconomyCurrencyRegistry {
         reload(SDMEconomyPlatform.getCurrenciesDir());
     }
 
+    /**
+     * Перезагружает все валюты которые были созданы.
+     * @param configDir Место где храняться пользовательские валюты
+     */
     public static void reload(Path configDir) {
         CURRENCIES.clear();
 

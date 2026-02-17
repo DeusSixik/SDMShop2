@@ -1,6 +1,9 @@
 package dev.sixik.sdmshop2.libs.sdmeconomy;
 
+import com.google.gson.Gson;
+import dev.sixik.sdmshop2.libs.sdmeconomy.custom_currency.ExternalItemCurrency;
 import dev.sixik.sdmshop2.utils.exceptions.NotInitializedException;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -14,6 +17,8 @@ import java.nio.file.Path;
 public class SDMEconomyPlatform {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SDMEconomyPlatform.class);
+
+    public static final Gson GSON = new Gson();
 
     private static Path CONFIG_DIR;
     private static Path CURRENCIES_DIR;
@@ -67,6 +72,11 @@ public class SDMEconomyPlatform {
         }
 
         return targetDir;
+    }
+
+    public static void init() {
+        SDMEconomyCurrencyRegistry.registerType(ResourceLocation.tryBuild("minecraft", "item"), new ExternalItemCurrency.ExternalItemCurrencyType());
+        shutdownHook();
     }
 
     public static void onServerStart(MinecraftServer server) {

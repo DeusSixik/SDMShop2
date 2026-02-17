@@ -15,6 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BankAccount {
 
+    /**
+     * Владелец Аккаунта. Это всегда ID {@link GameProfile}
+     */
     @Getter
     private final UUID gameProfileOwnerId;
 
@@ -35,24 +38,40 @@ public class BankAccount {
         this.gameProfileOwnerId = gameProfileId;
     }
 
+    /**
+     * Возвращает баланс игрока или стандартное значение валюты {@link IStoredCurrency#getDefaultBalance()} если у игрока нет этой валюты
+     */
     public BigDecimal getBalance(IStoredCurrency currency) {
         return balances.getOrDefault(currency.getId(), currency.getDefaultBalance());
     }
 
+    /**
+     * Устанавливает количество конкретной валюты
+     */
     public void setBalance(IStoredCurrency currency, BigDecimal amount) {
         balances.put(currency.getId(), amount);
         markDirty();
     }
 
+    /**
+     * Изменяет количество конкретной валюты
+     * @param amount Сколько добавить или убавить
+     */
     public void modify(IStoredCurrency currency, BigDecimal amount) {
         balances.merge(currency.getId(), amount, BigDecimal::add);
         markDirty();
     }
 
+    /**
+     * Помечает то что данные изменились и их нужно сохранить
+     */
     public void markDirty() {
         this.dirty = true;
     }
 
+    /**
+     * Помечает то что данные сохранять не нужно
+     */
     public void markClean() {
         this.dirty = false;
     }

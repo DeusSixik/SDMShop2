@@ -7,6 +7,9 @@ import net.minecraft.world.entity.player.Player;
 
 import java.math.BigDecimal;
 
+/**
+ * Позволят создавать валюту которпя применяет какие-то физические объекты (Предметы, жидкости, опыт и т.п)
+ */
 public interface IExternalCurrency extends ICurrency {
 
     default boolean withdraw(ServerPlayer player, BigDecimal amount) {
@@ -23,6 +26,9 @@ public interface IExternalCurrency extends ICurrency {
 
     BigDecimal getBalance(Player player);
 
+    /**
+     * Иконка валюты при рендере
+     */
     default CurrencyIcon getIcon() {
         return new CurrencyIcon(IconType.NONE, null);
     }

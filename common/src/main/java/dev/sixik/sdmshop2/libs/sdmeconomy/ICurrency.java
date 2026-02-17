@@ -7,12 +7,24 @@ import java.math.BigDecimal;
 
 public interface ICurrency {
 
+    /**
+     * Уникальное ID валюты
+     */
     ResourceLocation getId();
 
+    /**
+     * Отображаемое имя валюты
+     */
     Component getDisplayName();
 
+    /**
+     * Стороковое обозначение N количества валюты
+     */
     String format(BigDecimal decimal);
 
+    /**
+     * Цвет текста при отображении
+     */
     int getColor();
 
 }

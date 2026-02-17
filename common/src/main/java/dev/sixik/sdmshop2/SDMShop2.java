@@ -14,8 +14,7 @@ public final class SDMShop2 {
         LifecycleEvent.SERVER_BEFORE_START.register(SDMEconomyPlatform::onServerStart);
         LifecycleEvent.SERVER_STOPPED.register(SDMEconomyPlatform::onServerStop);
         PlayerEvent.PLAYER_QUIT.register(SDMEconomyPlatform::onPlayerLeft);
-        SDMEconomyPlatform.shutdownHook();
+        SDMEconomyPlatform.init();
 
-        EconomyTest.init();
     }
 }

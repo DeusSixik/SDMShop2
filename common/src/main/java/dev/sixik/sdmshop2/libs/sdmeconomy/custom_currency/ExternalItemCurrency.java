@@ -1,13 +1,15 @@
-package dev.sixik.sdmshop2.tests.economy;
+package dev.sixik.sdmshop2.libs.sdmeconomy.custom_currency;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import dev.sixik.sdmshop2.libs.sdmeconomy.ICurrencyType;
 import dev.sixik.sdmshop2.libs.sdmeconomy.IExternalCurrency;
+import dev.sixik.sdmshop2.utils.ShopItemHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -15,13 +17,13 @@ import net.minecraft.world.item.Items;
 
 import java.math.BigDecimal;
 
-public class CustomExternalCurrency implements IExternalCurrency {
+public class ExternalItemCurrency implements IExternalCurrency {
 
     private final ResourceLocation id;
     private final Component displayName;
-    private final Item itemType;
+    private final ItemStack itemType;
 
-    public CustomExternalCurrency(ResourceLocation id, Item itemType) {
+    public ExternalItemCurrency(ResourceLocation id, ItemStack itemType) {
         this.id = id;
         this.displayName = Component.translatable(id.toString().replace(":", "_"));
         this.itemType = itemType;
@@ -33,44 +35,23 @@ public class CustomExternalCurrency implements IExternalCurrency {
         if (currentBalance.doubleValue() < amount.doubleValue()) return false;
 
         if (!simulate) {
-            // Удаляем предметы. В ваниле есть helper, но надежнее ручной обход,
-            // чтобы точно контролировать NBT если нужно.
-            int remaining = amount.intValue();
-            Inventory inv = player.getInventory();
-
-            for (int i = 0; i < inv.getContainerSize(); i++) {
-                ItemStack stack = inv.getItem(i);
-                if (stack.getItem() == itemType) {
-                    int extract = Math.min(stack.getCount(), remaining);
-                    stack.shrink(extract);
-                    remaining -= extract;
-                    if (remaining <= 0) break;
-                }
-            }
+            return ShopItemHelper.shrinkItem(player.getInventory(), itemType, amount.intValue(), true, false);
         }
         return true;
     }
 
     @Override
     public boolean deposit(ServerPlayer player, BigDecimal amount, boolean simulate) {
-        // Проверка места в инвентаре сложнее, поэтому упростим:
-        // Всегда true, а если нет места — дропаем.
         if (!simulate) {
-            ItemStack stack = new ItemStack(itemType, amount.intValue());
-            // giveToPlayer вернет false, если инвентарь полон
-            boolean added = player.getInventory().add(stack);
-
-            if (!added) {
-                // Если не влезло — кидаем под ноги, чтобы игрок не потерял деньги
-                player.drop(stack, false);
-            }
+            ItemStack stack = itemType.copyWithCount(amount.intValue());
+            return ShopItemHelper.giveItems(player, stack, amount.intValue());
         }
         return true;
     }
 
     @Override
     public BigDecimal getBalance(Player player) {
-        return new BigDecimal(player.getInventory().countItem(itemType));
+        return new BigDecimal(ShopItemHelper.countItem(player.getInventory(), itemType, true, false));
     }
 
     @Override
@@ -93,10 +74,13 @@ public class CustomExternalCurrency implements IExternalCurrency {
         return 0;
     }
 
-    public static class CustomExternalCurrencyType implements ICurrencyType<CustomExternalCurrency> {
+    public static class ExternalItemCurrencyType implements ICurrencyType<ExternalItemCurrency> {
 
         @Override
-        public CustomExternalCurrency deserialize(ResourceLocation id, JsonObject json) {
+        public ExternalItemCurrency deserialize(ResourceLocation id, JsonObject json) {
+
+            if(!json.has("item"))
+                throw new NullPointerException("Param with id 'item' not exists!");
 
             String itemIdStr = json.get("item").getAsString();
             ResourceLocation itemId = ResourceLocation.tryParse(itemIdStr);
@@ -107,14 +91,37 @@ public class CustomExternalCurrency implements IExternalCurrency {
                 throw new IllegalArgumentException("Item not found: " + itemIdStr);
             }
 
-            return new CustomExternalCurrency(id, item);
+            CompoundTag nbt = null;
+            if (json.has("nbt")) {
+                String nbtString = json.get("nbt").getAsString();
+                try {
+                    nbt = TagParser.parseTag(nbtString);
+                } catch (Exception e) {
+                    throw new JsonSyntaxException("Invalid NBT in currency " + id + ": " + e.getMessage());
+                }
+            }
+
+
+            ItemStack itemStack = item.getDefaultInstance();
+
+            if(nbt != null)
+                itemStack.setTag(nbt);
+
+            return new ExternalItemCurrency(id, itemStack);
         }
 
         @Override
-        public JsonObject serialize(CustomExternalCurrency currency) {
+        public JsonObject serialize(ExternalItemCurrency currency) {
+            final ItemStack item = currency.itemType;
+
             JsonObject json = new JsonObject();
             serializeType(json, "item");
-            json.addProperty("item", BuiltInRegistries.ITEM.getKey(currency.itemType).toString());
+            json.addProperty("item", BuiltInRegistries.ITEM.getKey(item.getItem()).toString());
+
+            if(item.getTag() != null) {
+                json.addProperty("nbt", item.getTag().toString());
+            }
+
             return json;
         }
     }

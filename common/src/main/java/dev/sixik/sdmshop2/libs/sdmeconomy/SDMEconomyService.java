@@ -18,6 +18,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Класс в которм храняться данные о всех игроках и их балансах. <br> <br>
+ * <p>Основной принцип работы такой что если игрока в течении 10 минут не используют он будет выгружен на диск
+ * , но если он понадобиться он будет обратно загружен</p>
+ */
 public final class SDMEconomyService {
 
     @Getter
@@ -43,7 +48,7 @@ public final class SDMEconomyService {
     public SDMEconomyService(Path dataFolder) {
         this.dataFolder = dataFolder;
         this.accountCache = Caffeine.newBuilder()
-                .expireAfterAccess(5, TimeUnit.MINUTES)
+                .expireAfterAccess(10, TimeUnit.MINUTES)
                 .removalListener((uuid, account, cause) -> {
                     if(((BankAccount)account).isDirty())
                         saveAccount((UUID) uuid, (BankAccount) account);
@@ -51,14 +56,26 @@ public final class SDMEconomyService {
                 .build(this::loadAccountFromDisk);
     }
 
+    /**
+     * Получает данные игрока с его валютами. <br>
+     * <p>Если игрока нет в кэше он будет загружен с диска</p>
+     * @param gameProfileId {@link com.mojang.authlib.GameProfile}
+     */
     public BankAccount getAccount(UUID gameProfileId) {
         return accountCache.get(gameProfileId);
     }
 
+    /**
+     * Выгружает игрока из памяти на диск если он уже не нужно
+     * @param gameProfileId {@link com.mojang.authlib.GameProfile}
+     */
     public void unloadPlayer(UUID gameProfileId) {
         accountCache.invalidate(gameProfileId);
     }
 
+    /**
+     * Сохраняет все Аккаунты нуждающиеся в этом
+     */
     public void saveAllDirty() {
         ioExecutor.submit(() -> {
             accountCache.asMap().forEach((gameProfileId, acc) -> {

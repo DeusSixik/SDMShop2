@@ -17,8 +17,6 @@ public class EconomyTest {
 
     public static void init() {
 
-        SDMEconomyCurrencyRegistry.registerType(ResourceLocation.tryBuild("sdm", "item"), new CustomExternalCurrency.CustomExternalCurrencyType());
-
         PlayerEvent.DROP_ITEM.register((EconomyTest::drop));
     }
 
