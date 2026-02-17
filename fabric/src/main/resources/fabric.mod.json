@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "sdmshop2",
+  "version": "${version}",
+  "name": "SDMShop2",
+  "description": "",
+  "authors": [
+    ""
+  ],
+  "contact": {
+    "homepage": ""
+  },
+  "license": "LGPL-3.0",
+  "icon": "assets/sdmshop2/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.sixik.sdmshop2.fabric.SDMShop2Fabric"
+    ],
+    "client": [
+      "dev.sixik.sdmshop2.fabric.client.SDMShop2FabricClient"
+    ]
+  },
+  "mixins": [
+    "sdmshop2.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "architectury": ">=9.2.14",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
