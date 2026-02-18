@@ -36,6 +36,11 @@ public class SendPlayerAccountS2C extends BaseS2CMessage {
 
     @Override
     public void handle(NetworkManager.PacketContext packetContext) {
-        SDMEconomyServiceClient.getInstanceClient().getBankAccount().deserializeNbt(accountNbt);
+        try {
+            SDMEconomyServiceClient.getInstanceClient().getBankAccount().deserializeNbt(accountNbt);
+            SDMEconomyService.LOGGER.info("Accepted synchronization packet for Account!");
+        } catch (Exception e) {
+            SDMEconomyService.LOGGER.error("When accept synchronization packet for Account!", e);
+        }
     }
 }

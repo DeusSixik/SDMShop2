@@ -3,6 +3,7 @@ package dev.sixik.sdmshop2.libs.sdmeconomy;
 import com.google.gson.Gson;
 import dev.sixik.sdmshop2.libs.sdmeconomy.custom_currency.ExternalItemCurrency;
 import dev.sixik.sdmshop2.libs.sdmeconomy.network.packets.SendDynamicCurrencyS2C;
+import dev.sixik.sdmshop2.libs.sdmeconomy.network.packets.SendPlayerAccountS2C;
 import dev.sixik.sdmshop2.utils.exceptions.NotInitializedException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -125,5 +126,6 @@ public class SDMEconomyPlatform {
 
     public static void onPlayerJoin(ServerPlayer player) {
         new SendDynamicCurrencyS2C().sendTo(player);
+        new SendPlayerAccountS2C(player).sendTo(player);
     }
 }

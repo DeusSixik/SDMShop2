@@ -29,7 +29,6 @@ public final class SDMShop2 {
             ShopTable.Instance = new ShopTable(server);
         });
         LifecycleEvent.SERVER_STOPPED.register((server -> {
-
             SDMEconomyPlatform.onServerStop(server);
             ShopTable.Instance.saveAll();
         }));

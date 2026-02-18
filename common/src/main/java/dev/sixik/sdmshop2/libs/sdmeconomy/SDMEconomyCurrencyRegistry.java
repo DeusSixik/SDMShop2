@@ -123,8 +123,6 @@ public class SDMEconomyCurrencyRegistry {
         } catch (Exception e) {
             LOGGER.error("Error loading currency from file '{}'", file.getName(), e);
         }
-
-        LOGGER.info("Custom Currencies: " + CURRENCIES.size());
     }
 
     public static CompoundTag serializeCurrencies() {
@@ -150,7 +148,7 @@ public class SDMEconomyCurrencyRegistry {
 
     public static Map<ResourceLocation, IExternalCurrency> deserializeCurrencies(CompoundTag nbt) {
         if(!nbt.contains("currencies")) return new HashMap<>();
-        
+
         Map<ResourceLocation, IExternalCurrency> out = new HashMap<>();
 
         ListTag nbtCurrencies = (ListTag) nbt.get("currencies");
