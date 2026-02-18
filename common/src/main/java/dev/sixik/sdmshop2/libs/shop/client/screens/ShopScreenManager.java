@@ -1,0 +1,32 @@
+package dev.sixik.sdmshop2.libs.shop.client.screens;
+
+import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
+
+public class ShopScreenManager {
+
+    public static final ShopScreenManager INSTANCE = new ShopScreenManager();
+
+    protected WidgetGroup createGui() {
+        return new ShopScreen();
+    }
+
+    public void openGui() {
+
+        RenderSystem.recordRenderCall(() -> {
+            final var minecraft = Minecraft.getInstance();
+            final var entityPlayer = minecraft.player;
+
+            ModularUI ui = new ModularUI(createGui(), IUIHolder.EMPTY, entityPlayer);
+            ui.initWidgets();
+            ModularUIGuiContainer ModularUIGuiContainer = new ModularUIGuiContainer(ui, entityPlayer.containerMenu.containerId);
+
+            minecraft.setScreen(ModularUIGuiContainer);
+            entityPlayer.containerMenu = ModularUIGuiContainer.getMenu();
+        });
+    }
+}

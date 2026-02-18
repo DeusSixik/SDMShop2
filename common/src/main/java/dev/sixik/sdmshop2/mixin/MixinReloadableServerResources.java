@@ -1,6 +1,8 @@
 package dev.sixik.sdmshop2.mixin;
 
+import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyCurrencyRegistry;
+import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;
@@ -19,6 +21,6 @@ public class MixinReloadableServerResources {
 
     @Inject(method = "loadResources", at = @At("RETURN"))
     private static void bts$loadResources(ResourceManager resourceManager, RegistryAccess.Frozen frozen, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, int i, Executor executor, Executor executor2, CallbackInfoReturnable<CompletableFuture<ReloadableServerResources>> cir) {
-        cir.getReturnValue().thenRun(SDMEconomyCurrencyRegistry::reload);
+        cir.getReturnValue().thenRun(SDMPlatform::onReload);
     }
 }

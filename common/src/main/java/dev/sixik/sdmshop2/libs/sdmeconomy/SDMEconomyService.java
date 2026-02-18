@@ -21,23 +21,26 @@ import java.util.concurrent.TimeUnit;
  * <p>Основной принцип работы такой что если игрока в течении 10 минут не используют он будет выгружен на диск
  * , но если он понадобиться он будет обратно загружен</p>
  */
-public final class SDMEconomyService {
+public class SDMEconomyService {
 
     @Getter
     private static SDMEconomyService Instance;
 
-    static SDMEconomyService init() {
-        final SDMEconomyService service = new SDMEconomyService();
+    public static SDMEconomyService init() {
+        return init(new SDMEconomyService());
+    }
+
+    public static SDMEconomyService init(SDMEconomyService service) {
         Instance = service;
         return service;
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SDMEconomyService.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(SDMEconomyService.class);
 
-    private final LoadingCache<UUID, BankAccount> accountCache;
-    private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
+    protected final LoadingCache<UUID, BankAccount> accountCache;
+    protected final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
 
-    private final Path dataFolder;
+    protected final Path dataFolder;
 
     public SDMEconomyService() {
         this(SDMEconomyPlatform.getPlayersDataDir());
@@ -82,7 +85,7 @@ public final class SDMEconomyService {
         });
     }
 
-    private void saveAccount(UUID gameProfileId, BankAccount account) {
+    protected void saveAccount(UUID gameProfileId, BankAccount account) {
         final Path pathToFile = dataFolder.resolve(getFileName(gameProfileId));
         final File file = pathToFile.toFile();
 
@@ -94,7 +97,7 @@ public final class SDMEconomyService {
         }
     }
 
-    private BankAccount loadAccountFromDisk(UUID gameProfileId) {
+    protected BankAccount loadAccountFromDisk(UUID gameProfileId) {
         final Path pathToFile = dataFolder.resolve(getFileName(gameProfileId));
         final File file = pathToFile.toFile();
 
@@ -113,7 +116,7 @@ public final class SDMEconomyService {
         return new BankAccount(gameProfileId);
     }
 
-    private static String getFileName(Object name) {
+    protected static String getFileName(Object name) {
         return name.toString() + ".nbt";
     }
 }

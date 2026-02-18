@@ -1,18 +1,27 @@
 package dev.sixik.sdmshop2.tests.economy;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.PlayerEvent;
-import dev.sixik.sdmshop2.libs.sdmeconomy.BankAccount;
-import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyCurrencyRegistry;
-import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyService;
+import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
+import dev.sixik.sdmshop2.libs.shop.base.ShopEntry;
+import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
+import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
+import dev.sixik.sdmshop2.libs.shop.components.CategoryComponent;
+import dev.sixik.sdmshop2.libs.shop.components.ShopCategoriesContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.components.ShopEntriesContainerComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 
-import java.math.BigDecimal;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
 
 public class EconomyTest {
-
-    private static TestSDMCoin sdmCoin = new TestSDMCoin();
 
     public static void init() {
 
@@ -21,13 +30,56 @@ public class EconomyTest {
 
     private static EventResult drop(Player player, ItemEntity itemEntity) {
 
-        BankAccount account = SDMEconomyService.getInstance().getAccount(player.getGameProfile().getId());
-
-        System.out.println(account.getBalance(sdmCoin));
-        account.modify(sdmCoin, BigDecimal.ONE);
-
-        System.out.println(SDMEconomyCurrencyRegistry.getCurrency("custom_currency").getBalance(player));
-
+        new ShopScreenManager().openGui();
         return EventResult.interruptDefault();
+    }
+
+    public static void test() {
+
+        ShopInstance manager = ShopInstance.createManager(ResourceLocation.tryBuild("sdm", "test_manager"), true);
+
+        ShopEntriesContainerComponent entriesComponent = manager.getComponent(ShopEntriesContainerComponent.class).get();
+
+        UUID categoryId = UUID.randomUUID();
+
+        for (int i = 0; i < 20; i++) {
+            ShopEntry entry = ShopEntry.createEntry(UUID.randomUUID(), true);
+            entry.getComponent(CategoryComponent.class).get().setUuid(categoryId);
+            entriesComponent.addEntry(entry);
+        }
+
+        ShopCategoriesContainerComponent categoryManager = manager.getComponent(ShopCategoriesContainerComponent.class).get();
+        categoryManager.reindex();
+
+        System.out.println("Categorise Entries: " + categoryManager.getCategoriesEntry(categoryId).size());
+
+        final Path dir = SDMEconomyPlatform.getConfigDir();
+        if (!Files.exists(dir)) {
+            try { Files.createDirectories(dir); } catch (IOException e) { e.printStackTrace(); }
+        }
+
+        final File filePath = dir.resolve("Test.json").toFile();
+
+        // 1. Настраиваем Gson (PrettyPrinting делает JSON читаемым для человека)
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping() // Чтобы не экранировал символы типа < > =
+                .create();
+
+        // 2. Собираем данные в JsonObject
+        // Тут мы предполагаем, что у твоего ShopManager или компонентов есть метод serialize()
+        // Если его нет, мы собираем структуру вручную:
+        JsonElement root = manager.serialize();
+
+        // 3. Записываем в файл
+        try (FileWriter writer = new FileWriter(filePath)) {
+            // Gson сам всё запишет в writer
+            gson.toJson(root, writer);
+
+            System.out.println("Saved successfully to " + filePath.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
