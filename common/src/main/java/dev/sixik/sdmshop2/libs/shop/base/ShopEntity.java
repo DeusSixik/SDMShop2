@@ -2,16 +2,13 @@ package dev.sixik.sdmshop2.libs.shop.base;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 import lombok.Getter;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +18,7 @@ public class ShopEntity {
     private final List<ShopComponent> components = new ArrayList<>();
 
     public ShopEntity() {
-        initializeComponents();
+        initializeServerOnlyComponents();
     }
 
     private void initComponents() {
@@ -32,6 +29,8 @@ public class ShopEntity {
     }
 
     public final ShopEntity addComponent(ShopComponent component) {
+        if(hasComponent(component.getClass())) return this;
+
         component.setRoot(this);
         int i = 0;
         while (i < components.size() && components.get(i).priority() <= component.priority()) {
@@ -41,25 +40,17 @@ public class ShopEntity {
         return this;
     }
 
-    public final <T> boolean hasComponent(Class<T> type) {
-        for (ShopComponent component : components) {
-            if (type.isInstance(component)) {
+    public final boolean hasComponent(Class<?> type) {
+        for (int i = 0; i < components.size(); i++) {
+            if (type.isInstance(components.get(i))) {
                 return true;
             }
         }
-
         return false;
     }
 
-    @SuppressWarnings("unchecked")
-    public final <T> List<T> getComponents(Class<T> type) {
-        List<T> result = new ArrayList<>();
-        for (ShopComponent component : components) {
-            if (type.isInstance(component)) {
-                result.add((T) component);
-            }
-        }
-        return result;
+    public List<ShopComponent> getComponents() {
+        return Collections.unmodifiableList(components);
     }
 
     @SuppressWarnings("unchecked")
@@ -95,7 +86,7 @@ public class ShopEntity {
             components.add(ShopComponentRegistry.fromJson(compJson.getAsJsonObject()));
         }
 
-        initComponents();
+        initializeServerOnlyComponents();
     }
 
     public JsonElement serialize() {
@@ -107,11 +98,28 @@ public class ShopEntity {
     }
 
     public final void serializeComponentsNetwork(FriendlyByteBuf buf) {
-        buf.writeNbt((net.minecraft.nbt.CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, serializeComponents()));
+        List<ShopComponent> syncList = new ArrayList<>();
+        for (ShopComponent component : components) {
+            if (component.shouldSync()) {
+                syncList.add(component);
+            }
+        }
+
+        buf.writeVarInt(syncList.size());
+        for (ShopComponent component : syncList) {
+            ShopComponentRegistry.toNetwork(buf, component);
+        }
     }
 
     public final void deserializeComponentsNetwork(FriendlyByteBuf buf) {
-        deserializeComponents(NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, buf.readAnySizeNbt()));
+        int count = buf.readVarInt();
+
+        components.clear();
+        for (int i = 0; i < count; i++) {
+            addComponent(ShopComponentRegistry.fromNetwork(buf));
+        }
+
+        initializeClientOnlyComponents();
     }
 
     public void serializeNetwork(FriendlyByteBuf buf) {
@@ -122,10 +130,17 @@ public class ShopEntity {
         deserializeComponentsNetwork(buf);
     }
 
-    public final void initializeComponents() {
-        customInitializeComponents();
+    protected final void initializeClientOnlyComponents() {
+        customInitializeClientOnlyComponents();
         initComponents();
     }
 
-    protected void customInitializeComponents() {}
+    protected void customInitializeClientOnlyComponents() { }
+
+    public final void initializeServerOnlyComponents() {
+        customInitializeServerOnlyComponents();
+        initComponents();
+    }
+
+    protected void customInitializeServerOnlyComponents() { }
 }

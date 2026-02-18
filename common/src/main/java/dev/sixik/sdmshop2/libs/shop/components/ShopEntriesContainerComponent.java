@@ -86,12 +86,23 @@ public class ShopEntriesContainerComponent extends ShopComponent {
 
         @Override
         public void toNetwork(FriendlyByteBuf buf, ShopEntriesContainerComponent component) {
-            buf.writeNbt((net.minecraft.nbt.CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, serialize(component)));
+            final Map<UUID, ShopEntry> map = component.getEntryMap();
+
+            buf.writeVarInt(map.size());
+            map.forEach((key, value) -> value.serializeNetwork(buf));
         }
 
         @Override
         public ShopEntriesContainerComponent fromNetwork(FriendlyByteBuf buf) {
-            return deserialize(NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, buf.readNbt()).getAsJsonObject());
+            ShopEntriesContainerComponent component = new ShopEntriesContainerComponent();
+
+            int size = buf.readVarInt();
+
+            for (int i = 0; i < size; i++) {
+                component.addEntry(ShopEntry.fromNetwork(buf));
+            }
+
+            return component;
         }
     }
 }

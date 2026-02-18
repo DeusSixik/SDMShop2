@@ -2,7 +2,6 @@ package dev.sixik.sdmshop2.libs.sdmeconomy;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

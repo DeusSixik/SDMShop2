@@ -1,10 +1,10 @@
 package dev.sixik.sdmshop2.libs.shop.register;
 
 import dev.sixik.sdmshop2.libs.shop.components.CategoryComponent;
-import dev.sixik.sdmshop2.libs.shop.components.ShopEntriesContainerComponent;
-import dev.sixik.sdmshop2.libs.shop.components.ShopCategoriesContainerComponent;
-import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 import dev.sixik.sdmshop2.libs.shop.components.MoneyCostComponent;
+import dev.sixik.sdmshop2.libs.shop.components.ShopCategoriesContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.components.ShopEntriesContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 
 public class ShopRegister {
 

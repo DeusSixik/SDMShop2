@@ -1,7 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop;
 
-import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
+import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,7 +13,7 @@ public class SDMShopPlatform {
 
     @Environment(EnvType.CLIENT)
     public static ShopInstance getClientShopInstance() {
-        return SDMShopClient.MANAGER;
+        return SDMShopClient.Shop;
     }
 
     public static Optional<ShopInstance> getServerShopInstance(ResourceLocation shopId) {

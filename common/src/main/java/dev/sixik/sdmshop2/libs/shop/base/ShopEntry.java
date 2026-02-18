@@ -3,10 +3,9 @@ package dev.sixik.sdmshop2.libs.shop.base;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.components.CategoryComponent;
-import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import lombok.Getter;
+import net.minecraft.network.FriendlyByteBuf;
 
-import java.util.List;
 import java.util.UUID;
 
 public class ShopEntry extends ShopEntity {
@@ -15,7 +14,7 @@ public class ShopEntry extends ShopEntity {
         ShopEntry entry = new ShopEntry(uuid);
 
         if(initializeComponents)
-            entry.initializeComponents();
+            entry.initializeServerOnlyComponents();
         return entry;
     }
 
@@ -43,7 +42,19 @@ public class ShopEntry extends ShopEntity {
     }
 
     @Override
-    protected void customInitializeComponents() {
+    public void serializeNetwork(FriendlyByteBuf buf) {
+        buf.writeUUID(uuid);
+        super.serializeNetwork(buf);
+    }
+
+    @Override
+    protected void customInitializeServerOnlyComponents() {
         addComponent(new CategoryComponent("none"));
+    }
+
+    public static ShopEntry fromNetwork(FriendlyByteBuf buf) {
+        final ShopEntry entry = new ShopEntry(buf.readUUID());
+        entry.deserializeNetwork(buf);
+        return entry;
     }
 }

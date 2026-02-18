@@ -1,8 +1,6 @@
 package dev.sixik.sdmshop2.mixin;
 
 import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
-import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyCurrencyRegistry;
-import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;

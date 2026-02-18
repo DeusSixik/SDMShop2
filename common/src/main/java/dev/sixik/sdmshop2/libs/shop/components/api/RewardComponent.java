@@ -5,4 +5,9 @@ import net.minecraft.server.level.ServerPlayer;
 public abstract class RewardComponent extends ShopComponent {
 
     public abstract void reward(ServerPlayer player);
+
+    @Override
+    public boolean shouldSync() {
+        return false;
+    }
 }

@@ -3,9 +3,10 @@ package dev.sixik.sdmshop2.libs.shop.base;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import dev.sixik.sdmshop2.libs.shop.components.ShopEntriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ShopCategoriesContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.components.ShopEntriesContainerComponent;
 import lombok.Getter;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 public class ShopInstance extends ShopEntity {
@@ -16,7 +17,7 @@ public class ShopInstance extends ShopEntity {
         ShopInstance manager = new ShopInstance(shopId);
 
         if(initializeComponents)
-            manager.initializeComponents();
+            manager.initializeServerOnlyComponents();
 
         return manager;
     }
@@ -29,9 +30,14 @@ public class ShopInstance extends ShopEntity {
     }
 
     @Override
-    protected void customInitializeComponents() {
+    protected void customInitializeServerOnlyComponents() {
         addComponent(new ShopEntriesContainerComponent());
         addComponent(new ShopCategoriesContainerComponent());
+    }
+
+    @Override
+    protected void customInitializeClientOnlyComponents() {
+        customInitializeServerOnlyComponents();
     }
 
     @Override
@@ -49,7 +55,21 @@ public class ShopInstance extends ShopEntity {
 
         if (json.has("components")) {
             deserializeComponents(json.get("components").getAsJsonArray());
-        } else initializeComponents();
+        } else initializeServerOnlyComponents();
+    }
+
+    @Override
+    public void serializeNetwork(FriendlyByteBuf buf) {
+        buf.writeResourceLocation(id);
+        super.serializeNetwork(buf);
+    }
+
+    public static ShopInstance fromNetwork(FriendlyByteBuf buf) {
+        final ResourceLocation id = buf.readResourceLocation();
+
+        final ShopInstance shopInstance = new ShopInstance(id);
+        shopInstance.deserializeComponentsNetwork(buf);
+        return shopInstance;
     }
 
     public static ShopInstance fromJson(JsonElement element) {

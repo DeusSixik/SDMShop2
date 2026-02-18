@@ -1,6 +1,5 @@
 package dev.sixik.sdmshop2.libs.sdmeconomy.network.packets;
 
-import com.mojang.logging.LogUtils;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
@@ -8,7 +7,6 @@ import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyCurrencyRegistry;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyService;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyServiceClient;
 import dev.sixik.sdmshop2.libs.sdmeconomy.network.SDMEconomyNetwork;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 

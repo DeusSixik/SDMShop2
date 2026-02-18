@@ -12,11 +12,16 @@ import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
 import dev.sixik.sdmshop2.libs.shop.components.CategoryComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ShopCategoriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ShopEntriesContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.network.async.AsyncBridge;
+import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -53,6 +58,15 @@ public class EconomyTest {
 
         System.out.println("Categorise Entries: " + categoryManager.getCategoriesEntry(categoryId).size());
 
+
+
+        AsyncBridge.askPlayer(SDMEconomyPlatform.server.getPlayerList().getPlayers().get(0), AsyncServerTasks.SEND_SHOP_DATA, buf ->{
+            manager.serializeNetwork(buf);
+            return buf;
+        });
+    }
+
+    public static void save(ShopInstance manager) {
         final Path dir = SDMEconomyPlatform.getConfigDir();
         if (!Files.exists(dir)) {
             try { Files.createDirectories(dir); } catch (IOException e) { e.printStackTrace(); }
@@ -80,6 +94,5 @@ public class EconomyTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 }
