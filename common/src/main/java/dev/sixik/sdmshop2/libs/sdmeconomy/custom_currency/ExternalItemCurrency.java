@@ -78,6 +78,11 @@ public class ExternalItemCurrency implements IExternalCurrency {
     public static class ExternalItemCurrencyType implements ICurrencyType<ExternalItemCurrency> {
 
         @Override
+        public Class<ExternalItemCurrency> getOwnerClass() {
+            return ExternalItemCurrency.class;
+        }
+
+        @Override
         public ExternalItemCurrency deserialize(ResourceLocation id, JsonObject json) {
 
             if(!json.has("item"))

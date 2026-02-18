@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public interface ICurrencyType<T extends IExternalCurrency> {
 
+    Class<T> getOwnerClass();
+
     /**
      * Десериализация валюты из JSON
      * @param id Уникальный идентификатор валюты

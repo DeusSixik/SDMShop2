@@ -11,7 +11,6 @@ public class SDMPlatform {
         RELOADABLE.add(runnable);
     }
 
-
     public static void onReload() {
         for (Runnable runnable : RELOADABLE) {
             runnable.run();

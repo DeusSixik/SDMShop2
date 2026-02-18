@@ -2,6 +2,10 @@ package dev.sixik.sdmshop2.libs.sdmeconomy;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Getter;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -21,6 +25,7 @@ public class SDMEconomyCurrencyRegistry {
     private static final Logger LOGGER = LoggerFactory.getLogger(SDMEconomyCurrencyRegistry.class);
 
     private static final Map<ResourceLocation, ICurrencyType<?>> TYPES = new HashMap<>();
+    private static final Map<Class<?>, ICurrencyType<?>> TYPES_BY_CLASS = new HashMap<>();
 
     private static final Map<ResourceLocation, IExternalCurrency> CURRENCIES = new HashMap<>();
 
@@ -31,6 +36,7 @@ public class SDMEconomyCurrencyRegistry {
      */
     public static void registerType(ResourceLocation id, ICurrencyType<?> type) {
         TYPES.put(id, type);
+        TYPES_BY_CLASS.put(type.getOwnerClass(), type);
     }
 
     public static IExternalCurrency getCurrency(String id) {
@@ -43,6 +49,10 @@ public class SDMEconomyCurrencyRegistry {
 
     public static IExternalCurrency getCurrency(ResourceLocation id) {
         return CURRENCIES.get(id);
+    }
+
+    public static Map<ResourceLocation, IExternalCurrency> getCurrenciesMap() {
+        return new HashMap<>(CURRENCIES);
     }
 
     public static Collection<IExternalCurrency> getCurrencies() {
@@ -113,5 +123,59 @@ public class SDMEconomyCurrencyRegistry {
         } catch (Exception e) {
             LOGGER.error("Error loading currency from file '{}'", file.getName(), e);
         }
+
+        LOGGER.info("Custom Currencies: " + CURRENCIES.size());
+    }
+
+    public static CompoundTag serializeCurrencies() {
+        CompoundTag nbt = new CompoundTag();
+
+        ListTag nbtCurrencies = new ListTag();
+        for (Map.Entry<ResourceLocation, IExternalCurrency> entry : CURRENCIES.entrySet()) {
+            ResourceLocation key = entry.getKey();
+            IExternalCurrency value = entry.getValue();
+            final ICurrencyType type = TYPES_BY_CLASS.get(value.getClass());
+            if (type == null) continue;
+
+            CompoundTag data = new CompoundTag();
+            data.putString("key", key.toString());
+            data.putString("owner", type.getOwnerClass().getName());
+            data.put("data", type.serializeNbt(value));
+            nbtCurrencies.add(data);
+        }
+
+        nbt.put("currencies", nbtCurrencies);
+        return nbt;
+    }
+
+    public static Map<ResourceLocation, IExternalCurrency> deserializeCurrencies(CompoundTag nbt) {
+        if(!nbt.contains("currencies")) return new HashMap<>();
+        
+        Map<ResourceLocation, IExternalCurrency> out = new HashMap<>();
+
+        ListTag nbtCurrencies = (ListTag) nbt.get("currencies");
+        for (Tag nbtCurrency : nbtCurrencies) {
+            CompoundTag data = (CompoundTag) nbtCurrency;
+
+            ResourceLocation id = ResourceLocation.tryParse(data.getString("key"));
+            Class<?> clz;
+            try {
+                clz = Class.forName(data.getString("owner"));
+            } catch (ClassNotFoundException e) {
+                LOGGER.error("Unknown type: {}", data.getString("owner"));
+                continue;
+            }
+
+            ICurrencyType<?> type = TYPES_BY_CLASS.get(clz);
+            if(type == null) {
+                LOGGER.error("Unknown type: {}", clz.getName());
+                continue;
+            }
+
+            IExternalCurrency obj = type.deserializeNbt(id, data.get("data"));
+            out.put(id, obj);
+        }
+
+        return out;
     }
 }

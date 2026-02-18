@@ -2,11 +2,14 @@ package dev.sixik.sdmshop2.libs.sdmeconomy;
 
 import com.google.gson.Gson;
 import dev.sixik.sdmshop2.libs.sdmeconomy.custom_currency.ExternalItemCurrency;
+import dev.sixik.sdmshop2.libs.sdmeconomy.network.packets.SendDynamicCurrencyS2C;
 import dev.sixik.sdmshop2.utils.exceptions.NotInitializedException;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +18,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SDMEconomyPlatform {
+
+    @Nullable
+    public static MinecraftServer server;
+
+    public static final String MODID = "sdmeconomy";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SDMEconomyPlatform.class);
 
@@ -80,12 +88,14 @@ public class SDMEconomyPlatform {
     }
 
     public static void onServerStart(MinecraftServer server) {
+        SDMEconomyPlatform.server = server;
         loadPlayersDataDir(server.getWorldPath(LevelResource.ROOT));
         SDMEconomyService.init();
     }
 
     public static void onServerStop(MinecraftServer server) {
         SDMEconomyService.getInstance().saveAllDirty();
+        SDMEconomyPlatform.server = null;
     }
 
     public static void onPlayerLeft(ServerPlayer player) {
@@ -93,8 +103,27 @@ public class SDMEconomyPlatform {
     }
 
     public static void shutdownHook() {
-        final Thread thread = new Thread(() -> SDMEconomyService.getInstance().saveAllDirty());
+        final Thread thread = new Thread(() -> {
+            SDMEconomyService.getInstance().saveAllDirty();
+            SDMEconomyPlatform.server = null;
+        });
         thread.setDaemon(true);
         Runtime.getRuntime().addShutdownHook(thread);
+    }
+
+    public static void onReload() {
+        SDMEconomyCurrencyRegistry.reload();
+
+        if(server == null) return;
+        final CompoundTag nbt = SDMEconomyCurrencyRegistry.serializeCurrencies();
+        final SendDynamicCurrencyS2C packet = new SendDynamicCurrencyS2C(nbt);
+
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            packet.sendTo(player);
+        }
+    }
+
+    public static void onPlayerJoin(ServerPlayer player) {
+        new SendDynamicCurrencyS2C().sendTo(player);
     }
 }
