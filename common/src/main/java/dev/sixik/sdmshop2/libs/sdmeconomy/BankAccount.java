@@ -7,10 +7,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BankAccount {
@@ -60,6 +60,19 @@ public class BankAccount {
     public void modify(IStoredCurrency currency, BigDecimal amount) {
         balances.merge(currency.getId(), amount, BigDecimal::add);
         markDirty();
+    }
+
+    @Nullable
+    public BigDecimal removeBalance(IStoredCurrency currency) {
+        try {
+            return balances.remove(currency.getId());
+        } finally {
+            markDirty();
+        }
+    }
+
+    public List<ResourceLocation> getCurrenciesIds() {
+        return new ArrayList<>(balances.keySet());
     }
 
     /**

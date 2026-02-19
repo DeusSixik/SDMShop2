@@ -18,13 +18,15 @@ public class CategoryComponent extends ShopComponent {
 
     @Getter
     @Setter
-    private String id = NULL;
+    private String id;
 
     @Getter
     @Setter
     private UUID uuid;
 
-    public CategoryComponent() { }
+    public CategoryComponent() {
+        this(NULL);
+    }
 
     public CategoryComponent(String id) {
         this(id, UUID.randomUUID());

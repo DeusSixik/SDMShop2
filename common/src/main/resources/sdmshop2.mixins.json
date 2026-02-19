@@ -4,6 +4,8 @@
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [
+    "ldlib.MixinDrawerHelper$inject_loading",
+    "ldlib.MixinShaders$inject_loading"
   ],
   "mixins": [
     "MixinReloadableServerResources"

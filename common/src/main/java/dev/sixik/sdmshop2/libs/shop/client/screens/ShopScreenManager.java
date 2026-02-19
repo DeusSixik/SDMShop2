@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.sixik.sdmshop2.libs.shop.client.screens.test.ShopMainPanel;
 import net.minecraft.client.Minecraft;
 
 public class ShopScreenManager {
@@ -12,7 +13,7 @@ public class ShopScreenManager {
     public static final ShopScreenManager INSTANCE = new ShopScreenManager();
 
     protected WidgetGroup createGui() {
-        return new ShopScreen();
+        return new ShopMainPanel();
     }
 
     public void openGui() {

@@ -14,7 +14,6 @@ import java.util.Optional;
 
 public class ShopEntity {
 
-    @Getter
     private final List<ShopComponent> components = new ArrayList<>();
 
     public ShopEntity() {
