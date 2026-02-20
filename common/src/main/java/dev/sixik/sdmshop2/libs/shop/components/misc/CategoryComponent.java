@@ -1,4 +1,4 @@
-package dev.sixik.sdmshop2.libs.shop.components;
+package dev.sixik.sdmshop2.libs.shop.components.misc;
 
 import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;

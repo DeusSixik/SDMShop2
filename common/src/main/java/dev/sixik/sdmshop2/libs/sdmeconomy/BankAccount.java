@@ -62,6 +62,14 @@ public class BankAccount {
         markDirty();
     }
 
+    public boolean hasMoney(ResourceLocation moneyId) {
+        return balances.containsKey(moneyId);
+    }
+
+    public boolean hasMoney(IStoredCurrency currency) {
+        return hasMoney(currency.getId());
+    }
+
     @Nullable
     public BigDecimal removeBalance(IStoredCurrency currency) {
         try {

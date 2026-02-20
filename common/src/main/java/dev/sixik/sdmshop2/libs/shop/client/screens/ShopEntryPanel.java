@@ -1,17 +1,11 @@
 package dev.sixik.sdmshop2.libs.shop.client.screens;
 
-import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import dev.sixik.sdmshop2.libs.shop.base.ShopEntry;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ShopEntryCardWidget;
-import dev.sixik.sdmshop2.libs.shop.components.CategoryComponent;
-import dev.sixik.sdmshop2.libs.shop.components.ShopCategoriesContainerComponent;
-import dev.sixik.sdmshop2.libs.shop.components.ShopEntriesContainerComponent;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 import java.util.UUID;

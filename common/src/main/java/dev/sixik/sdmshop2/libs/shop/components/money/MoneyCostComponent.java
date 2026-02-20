@@ -1,24 +1,35 @@
-package dev.sixik.sdmshop2.libs.shop.components;
+package dev.sixik.sdmshop2.libs.shop.components.money;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import dev.sixik.sdmshop2.libs.sdmeconomy.BankAccount;
-import dev.sixik.sdmshop2.libs.sdmeconomy.DynamicStoredCurrency;
-import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyService;
+import dev.sixik.sdmshop2.SDMShop2;
+import dev.sixik.sdmshop2.libs.sdmeconomy.*;
 import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
+import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 public class MoneyCostComponent extends CostComponent {
 
     public static final IComponentType<MoneyCostComponent> TYPE = new Type();
 
-    private final ResourceLocation moneyId;
-    private final double amount;
+    public static final ThreadLocal<DynamicStoredCurrency> DYNAMIC_CURRENCY = ThreadLocal.withInitial(() -> new DynamicStoredCurrency(EMPTY));
+
+    @Getter
+    private ResourceLocation moneyId;
+
+    @Getter
+    private double amount;
+
+    public MoneyCostComponent() {
+        this(EMPTY, 0);
+    }
 
     public MoneyCostComponent(ResourceLocation moneyId, double amount) {
         this.moneyId = moneyId;
@@ -27,14 +38,37 @@ public class MoneyCostComponent extends CostComponent {
 
     @Override
     public boolean canPay(Player player) {
-        final BankAccount account = SDMEconomyService.getInstance().getAccount(player.getGameProfile().getId());
-        return account.getBalance(new DynamicStoredCurrency(moneyId)).doubleValue() >= amount;
+        final Map<ResourceLocation, IExternalCurrency> currencies = player.isLocalPlayer() ?
+                SDMEconomyServiceClient.getAllCurrencies()
+                : SDMEconomyCurrencyRegistry.getCurrenciesMap();
+
+        if(currencies.containsKey(moneyId))
+            return currencies.get(moneyId).getBalance(player).doubleValue() >= amount;
+
+        final BankAccount account = player.isLocalPlayer()
+                ? SDMEconomyServiceClient.getInstanceClient().getBankAccount()
+                : SDMEconomyService.getInstance().getAccount(player.getGameProfile().getId());
+        return account.getBalance(DYNAMIC_CURRENCY.get().setId(moneyId)).doubleValue() >= amount;
     }
 
     @Override
     public void pay(Player player) {
-        final BankAccount account = SDMEconomyService.getInstance().getAccount(player.getGameProfile().getId());
-        account.modify(new DynamicStoredCurrency(moneyId), new BigDecimal(-amount));
+        if (player.isLocalPlayer()) {
+            SDMShop2.LOGGER.warn("Call Pay methods on client!");
+            return;
+        }
+
+        final BigDecimal value = BigDecimal.valueOf(amount);
+        Map<ResourceLocation, IExternalCurrency> currencies = SDMEconomyCurrencyRegistry.getCurrenciesMap();
+
+        if (currencies.containsKey(moneyId)) {
+            currencies.get(moneyId).withdraw((ServerPlayer) player, value);
+            return;
+        }
+
+        SDMEconomyService.getInstance()
+                .getAccount(player.getGameProfile().getId())
+                .modify(DYNAMIC_CURRENCY.get().setId(moneyId), value.negate());
     }
 
     @Override

@@ -27,16 +27,14 @@ public class ShopEntity {
         }
     }
 
-    public final ShopEntity addComponent(ShopComponent component) {
-        if(hasComponent(component.getClass())) return this;
-
+    public final <T extends ShopComponent> T addComponent(T component) {
         component.setRoot(this);
         int i = 0;
         while (i < components.size() && components.get(i).priority() <= component.priority()) {
             i++;
         }
         components.add(i, component);
-        return this;
+        return component;
     }
 
     public final boolean hasComponent(Class<?> type) {
@@ -48,8 +46,19 @@ public class ShopEntity {
         return false;
     }
 
-    public List<ShopComponent> getComponents() {
+    public final List<ShopComponent> getComponents() {
         return Collections.unmodifiableList(components);
+    }
+
+    @SuppressWarnings("unchecked")
+    public final <T> List<T> getComponents(Class<T> type) {
+        List<T> out = new ArrayList<>();
+        for (ShopComponent component : components) {
+            if (type.isInstance(component)) {
+                out.add((T) component);
+            }
+        }
+        return out;
     }
 
     @SuppressWarnings("unchecked")

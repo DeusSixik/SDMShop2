@@ -1,10 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop.client.screens.test;
 
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.mojang.blaze3d.platform.Window;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopEntryPanel;
@@ -37,6 +34,23 @@ public class ShopMainPanel extends WidgetGroup {
         buildCatalogGrid();
     }
 
+    public void openCustomModal() {
+        // 1. Создаем диалог. isClient = true
+        DialogWidget dialog = new DialogWidget(this, true);
+
+        // 2. Делаем остальные виджеты на фоне невидимыми/неактивными (эффект модальности)
+        dialog.setParentInVisible();
+
+        // 3. Создаем контейнер с красивой рамкой и фоном (ширина 250, высота 150)
+        WidgetGroup container = DialogWidget.createContainer(dialog, 250, 150, "Редактирование товара");
+
+        // 4. Добавляем в контейнер любые свои виджеты (кнопки, текстовые поля, иконки)
+        container.addWidget(new LabelWidget(10, 20, "Настройте параметры:").setTextColor(ShopColors.TEXT_MAIN));
+
+        // 5. Кнопка закрытия
+        DialogWidget.createButton(container, 10, 120, 100, 15, "Закрыть", dialog::close);
+    }
+
     private void buildSidebar() {
         sidebar = new WidgetGroup(0, 0, sidebarWidth, getSizeHeight());
         // Фон панели с правой рамкой
@@ -53,6 +67,10 @@ public class ShopMainPanel extends WidgetGroup {
 // 2. Создаем саму кнопку внутри группы (размер равен группе, позиция 0,0)
         ButtonWidget categoryBtn = new ButtonWidget(0, 0, categoryGroup.getSizeWidth(), categoryGroup.getSizeHeight(), cd -> {
             System.out.println("Выбрана категория: Оружие");
+        });
+
+        categoryBtn.setOnPressCallback((s) -> {
+            openCustomModal();
         });
 
 // Настраиваем фон и ховер именно на кнопке

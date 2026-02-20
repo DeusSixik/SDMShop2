@@ -2,7 +2,7 @@ package dev.sixik.sdmshop2.libs.shop.base;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.sixik.sdmshop2.libs.shop.components.CategoryComponent;
+import dev.sixik.sdmshop2.libs.shop.components.misc.CategoryComponent;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 

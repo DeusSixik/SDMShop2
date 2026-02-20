@@ -1,14 +1,12 @@
-package dev.sixik.sdmshop2.libs.shop.components;
+package dev.sixik.sdmshop2.libs.shop.components.misc;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
 import dev.sixik.sdmshop2.libs.shop.base.ShopEntry;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import lombok.Getter;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;

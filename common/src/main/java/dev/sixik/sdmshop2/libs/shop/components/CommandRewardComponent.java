@@ -1,0 +1,102 @@
+package dev.sixik.sdmshop2.libs.shop.components;
+
+import com.google.gson.JsonObject;
+import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
+import dev.sixik.sdmshop2.libs.shop.components.api.RewardComponent;
+import lombok.Getter;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+
+public class CommandRewardComponent extends RewardComponent {
+
+    public static final String EMPTY = "Command";
+    public static final String DEFAULT_COMMAND = "/time set day";
+
+    public static final IComponentType<CommandRewardComponent> TYPE = new Type();
+
+    @Getter
+    private String displayName;
+
+    @Getter
+    private String command;
+
+    public CommandRewardComponent() {
+        this(DEFAULT_COMMAND, EMPTY);
+    }
+
+    public CommandRewardComponent(String command, String displayName) {
+        this.command = command;
+        this.displayName = displayName;
+    }
+
+    @Override
+    public void reward(ServerPlayer player) {
+        CommandSourceStack source = player.createCommandSourceStack();
+        source.withPermission(2);
+        source.withSuppressedOutput();
+        player.getServer().getCommands().performPrefixedCommand(source, formatCommand(command, player));
+    }
+
+    @Override
+    public IComponentType<?> getType() {
+        return TYPE;
+    }
+
+    private static class Type implements IComponentType<CommandRewardComponent> {
+
+        private static final ResourceLocation ID = ResourceLocation.tryBuild("sdm", "reward_command");
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
+        @Override
+        public JsonObject serialize(CommandRewardComponent component) {
+            JsonObject json = new JsonObject();
+
+            if(!component.displayName.equals(EMPTY))
+                json.addProperty("name", component.displayName);
+
+            if(!component.command.equals(DEFAULT_COMMAND))
+                json.addProperty("command", component.command);
+
+           return json;
+        }
+
+        @Override
+        public CommandRewardComponent deserialize(JsonObject json) {
+
+            String command = DEFAULT_COMMAND;
+            String name = EMPTY;
+
+            if(json.has("name"))
+                name = json.get("name").getAsString();
+
+            if(json.has("command"))
+                command = json.get("command").getAsString();
+
+            return new CommandRewardComponent(command, name);
+        }
+
+        @Override
+        public void toNetwork(FriendlyByteBuf buf, CommandRewardComponent component) {
+            buf.writeUtf(component.displayName);
+        }
+
+        @Override
+        public CommandRewardComponent fromNetwork(FriendlyByteBuf buf) {
+            return new CommandRewardComponent(DEFAULT_COMMAND, buf.readUtf());
+        }
+    }
+
+    protected static String formatCommand(String command, ServerPlayer player) {
+        String copy = command;
+
+        if(command.contains("{player}"))
+            copy = copy.replace("{player}", player.getName().getString());
+        return copy;
+    }
+}
