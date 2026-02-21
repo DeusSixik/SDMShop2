@@ -8,7 +8,6 @@ public abstract class ShopComponent {
 
     public static ResourceLocation EMPTY = ResourceLocation.tryBuild("sdm", "null");
 
-
     private ShopEntity root;
 
     public void init() { }

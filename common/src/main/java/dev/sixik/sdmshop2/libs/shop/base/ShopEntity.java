@@ -7,24 +7,23 @@ import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ShopEntity {
 
-    private final List<ShopComponent> components = new ArrayList<>();
+    private boolean initialized = false;
 
-    public ShopEntity() {
-        initializeServerOnlyComponents();
-    }
+    private final List<ShopComponent> components = new ArrayList<>();
+    private final Map<Class<?>, List<ShopComponent>> componentCache = new IdentityHashMap<>();
+
+    public ShopEntity() { }
 
     private void initComponents() {
         final List<ShopComponent> array = components;
         for (int i = 0; i < array.size(); i++) {
             array.get(i).init();
         }
+        initialized = true;
     }
 
     public final <T extends ShopComponent> T addComponent(T component) {
@@ -34,16 +33,17 @@ public class ShopEntity {
             i++;
         }
         components.add(i, component);
+
+        componentCache.clear();
+
+        if(initialized)
+            component.init();
+
         return component;
     }
 
     public final boolean hasComponent(Class<?> type) {
-        for (int i = 0; i < components.size(); i++) {
-            if (type.isInstance(components.get(i))) {
-                return true;
-            }
-        }
-        return false;
+       return !getComponents(type).isEmpty();
     }
 
     public final List<ShopComponent> getComponents() {
@@ -52,23 +52,28 @@ public class ShopEntity {
 
     @SuppressWarnings("unchecked")
     public final <T> List<T> getComponents(Class<T> type) {
-        List<T> out = new ArrayList<>();
-        for (ShopComponent component : components) {
-            if (type.isInstance(component)) {
-                out.add((T) component);
+        /*
+            Ленивое кэширование. Фильтруем только при первом запросе конкретного типа.
+         */
+        return (List<T>) componentCache.computeIfAbsent(type, k -> {
+            List<ShopComponent> filtered = new ArrayList<>();
+            for (int i = 0; i < components.size(); i++) {
+                ShopComponent c = components.get(i);
+                if (k.isInstance(c)) {
+                    filtered.add(c);
+                }
             }
-        }
-        return out;
+
+            /*
+                Используем emptyList() для экономии памяти, если компонентов нет
+             */
+            return filtered.isEmpty() ? Collections.emptyList() : Collections.unmodifiableList(filtered);
+        });
     }
 
-    @SuppressWarnings("unchecked")
     public final <T> Optional<T> getComponent(Class<T> type) {
-        for (ShopComponent component : components) {
-            if (type.isInstance(component)) {
-                return Optional.of((T) component);
-            }
-        }
-        return Optional.empty();
+        List<T> list = getComponents(type);
+        return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
 
     public final JsonArray serializeComponents() {
@@ -89,6 +94,7 @@ public class ShopEntity {
 
     public final void deserializeComponents(JsonArray array) {
         components.clear();
+        componentCache.clear();
 
         for (JsonElement compJson : array) {
             components.add(ShopComponentRegistry.fromJson(compJson.getAsJsonObject()));
@@ -123,6 +129,7 @@ public class ShopEntity {
         int count = buf.readVarInt();
 
         components.clear();
+        componentCache.clear();
         for (int i = 0; i < count; i++) {
             addComponent(ShopComponentRegistry.fromNetwork(buf));
         }
@@ -139,6 +146,7 @@ public class ShopEntity {
     }
 
     protected final void initializeClientOnlyComponents() {
+        initialized = false;
         customInitializeClientOnlyComponents();
         initComponents();
     }
@@ -146,6 +154,7 @@ public class ShopEntity {
     protected void customInitializeClientOnlyComponents() { }
 
     public final void initializeServerOnlyComponents() {
+        initialized = false;
         customInitializeServerOnlyComponents();
         initComponents();
     }

@@ -1,11 +1,50 @@
 package dev.sixik.sdmshop2.libs.shop.components.api;
 
-import net.minecraft.world.entity.player.Player;
+import com.google.gson.JsonObject;
+import dev.sixik.sdmshop2.libs.shop.components.exceptions.NoSuchComponents;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
-public abstract class RenderHideComponent extends ShopComponent {
+public final class RenderHideComponent extends ShopComponent {
 
-    /**
-     * @return true прошёл проверку false нужно скрыть
-     */
-    public abstract boolean isChecked(Player player);
+    public static final IComponentType<RenderHideComponent> TYPE = new Type();
+
+    @Override
+    public IComponentType<?> getType() {
+        return TYPE;
+    }
+
+    @Override
+    public void init() {
+        if(!getRoot().hasComponent(ConditionComponent.class))
+            throw new NoSuchComponents(getClass(), ConditionComponent.class);
+    }
+
+    private static class Type implements IComponentType<RenderHideComponent> {
+
+        private static final ResourceLocation ID = ResourceLocation.tryBuild("sdm", "hide_render");
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
+        @Override
+        public JsonObject serialize(RenderHideComponent component) {
+            return new JsonObject();
+        }
+
+        @Override
+        public RenderHideComponent deserialize(JsonObject json) {
+            return new RenderHideComponent();
+        }
+
+        @Override
+        public void toNetwork(FriendlyByteBuf buf, RenderHideComponent component) { }
+
+        @Override
+        public RenderHideComponent fromNetwork(FriendlyByteBuf buf) {
+            return new RenderHideComponent();
+        }
+    }
 }

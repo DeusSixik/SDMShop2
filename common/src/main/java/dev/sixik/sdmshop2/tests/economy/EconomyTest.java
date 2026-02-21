@@ -14,6 +14,9 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
 import dev.sixik.sdmshop2.libs.shop.components.CommandRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ItemRewardComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.ConditionComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.RenderHideComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.CategoryComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopEntriesContainerComponent;
@@ -26,6 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -33,6 +37,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.UUID;
 
 public class EconomyTest {
@@ -68,16 +73,16 @@ public class EconomyTest {
         entriesComponent.addEntry(entry);
 
         MoneyCostComponent moneyCostComponent = entry.addComponent(new MoneyCostComponent(debug, 5));
-        ItemRewardComponent itemRewardComponent = entry.addComponent(new ItemRewardComponent(Items.BEDROCK.getDefaultInstance(), 5));
+        entry.addComponent(new MoneyCostComponent(null, 50));
+
+        ItemRewardComponent itemRewardComponent = entry.addComponent(
+                new ItemRewardComponent(Items.BEDROCK.getDefaultInstance(), 5));
         CommandRewardComponent commandRewardComponent = entry.addComponent(
                 new CommandRewardComponent("/give {player} diamond", "test")
         );
-
-        player.sendSystemMessage(Component.literal(String.valueOf(moneyCostComponent.canPay(player))));
         moneyCostComponent.pay(player);
         itemRewardComponent.reward(player);
         commandRewardComponent.reward(player);
-
     }
 
     public static void test() {
