@@ -15,6 +15,12 @@ public class ShopColors {
     /** Фон при наведении на элемент списка (Hover) */
     public static final int BG_HOVER = 0xFF333342;
 
+    /** Фон кнопки */
+    public static final int BG_BUTTON = 0xFF333342;
+
+    /** Фон кнопки при наведении (Hover)*/
+    public static final int HOV_BUTTON = 0xFF525269;
+
     /** Полупрозрачный черный фон для кнопок цены (Alpha ~30%) */
     public static final int PRICE_BG = 0x4C000000;
 

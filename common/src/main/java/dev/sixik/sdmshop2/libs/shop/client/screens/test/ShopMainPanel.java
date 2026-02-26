@@ -1,37 +1,27 @@
 package dev.sixik.sdmshop2.libs.shop.client.screens.test;
 
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
-import com.mojang.blaze3d.platform.Window;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopEntryPanel;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 
 public class ShopMainPanel extends WidgetGroup {
 
-    private final int sidebarWidth = 200;
-    private final int topBarHeight = 40;
+    private final int sidebarWidth = 140;
+    private final int topBarHeight = 32;
 
     private WidgetGroup sidebar;
-    private WidgetGroup mainContent;
     private ShopEntryPanel catalogGrid; // Тот самый скролл-виджет, который мы писали ранее
 
     public ShopMainPanel() {
         final Minecraft minecraft = Minecraft.getInstance();
-        final Window window = minecraft.getWindow();
 
-        final int w = window.getGuiScaledWidth();
-        final int h = window.getGuiScaledHeight();
-
-        setSize(w - w / 8, h - h / 6);
-
-        // Главный фон экрана (--bg-base)
         setBackground(new ColorRectTexture(ShopColors.BG_BASE));
-
-        buildSidebar();
-        buildTopBar();
-        buildCatalogGrid();
     }
 
     public void openCustomModal() {
@@ -58,11 +48,11 @@ public class ShopMainPanel extends WidgetGroup {
                 .setRightRadius(0)); // Радиус только если нужен, иначе просто прямая заливка
 
         // Заголовок
-        LabelWidget title = new LabelWidget(20, 20, "Магазин").setTextColor(ShopColors.TEXT_MAIN);
+        LabelWidget title = new LabelWidget(10, 10, "Магазин").setTextColor(ShopColors.TEXT_MAIN);
         // В LDLib LabelWidget сам считает свой размер, но можно увеличить масштаб через матрицу или использовать TextTextureWidget
         sidebar.addWidget(title);
 
-        WidgetGroup categoryGroup = new WidgetGroup(15, 50, sidebarWidth - 30, 25);
+        WidgetGroup categoryGroup = new WidgetGroup(5, 33, sidebarWidth - 10, 25);
 
 // 2. Создаем саму кнопку внутри группы (размер равен группе, позиция 0,0)
         ButtonWidget categoryBtn = new ButtonWidget(0, 0, categoryGroup.getSizeWidth(), categoryGroup.getSizeHeight(), cd -> {
@@ -73,17 +63,12 @@ public class ShopMainPanel extends WidgetGroup {
             openCustomModal();
         });
 
-// Настраиваем фон и ховер именно на кнопке
-        categoryBtn.setBackground(new ColorRectTexture(0x00000000).setRadius(6)); // Прозрачная
-        categoryBtn.setHoverTexture(new ColorRectTexture(ShopColors.BG_HOVER).setRadius(6));
-        categoryBtn.setDrawBackgroundWhenHover(false);
-
 // 3. Добавляем в группу СНАЧАЛА кнопку (она будет фоном и ловить клики)
         categoryGroup.addWidget(categoryBtn);
 
 // 4. ДОБАВЛЯЕМ текст и иконки ПОВЕРХ кнопки (позиция относительно группы)
-        categoryGroup.addWidget(new LabelWidget(10, 7, "⚔️ Оружие и Броня").setTextColor(ShopColors.TEXT_MAIN));
-
+        categoryBtn.setButtonTexture(new GuiTextureGroup(new ColorRectTexture(ShopColors.BG_BUTTON).setRadius(6),new TextTexture("Weapon")));
+        categoryBtn.setHoverTexture(new GuiTextureGroup(new ColorRectTexture(ShopColors.HOV_BUTTON).setRadius(6),new TextTexture("Weapon")));
 // 5. Добавляем всю группу в сайдбар
         sidebar.addWidget(categoryGroup);
 
@@ -92,17 +77,18 @@ public class ShopMainPanel extends WidgetGroup {
 
     private void buildTopBar() {
         WidgetGroup topBar = new WidgetGroup(sidebarWidth, 0, getSizeWidth() - sidebarWidth, topBarHeight);
-
+        topBar.setBackground(new ColorRectTexture(ShopColors.BG_PANEL));
         // Поле поиска
-        TextFieldWidget searchField = new TextFieldWidget(20, 10, 200, 20, () -> "", text -> {
+        TextFieldWidget searchField = new TextFieldWidget(20, 6, sidebarWidth - 12, 20, () -> "", text -> {
             // Поиск по тексту
         });
+        searchField.setBordered(false);
         searchField.setBackground(new ColorRectAndBorderTexture(ShopColors.BG_PANEL, ShopColors.BORDER, 1).setRadius(4));
         searchField.setTextColor(ShopColors.TEXT_MAIN);
         topBar.addWidget(searchField);
 
         // Баланс (справа)
-        LabelWidget balance = new LabelWidget(topBar.getSizeWidth() - 150, 15, "Баланс: $150 | 💎 12")
+        LabelWidget balance = new LabelWidget(topBar.getSizeWidth() - 120, 15, "Баланс: $150 | 💎 12")
                 .setTextColor(ShopColors.TEXT_MAIN);
         topBar.addWidget(balance);
 
@@ -122,12 +108,32 @@ public class ShopMainPanel extends WidgetGroup {
         addWidget(catalogGrid);
     }
 
+
+    public void drawInBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+
+        int x = sidebarWidth;
+        int y = 32;
+        int width = getSize().width;
+
+        // graphics.fill(startX, startY, endX, endY, color_ARGB)
+        // Горизонтальная линия под шапкой
+        graphics.fill(x, y, x + width, y + 1, 0xFFC4C4FF);
+
+        // Вертикальная линия, отделяющая сайдбар
+        //graphics.fill(x + 200, y, x + 201, y + getSize().height, ShopColors.BORDER);
+    }
+
     // Обработка ресайза окна Minecraft
     @Override
     public void onScreenSizeUpdate(int screenWidth, int screenHeight) {
-        super.onScreenSizeUpdate(screenWidth, screenHeight);
+
         setSize(screenWidth, screenHeight);
+        super.onScreenSizeUpdate(screenWidth, screenHeight);
+        clearAllWidgets();
+        buildSidebar();
         sidebar.setSizeHeight(screenHeight);
-        // Обновляем размеры остальных зон...
+        buildTopBar();
+        //buildCatalogGrid();
     }
 }
