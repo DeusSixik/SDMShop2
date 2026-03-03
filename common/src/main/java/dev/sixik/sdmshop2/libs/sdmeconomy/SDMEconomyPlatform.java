@@ -1,7 +1,12 @@
 package dev.sixik.sdmshop2.libs.sdmeconomy;
 
 import com.google.gson.Gson;
+import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.event.events.common.PlayerEvent;
+import dev.architectury.platform.Platform;
+import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.custom_currency.ExternalItemCurrency;
+import dev.sixik.sdmshop2.libs.sdmeconomy.network.SDMEconomyNetwork;
 import dev.sixik.sdmshop2.libs.sdmeconomy.network.packets.SendDynamicCurrencyS2C;
 import dev.sixik.sdmshop2.libs.sdmeconomy.network.packets.SendPlayerAccountS2C;
 import dev.sixik.sdmshop2.utils.exceptions.NotInitializedException;
@@ -84,8 +89,19 @@ public class SDMEconomyPlatform {
     }
 
     public static void init() {
+        SDMPlatform.addReloading(SDMEconomyPlatform::onReload);
+        SDMEconomyPlatform.loadConfigDir(Platform.getConfigFolder());
+
         SDMEconomyCurrencyRegistry.registerType(ResourceLocation.tryBuild("minecraft", "item"), new ExternalItemCurrency.ExternalItemCurrencyType());
         shutdownHook();
+
+        SDMEconomyNetwork.init();
+
+        LifecycleEvent.SERVER_BEFORE_START.register(SDMEconomyPlatform::onServerStart);
+        LifecycleEvent.SERVER_STOPPED.register(SDMEconomyPlatform::onServerStop);
+
+        PlayerEvent.PLAYER_JOIN.register(SDMEconomyPlatform::onPlayerJoin);
+        PlayerEvent.PLAYER_QUIT.register(SDMEconomyPlatform::onPlayerLeft);
     }
 
     public static void onServerStart(MinecraftServer server) {

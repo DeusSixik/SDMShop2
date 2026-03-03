@@ -8,4 +8,6 @@ import org.jetbrains.annotations.Nullable;
  * @param icon Иконка в зависимости от типа. Если (None то Null)
  */
 public record CurrencyIcon(IconType type, @Nullable Object icon) {
+
+    public static final CurrencyIcon EMPTY = new CurrencyIcon(IconType.NONE, null);
 }

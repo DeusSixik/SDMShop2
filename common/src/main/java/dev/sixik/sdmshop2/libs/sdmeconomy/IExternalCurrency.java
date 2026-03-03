@@ -25,11 +25,4 @@ public interface IExternalCurrency extends ICurrency {
     boolean deposit(ServerPlayer player, BigDecimal amount, boolean simulate);
 
     BigDecimal getBalance(Player player);
-
-    /**
-     * Иконка валюты при рендере
-     */
-    default CurrencyIcon getIcon() {
-        return new CurrencyIcon(IconType.NONE, null);
-    }
 }
