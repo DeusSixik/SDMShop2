@@ -1,11 +1,14 @@
+import java.util.zip.ZipFile
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Type as AsmType
+
 architectury {
     common rootProject.enabled_platforms.split(',')
 }
 
 dependencies {
-    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
-    // which get remapped to the correct annotations on each platform.
-    // Do NOT use other classes from Fabric Loader.
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
     modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
@@ -16,4 +19,100 @@ dependencies {
 
     minecraftLibraries("com.github.ben-manes.caffeine:caffeine:3.2.3")
     include(minecraftRuntimeLibraries("com.github.ben-manes.caffeine:caffeine:3.2.3"))
+}
+
+tasks.register('generateLDLibDocsSafe') {
+    group = "documentation"
+    description = "Generates an MD file by reading the bytecode directly (without loading it into the JVM)"
+
+    def formatType = { AsmType type -> type.className.replaceAll("\\b[a-z0-9_]+\\.", "") }
+    def formatParams = { String desc ->
+        def types = AsmType.getArgumentTypes(desc)
+        def params = []
+        for (int i = 0; i < types.length; i++) params << "${formatType(types[i])} arg$i"
+        return params.join(", ")
+    }
+
+    doLast {
+        def targetJar = configurations.compileClasspath.files.find { it.name.contains("ldlib-common") && it.name.endsWith(".jar") }
+        if (!targetJar) throw new GradleException("JAR ldlib-common не найден.")
+
+        def outputFile = file("$buildDir/api-docs/LDLib_Full_API.md")
+        outputFile.parentFile.mkdirs()
+
+        TreeMap<String, List<ClassNode>> groupedClasses = new TreeMap<>()
+
+        new ZipFile(targetJar).withCloseable { zip ->
+            zip.entries().findAll { it.name.endsWith('.class') && !it.name.contains('$') }.each { entry ->
+                zip.getInputStream(entry).withCloseable { is ->
+                    ClassReader reader = new ClassReader(is)
+                    ClassNode node = new ClassNode()
+
+                    reader.accept(node, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES)
+
+                    if ((node.access & Opcodes.ACC_PUBLIC) != 0 || (node.access & Opcodes.ACC_PROTECTED) != 0) {
+                        String className = node.name.replace('/', '.')
+                        String pkg = className.contains('.') ? className.substring(0, className.lastIndexOf('.')) : "default.package"
+                        groupedClasses.computeIfAbsent(pkg, { [] }).add(node)
+                    }
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder(1024 * 1024)
+        String currentBasePackage = ""
+
+        groupedClasses.each { pkg, classes ->
+            def pkgParts = pkg.tokenize('.')
+            def basePkg = pkgParts.take(3).join('.')
+            def subPkg = pkgParts.drop(3).join('.') ?: "core"
+
+            if (currentBasePackage != basePkg) {
+                currentBasePackage = basePkg
+                sb.append("# ").append(basePkg).append("\n")
+            }
+            sb.append("## ").append(subPkg).append("\n")
+
+            classes.sort { it.name }.each { node ->
+                String simpleName = node.name.substring(node.name.lastIndexOf('/') + 1)
+                sb.append("### ").append(simpleName)
+
+                if ((node.access & Opcodes.ACC_ABSTRACT) != 0 && (node.access & Opcodes.ACC_INTERFACE) == 0) sb.append(" (abstract)")
+                if (node.superName && node.superName != "java/lang/Object") {
+                    sb.append(" (extends ").append(node.superName.substring(node.superName.lastIndexOf('/') + 1)).append(")")
+                }
+                if (node.interfaces) {
+                    sb.append(" (implements ").append(node.interfaces.collect { it.substring(it.lastIndexOf('/') + 1) }.join(", ")).append(")")
+                }
+                sb.append("\n\n")
+
+                def writeMembers = { String label, int mask ->
+                    def fields = node.fields?.findAll { (it.access & mask) != 0 && (it.access & Opcodes.ACC_SYNTHETIC) == 0 } ?: []
+                    def methods = node.methods?.findAll { it.name != "<clinit>" && (it.access & mask) != 0 && (it.access & Opcodes.ACC_SYNTHETIC) == 0 && (it.access & Opcodes.ACC_BRIDGE) == 0 } ?: []
+
+                    def constructors = methods.findAll { it.name == "<init>" }
+                    def regularMethods = methods.findAll { it.name != "<init>" }
+
+                    if (label == "public" && constructors) {
+                        sb.append("#### constructor\n")
+                        constructors.each { c -> sb.append("- ").append(simpleName).append("(").append(formatParams(c.desc)).append(")\n") }
+                        sb.append("\n")
+                    }
+
+                    if (!fields && !regularMethods) return
+
+                    sb.append("#### ").append(label).append("\n")
+                    fields.each { f -> sb.append("- ").append(formatType(AsmType.getType(f.desc))).append(" ").append(f.name).append("\n") }
+                    regularMethods.each { m -> sb.append("- ").append(formatType(AsmType.getReturnType(m.desc))).append(" ").append(m.name).append("(").append(formatParams(m.desc)).append(")\n") }
+                    sb.append("\n")
+                }
+
+                writeMembers("public", Opcodes.ACC_PUBLIC)
+                writeMembers("protected", Opcodes.ACC_PROTECTED)
+            }
+        }
+
+        outputFile.text = sb.toString()
+        println "Documentation generated successfully! File: $outputFile"
+    }
 }

@@ -18,8 +18,11 @@ public class ShopLeftPanel extends WidgetGroup {
 
     public final ButtonWidget testButton;
 
+
+
     public ShopLeftPanel(ShopScreen shopScreen) {
         this.shopScreen = shopScreen;
+
 
         setSize(shopScreen.getSize().width / 6, shopScreen.getSize().height);
         setBackground(new ColorRectTexture(0xff1fafa0).setRadius(6));
