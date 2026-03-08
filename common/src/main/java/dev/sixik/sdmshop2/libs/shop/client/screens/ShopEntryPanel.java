@@ -70,7 +70,7 @@ public class ShopEntryPanel extends DraggableScrollableWidgetGroup {
         int availableWidth = this.getSizeWidth() - 14;
         int columns = Math.max(1, (availableWidth + PADDING) / (CARD_WIDTH + PADDING));
 
-        for (Widget containedWidget : getContainedWidgets(true)) {
+        for (Widget containedWidget : widgets) {
             int col = index % columns; // Остаток от деления (0, 1, 2...)
             int row = index / columns; // Целочисленное деление (0, 0, 0, 1, 1, 1...)
 

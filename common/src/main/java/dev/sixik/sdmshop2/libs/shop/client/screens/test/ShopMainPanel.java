@@ -85,6 +85,7 @@ public class ShopMainPanel extends WidgetGroup {
         searchField.setBordered(false);
         searchField.setBackground(new ColorRectAndBorderTexture(ShopColors.BG_PANEL, ShopColors.BORDER, 1).setRadius(4));
         searchField.setTextColor(ShopColors.TEXT_MAIN);
+        searchField.appendHoverTooltips("Поиск");
         topBar.addWidget(searchField);
 
         // Баланс (справа)
@@ -99,8 +100,8 @@ public class ShopMainPanel extends WidgetGroup {
         catalogGrid = new ShopEntryPanel(sidebarWidth + 20, topBarHeight + 10, getSizeWidth() - sidebarWidth - 40, getSizeHeight() - topBarHeight - 20);
 
         // Заполняем тестовыми данными
-        catalogGrid.addWidget(new ShopEntryCardWidget(280, 120)); // Карточка 1
-        catalogGrid.addWidget(new ShopEntryCardWidget(280, 120)); // Карточка 2
+        catalogGrid.addWidget(new ShopEntryCardWidget(200, 200)); // Карточка 1
+        //catalogGrid.addWidget(new ShopEntryCardWidget(200, 200)); // Карточка 2
 
         // Вызываем метод, который мы писали ранее, чтобы он расставил их по сетке (Grid Layout)
         catalogGrid.recalculateGrid();
@@ -118,10 +119,10 @@ public class ShopMainPanel extends WidgetGroup {
 
         // graphics.fill(startX, startY, endX, endY, color_ARGB)
         // Горизонтальная линия под шапкой
-        graphics.fill(x, y, x + width, y + 1, 0xFFC4C4FF);
+        graphics.fill(0, y, x + width, y + 1, 0xFFC4C4FF);
 
         // Вертикальная линия, отделяющая сайдбар
-        //graphics.fill(x + 200, y, x + 201, y + getSize().height, ShopColors.BORDER);
+        graphics.fill(sidebarWidth, 0, x + 1, getSizeHeight(), 0xFFC4C4FF);
     }
 
     // Обработка ресайза окна Minecraft
@@ -134,6 +135,6 @@ public class ShopMainPanel extends WidgetGroup {
         buildSidebar();
         sidebar.setSizeHeight(screenHeight);
         buildTopBar();
-        //buildCatalogGrid();
+        buildCatalogGrid();
     }
 }

@@ -44,6 +44,7 @@ public class ShopColors {
 
     /** Альтернативный акцент (Оранжево-золотой, для второй цены или "ИЛИ") */
     public static final int ACCENT_ORANGE = 0xFFFFB74D;
+    public static final int BG_ORANGE = 0xFF96722D;
 
     /** Альтернативный акцент (Синий, для других вариантов кнопок) */
     public static final int ACCENT_BLUE = 0xFF2196F3;
