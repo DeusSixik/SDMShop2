@@ -1,14 +1,14 @@
 package dev.sixik.sdmshop2.libs.shop.client.screens.test;
 
-import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopEntryPanel;
+import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 
 public class ShopMainPanel extends WidgetGroup {
 
@@ -92,7 +92,19 @@ public class ShopMainPanel extends WidgetGroup {
         LabelWidget balance = new LabelWidget(topBar.getSizeWidth() - 120, 15, "Баланс: $150 | 💎 12")
                 .setTextColor(ShopColors.TEXT_MAIN);
         topBar.addWidget(balance);
+        ButtonWidget createOffer = new ButtonWidget(topBar.getSizeWidth() - 152,2,28,28, clickData ->{
+            WidgetGroup offerPanel = new CreateOfferPanel();
+            ShopScreenManager.INSTANCE.openGui(offerPanel);
+        });
 
+        ResourceLocation skin = Minecraft.getInstance().player.getSkinTextureLocation();
+        IGuiTexture baseFace = new ResourceTexture(skin).getSubTexture(8f/64, 8f/64, 8f/64, 8f/64);
+        // Слой волос/шляпы (UV-маппинг: x=40, y=8, w=8, h=8 на холсте 64x64)
+        IGuiTexture hatLayer = new ResourceTexture(skin).getSubTexture(40f/64, 8f/64, 8f/64, 8f/64);
+        // Композиция слоев (GuiTextureGroup отрисует оба слоя без Z-fighting)
+        IGuiTexture combinedFace = new GuiTextureGroup(baseFace, hatLayer);
+        createOffer.setButtonTexture(combinedFace);
+        topBar.addWidget(createOffer);
         addWidget(topBar);
     }
 
