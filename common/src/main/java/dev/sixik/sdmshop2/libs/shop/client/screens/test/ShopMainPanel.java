@@ -9,6 +9,8 @@ import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class ShopMainPanel extends WidgetGroup {
 
@@ -92,11 +94,25 @@ public class ShopMainPanel extends WidgetGroup {
         LabelWidget balance = new LabelWidget(topBar.getSizeWidth() - 120, 15, "Баланс: $150 | 💎 12")
                 .setTextColor(ShopColors.TEXT_MAIN);
         topBar.addWidget(balance);
-        ButtonWidget createOffer = new ButtonWidget(topBar.getSizeWidth() - 152,2,28,28, clickData ->{
-            WidgetGroup offerPanel = new CreateOfferPanel();
-            ShopScreenManager.INSTANCE.openGui(offerPanel);
-        });
+        Widget item = new WidgetGroup();
+        item.setSize(10,10);
+        item.setSelfPosition(10,2);
+        item.setBackground(new ItemStackTexture(Items.ACACIA_WOOD));
 
+        ButtonWidget createOffer = new ButtonWidget(topBar.getSizeWidth() - 152,2,28,28, clickData ->{
+            //WidgetGroup offerPanel = new CreateOfferPanel();
+//            ItemStackSelectorWidget offerPanel = new ItemStackSelectorWidget(0,0,getSizeWidth());
+//            ShopScreenManager.INSTANCE.openGui(offerPanel);
+//            offerPanel.setOnItemStackUpdate(s -> item.setBackground(new ItemStackTexture(s)));
+            // Создаем пустой диалог и вызываем встроенный метод выбора предмета
+            // Создаем и открываем диалог. Передаем "this" как родителя.
+            new ItemStackSelector(this, selectedStack -> {
+                // Коллбэк сработает, когда игрок кликнет по предмету в сетке
+                item.setBackground(new ItemStackTexture(selectedStack));
+                // Тут ты обновляешь данные своего товара
+            });
+        });
+        topBar.addWidget(item);
         ResourceLocation skin = Minecraft.getInstance().player.getSkinTextureLocation();
         IGuiTexture baseFace = new ResourceTexture(skin).getSubTexture(8f/64, 8f/64, 8f/64, 8f/64);
         // Слой волос/шляпы (UV-маппинг: x=40, y=8, w=8, h=8 на холсте 64x64)
@@ -128,13 +144,12 @@ public class ShopMainPanel extends WidgetGroup {
         int x = sidebarWidth;
         int y = 32;
         int width = getSize().width;
-
-        // graphics.fill(startX, startY, endX, endY, color_ARGB)
-        // Горизонтальная линия под шапкой
-        graphics.fill(0, y, x + width, y + 1, 0xFFC4C4FF);
-
-        // Вертикальная линия, отделяющая сайдбар
-        graphics.fill(sidebarWidth, 0, x + 1, getSizeHeight(), 0xFFC4C4FF);
+        if(widget().widgets.get(0).isVisible()) {
+            // Горизонтальная линия под шапкой
+            graphics.fill(0, y, x + width, y + 1, 0xFFC4C4FF);
+            // Вертикальная линия, отделяющая сайдбар
+            graphics.fill(sidebarWidth, 0, x + 1, getSizeHeight(), 0xFFC4C4FF);
+        }
     }
 
     // Обработка ресайза окна Minecraft
