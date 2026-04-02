@@ -103,9 +103,6 @@ public class ShopMainPanel extends WidgetGroup {
             //WidgetGroup offerPanel = new CreateOfferPanel();
 //            ItemStackSelectorWidget offerPanel = new ItemStackSelectorWidget(0,0,getSizeWidth());
 //            ShopScreenManager.INSTANCE.openGui(offerPanel);
-//            offerPanel.setOnItemStackUpdate(s -> item.setBackground(new ItemStackTexture(s)));
-            // Создаем пустой диалог и вызываем встроенный метод выбора предмета
-            // Создаем и открываем диалог. Передаем "this" как родителя.
             new ItemStackSelector(this, selectedStack -> {
                 // Коллбэк сработает, когда игрок кликнет по предмету в сетке
                 item.setBackground(new ItemStackTexture(selectedStack));

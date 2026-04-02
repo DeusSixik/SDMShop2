@@ -3,9 +3,11 @@ package dev.sixik.sdmshop2.libs.shop.client.screens.test;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
+import com.lowdragmc.lowdraglib.gui.widget.layout.Align;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -25,20 +27,25 @@ public class ItemStackSelector extends DialogWidget {
     private final Consumer<ItemStack> onSelect;
     private  DraggableScrollableWidgetGroup grid;
     private List<ItemStack> allItems;
+    protected int panelSize;
+    protected final int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+    protected final int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
 
     public ItemStackSelector(WidgetGroup parent, Consumer<ItemStack> onSelect) {
         // Вызов суперконструктора с autoAdd = true сам добавит диалог поверх parent
         super(parent, true);
-        this.setSize(220, 240);
         this.onSelect = onSelect;
         this.setParentInVisible();
-        this.setBackground(new ColorRectAndBorderTexture(ShopColors.BG_PANEL, ShopColors.BORDER, 0));
-
+        int a = Math.min(screenHeight,screenWidth);
+        panelSize = (int) (a*0.7);
+        setSize(panelSize, panelSize);
+        setBackground(new ColorRectAndBorderTexture(ShopColors.BG_PANEL, ShopColors.BORDER, 0));
+        setAlign(Align.CENTER);
         drawDialogPanel();
     }
 
     private void drawDialogPanel() {
-        // 1. Кешируем все предметы один раз при открытии диалога
+
         allItems = new ArrayList<>();
         // Если у тебя Fabric или версия 1.20+, замени ForgeRegistries.ITEMS на BuiltInRegistries.ITEM
         for (Item item : BuiltInRegistries.ITEM) {
@@ -53,7 +60,7 @@ public class ItemStackSelector extends DialogWidget {
 
         this.addWidget(searchField);
         // 3. Скролл-панель для сетки предметов
-        grid = new DraggableScrollableWidgetGroup(10, 30, 200, 200);
+        grid = new DraggableScrollableWidgetGroup(10, searchField.getPositionY()+14, panelSize - 20, panelSize - (searchField.getPositionY()+16));
         grid.setScrollable(true);
         grid.setUseScissor(true); // Критически важно для отсечения невидимых предметов при рендере
         this.addWidget(grid);
@@ -75,7 +82,7 @@ public class ItemStackSelector extends DialogWidget {
         final int padding = 2;
         int columns = grid.getSizeWidth() / (itemSize + padding);
         if (columns <= 0) columns = 1;
-
+        grid.setSelfPositionX((panelSize-20*columns)/2);
         // Математическое построение без вложенных Layout-контейнеров (Hot Path)
         for (int i = 0; i < filtered.size(); i++) {
             ItemStack stack = filtered.get(i);
@@ -85,7 +92,7 @@ public class ItemStackSelector extends DialogWidget {
             int x = col * (itemSize + padding);
             int y = row * (itemSize + padding);
             ItemButton button = new ItemButton(x, y, itemSize, stack, this::selectItem);
-            button.setBackground(new ItemStackTexture(stack));
+            //button.setBackground(new ItemStackTexture(stack));
             grid.addWidget(button);
         }
     }
@@ -101,8 +108,9 @@ public class ItemStackSelector extends DialogWidget {
 
         public ItemButton(int x, int y, int size, ItemStack stack, Consumer<ItemStack> onClick) {
             super(x, y, size, size, click -> onClick.accept(stack));
+            this.setBackground(new GuiTextureGroup(new ColorRectTexture(ShopColors.ITEM_SElECTOR_BUTTONS),new ItemStackTexture(stack)));
             // Подсветка при наведении (полупрозрачный белый)
-            this.setHoverTexture(new IGuiTexture[]{ new ColorRectTexture(0x44FFFFFF) });
+            this.setHoverTexture(new ColorRectTexture(0x44FFFFFF));
             // Тултип с названием предмета
             this.setHoverTooltips(new Component[]{ stack.getHoverName() });
         }

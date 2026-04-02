@@ -48,4 +48,7 @@ public class ShopColors {
 
     /** Альтернативный акцент (Синий, для других вариантов кнопок) */
     public static final int ACCENT_BLUE = 0xFF2196F3;
+
+    // Фон кнопок в атем селекторе
+    public static final int ITEM_SElECTOR_BUTTONS = 0xFF3F3F5D;
 }
