@@ -104,10 +104,11 @@ public class ShopMainPanel extends WidgetGroup {
 //            ItemStackSelectorWidget offerPanel = new ItemStackSelectorWidget(0,0,getSizeWidth());
 //            ShopScreenManager.INSTANCE.openGui(offerPanel);
             new ItemStackSelector(this, selectedStack -> {
+
                 // Коллбэк сработает, когда игрок кликнет по предмету в сетке
                 item.setBackground(new ItemStackTexture(selectedStack));
                 // Тут ты обновляешь данные своего товара
-            });
+            }).initWidget();
         });
         topBar.addWidget(item);
         ResourceLocation skin = Minecraft.getInstance().player.getSkinTextureLocation();

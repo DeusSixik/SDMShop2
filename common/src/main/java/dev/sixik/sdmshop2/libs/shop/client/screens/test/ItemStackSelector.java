@@ -26,7 +26,9 @@ public class ItemStackSelector extends DialogWidget {
 
     private final Consumer<ItemStack> onSelect;
     private  DraggableScrollableWidgetGroup grid;
-    private List<ItemStack> allItems;
+    private boolean isAll = true;
+    private ButtonWidget changButton = new ButtonWidget();
+    private final List<ItemStack> allItems = new ArrayList<>();
     protected int panelSize;
     protected final int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
     protected final int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
@@ -40,25 +42,57 @@ public class ItemStackSelector extends DialogWidget {
         panelSize = (int) (a*0.7);
         setSize(panelSize, panelSize);
         setBackground(new ColorRectAndBorderTexture(ShopColors.BG_PANEL, ShopColors.BORDER, 0));
-        setAlign(Align.CENTER);
-        drawDialogPanel();
-    }
-
-    private void drawDialogPanel() {
-
-        allItems = new ArrayList<>();
-        // Если у тебя Fabric или версия 1.20+, замени ForgeRegistries.ITEMS на BuiltInRegistries.ITEM
         for (Item item : BuiltInRegistries.ITEM) {
             if (item != Items.AIR) {
                 allItems.add(item.getDefaultInstance());
             }
         }
+        drawDialogPanel();
+        //changButton.setButtonTexture(new GuiTextureGroup(new ColorRectAndBorderTexture(ShopColors.BG_BUTTON,ShopColors.BORDER,0).setRightRadius(5),new TextTexture("All")));
+    }
+
+    @Override
+    public void initWidget() {
+        super.initWidget();
+        setSelfPosition((this.parent.getSize().width - this.getSize().width) / 2, (this.parent.getSize().height - this.getSize().height) / 2);
+    }
+
+    private void drawDialogPanel() {
+
         // 2. Поле поиска
         TextFieldWidget searchField = new TextFieldWidget(10, 10, getSizeWidth() - 20, 10,
                 null,
                 text -> rebuildGrid(text.toLowerCase()));
 
         this.addWidget(searchField);
+        // Кнопка смены списка предметов
+        changButton = new ButtonWidget(getSizeWidth(),0,18,18,
+                clickData -> {
+                    if (isAll) {
+                        changButton.setBackground(new GuiTextureGroup(new ColorRectAndBorderTexture(ShopColors.BG_BUTTON,ShopColors.BORDER,0).setRightRadius(5),new TextTexture("All")));
+                        allItems.clear();
+                        for (ItemStack item : Minecraft.getInstance().player.inventoryMenu.getItems().stream().toList()) {
+                            if (item.getItem() != Items.AIR) {
+                                allItems.add(item);
+                            }
+                        }
+                        rebuildGrid("");
+                        isAll = !isAll;
+                    }else{
+                        changButton.setBackground(new GuiTextureGroup(new ColorRectAndBorderTexture(ShopColors.BG_BUTTON,ShopColors.BORDER,0).setRightRadius(5),new TextTexture("Inv")));
+                        allItems.clear();
+                        for (Item item : BuiltInRegistries.ITEM) {
+                            if (item != Items.AIR) {
+                                allItems.add(item.getDefaultInstance());
+                            }
+                        }
+                        rebuildGrid("");
+                        isAll = !isAll;
+                    }
+                }
+        );
+        changButton.setButtonTexture(new GuiTextureGroup(new ColorRectAndBorderTexture(ShopColors.BG_BUTTON,ShopColors.BORDER,0).setRightRadius(5),new TextTexture("Inv")));
+        addWidget(changButton);
         // 3. Скролл-панель для сетки предметов
         grid = new DraggableScrollableWidgetGroup(10, searchField.getPositionY()+14, panelSize - 20, panelSize - (searchField.getPositionY()+16));
         grid.setScrollable(true);
