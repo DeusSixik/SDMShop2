@@ -2,9 +2,11 @@ package dev.sixik.sdmshop2.libs.shop.client.screens.test;
 
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
+import com.lowdragmc.lowdraglib.gui.widget.layout.Align;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopEntryPanel;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
+import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ItemStackSelectorButton;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -98,19 +100,14 @@ public class ShopMainPanel extends WidgetGroup {
         item.setSize(10,10);
         item.setSelfPosition(10,2);
         item.setBackground(new ItemStackTexture(Items.ACACIA_WOOD));
-
-        ButtonWidget createOffer = new ButtonWidget(topBar.getSizeWidth() - 152,2,28,28, clickData ->{
-            //WidgetGroup offerPanel = new CreateOfferPanel();
-//            ItemStackSelectorWidget offerPanel = new ItemStackSelectorWidget(0,0,getSizeWidth());
-//            ShopScreenManager.INSTANCE.openGui(offerPanel);
-            new ItemStackSelector(this, selectedStack -> {
-
-                // Коллбэк сработает, когда игрок кликнет по предмету в сетке
-                item.setBackground(new ItemStackTexture(selectedStack));
-                // Тут ты обновляешь данные своего товара
-            }).initWidget();
-        });
         topBar.addWidget(item);
+
+        //Кнопка создания оффера
+        ButtonWidget createOffer = new ButtonWidget(topBar.getSizeWidth() - 152,2,28,28, clickData ->{
+            WidgetGroup offerPanel = new CreateOfferPanel();
+            ShopScreenManager.INSTANCE.openGui(offerPanel);
+        });
+
         ResourceLocation skin = Minecraft.getInstance().player.getSkinTextureLocation();
         IGuiTexture baseFace = new ResourceTexture(skin).getSubTexture(8f/64, 8f/64, 8f/64, 8f/64);
         // Слой волос/шляпы (UV-маппинг: x=40, y=8, w=8, h=8 на холсте 64x64)
