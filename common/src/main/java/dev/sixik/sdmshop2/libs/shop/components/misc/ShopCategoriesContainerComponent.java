@@ -1,7 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop.components.misc;
 
 import com.google.gson.JsonObject;
-import dev.sixik.sdmshop2.libs.shop.base.ShopEntry;
+import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,7 +14,7 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
 
     public static final IComponentType<ShopCategoriesContainerComponent> TYPE = new Type();
 
-    protected final Map<UUID, List<ShopEntry>> indexedEntries = new ConcurrentHashMap<>();
+    protected final Map<UUID, List<ShopOffer>> indexedEntries = new ConcurrentHashMap<>();
 
     @Override
     public IComponentType<?> getType() {
@@ -42,7 +42,7 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
         ShopEntriesContainerComponent container = opt.get();
 
         indexedEntries.clear();
-        for (ShopEntry entry : container.getEntryMap().values()) {
+        for (ShopOffer entry : container.getEntryMap().values()) {
             Optional<CategoryComponent> opt2 = entry.getComponent(CategoryComponent.class);
 
             if(opt2.isEmpty()) throw new NullPointerException("ShopEntry didn't have 'CategoryComponent'!");
@@ -63,7 +63,7 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
     /**
      * Возвращает копию массива Товаров категории
      */
-    public List<ShopEntry> getCategoriesEntry(UUID categoryId) {
+    public List<ShopOffer> getCategoriesEntry(UUID categoryId) {
         return new ArrayList<>(indexedEntries.getOrDefault(categoryId, new ArrayList<>()));
     }
 
@@ -94,6 +94,11 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
         @Override
         public ShopCategoriesContainerComponent fromNetwork(FriendlyByteBuf buf) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ShopCategoriesContainerComponent createDefault() {
+            return new ShopCategoriesContainerComponent();
         }
     }
 }

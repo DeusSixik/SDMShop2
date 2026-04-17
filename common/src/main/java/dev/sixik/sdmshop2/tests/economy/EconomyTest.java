@@ -9,27 +9,24 @@ import dev.sixik.sdmshop2.libs.sdmeconomy.BankAccount;
 import dev.sixik.sdmshop2.libs.sdmeconomy.DynamicStoredCurrency;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyService;
-import dev.sixik.sdmshop2.libs.shop.base.ShopEntry;
+import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
 import dev.sixik.sdmshop2.libs.shop.components.CommandRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ItemRewardComponent;
-import dev.sixik.sdmshop2.libs.shop.components.api.ConditionComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
-import dev.sixik.sdmshop2.libs.shop.components.api.RenderHideComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.RewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.CategoryComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopEntriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncBridge;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -37,7 +34,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.UUID;
 
 public class EconomyTest {
@@ -68,21 +64,16 @@ public class EconomyTest {
         ShopEntriesContainerComponent entriesComponent = manager
                 .getComponent(ShopEntriesContainerComponent.class).get();
 
-        ShopEntry entry = ShopEntry.createEntry(UUID.randomUUID(), true);
+        // Собираем товар который игрок покупает
+        ShopOffer entry = ShopOffer.create(UUID.randomUUID(), false);
         entry.getComponent(CategoryComponent.class).get().setUuid(UUID.randomUUID());
         entriesComponent.addEntry(entry);
 
-        MoneyCostComponent moneyCostComponent = entry.addComponent(new MoneyCostComponent(debug, 5));
+        // Игрок платит
+        entry.addComponent(new MoneyCostComponent(debug, 5));
         entry.addComponent(new MoneyCostComponent(null, 50));
-
-        ItemRewardComponent itemRewardComponent = entry.addComponent(
-                new ItemRewardComponent(Items.BEDROCK.getDefaultInstance(), 5));
-        CommandRewardComponent commandRewardComponent = entry.addComponent(
-                new CommandRewardComponent("/give {player} diamond", "test")
-        );
-        moneyCostComponent.pay(player);
-        itemRewardComponent.reward(player);
-        commandRewardComponent.reward(player);
+        entry.addComponent(new ItemRewardComponent(Items.BEDROCK.getDefaultInstance(), 5));
+        entry.addComponent(new CommandRewardComponent("/give {player} diamond", "test"));
     }
 
     public static void test() {
@@ -94,7 +85,7 @@ public class EconomyTest {
         UUID categoryId = UUID.randomUUID();
 
         for (int i = 0; i < 20; i++) {
-            ShopEntry entry = ShopEntry.createEntry(UUID.randomUUID(), true);
+            ShopOffer entry = ShopOffer.create(UUID.randomUUID(), true);
             entry.getComponent(CategoryComponent.class).get().setUuid(categoryId);
             entriesComponent.addEntry(entry);
         }

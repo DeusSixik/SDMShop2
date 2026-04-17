@@ -117,5 +117,10 @@ public class ItemRewardComponent extends RewardComponent {
         public ItemRewardComponent fromNetwork(FriendlyByteBuf buf) {
             return new ItemRewardComponent(buf.readItem(), buf.readVarInt());
         }
+
+        @Override
+        public ItemRewardComponent createDefault() {
+            return new ItemRewardComponent();
+        }
     }
 }

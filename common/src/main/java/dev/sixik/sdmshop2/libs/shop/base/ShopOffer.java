@@ -8,10 +8,10 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
 
-public class ShopEntry extends ShopEntity {
+public class ShopOffer extends ShopEntity {
 
-    public static ShopEntry createEntry(UUID uuid, boolean initializeComponents) {
-        ShopEntry entry = new ShopEntry(uuid);
+    public static ShopOffer create(UUID uuid, boolean initializeComponents) {
+        ShopOffer entry = new ShopOffer(uuid);
 
         if(initializeComponents)
             entry.initializeServerOnlyComponents();
@@ -21,7 +21,7 @@ public class ShopEntry extends ShopEntity {
     @Getter
     private final UUID uuid;
 
-    protected ShopEntry(UUID uuid) {
+    protected ShopOffer(UUID uuid) {
         this.uuid = uuid;
     }
 
@@ -52,8 +52,8 @@ public class ShopEntry extends ShopEntity {
         addComponent(new CategoryComponent("none"));
     }
 
-    public static ShopEntry fromNetwork(FriendlyByteBuf buf) {
-        final ShopEntry entry = new ShopEntry(buf.readUUID());
+    public static ShopOffer fromNetwork(FriendlyByteBuf buf) {
+        final ShopOffer entry = new ShopOffer(buf.readUUID());
         entry.deserializeNetwork(buf);
         return entry;
     }

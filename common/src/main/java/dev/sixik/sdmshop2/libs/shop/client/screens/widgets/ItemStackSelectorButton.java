@@ -8,7 +8,13 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.test.ItemStackSelector;
+import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
+import dev.sixik.sdmshop2.utils.ShopUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Map;
 
 
 public class ItemStackSelectorButton extends WidgetGroup {
@@ -16,6 +22,13 @@ public class ItemStackSelectorButton extends WidgetGroup {
     public ItemStack item = null;
 
    public ItemStackSelectorButton(WidgetGroup panel){
+
+       Map<ResourceLocation, ShopComponent> components =
+               ShopUtils.createDefaultComponentsMap(CostComponent.class);
+       for (Map.Entry<ResourceLocation, ShopComponent> entry : components.entrySet()) {
+           System.out.println("Find component: " + entry.getKey());
+       }
+
 
        Widget icon = new WidgetGroup(0,0,getSizeWidth(),getSizeHeight());
        icon.setBackground(new ColorRectTexture(ShopColors.BG_ORANGE));

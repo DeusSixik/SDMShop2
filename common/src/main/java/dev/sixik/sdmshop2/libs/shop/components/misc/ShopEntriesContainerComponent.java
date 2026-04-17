@@ -3,7 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.components.misc;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.sixik.sdmshop2.libs.shop.base.ShopEntry;
+import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import lombok.Getter;
@@ -20,7 +20,7 @@ public class ShopEntriesContainerComponent extends ShopComponent {
     public static final IComponentType<ShopEntriesContainerComponent> TYPE = new Type();
 
     @Getter
-    protected final Map<UUID, ShopEntry> entryMap = new ConcurrentHashMap<>();
+    protected final Map<UUID, ShopOffer> entryMap = new ConcurrentHashMap<>();
 
     @Override
     public IComponentType<?> getType() {
@@ -32,12 +32,12 @@ public class ShopEntriesContainerComponent extends ShopComponent {
         return 1000;
     }
 
-    public void addEntry(ShopEntry entry) {
+    public void addEntry(ShopOffer entry) {
         entryMap.put(entry.getUuid(), entry);
     }
 
     @Nullable
-    public ShopEntry getEntry(UUID entryId) {
+    public ShopOffer getEntry(UUID entryId) {
         return entryMap.get(entryId);
     }
 
@@ -68,13 +68,13 @@ public class ShopEntriesContainerComponent extends ShopComponent {
             if(!json.has("entries"))
                 throw new NullPointerException("Not found 'entries' key!");
 
-            final Map<UUID, ShopEntry> map = component.getEntryMap();
+            final Map<UUID, ShopOffer> map = component.getEntryMap();
 
             final JsonArray entryArray = json.get("entries").getAsJsonArray();
             for (JsonElement element : entryArray) {
                 final JsonObject entryJson = element.getAsJsonObject();
 
-                ShopEntry entry = ShopEntry.createEntry(UUID.fromString(entryJson.get("uuid").getAsString()), true);
+                ShopOffer entry = ShopOffer.create(UUID.fromString(entryJson.get("uuid").getAsString()), true);
                 entry.deserialize(entryJson);
                 map.put(entry.getUuid(), entry);
             }
@@ -84,7 +84,7 @@ public class ShopEntriesContainerComponent extends ShopComponent {
 
         @Override
         public void toNetwork(FriendlyByteBuf buf, ShopEntriesContainerComponent component) {
-            final Map<UUID, ShopEntry> map = component.getEntryMap();
+            final Map<UUID, ShopOffer> map = component.getEntryMap();
 
             buf.writeVarInt(map.size());
             map.forEach((key, value) -> value.serializeNetwork(buf));
@@ -97,10 +97,15 @@ public class ShopEntriesContainerComponent extends ShopComponent {
             int size = buf.readVarInt();
 
             for (int i = 0; i < size; i++) {
-                component.addEntry(ShopEntry.fromNetwork(buf));
+                component.addEntry(ShopOffer.fromNetwork(buf));
             }
 
             return component;
+        }
+
+        @Override
+        public ShopEntriesContainerComponent createDefault() {
+            return new ShopEntriesContainerComponent();
         }
     }
 }

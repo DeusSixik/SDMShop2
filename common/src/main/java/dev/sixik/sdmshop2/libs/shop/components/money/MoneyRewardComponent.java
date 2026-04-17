@@ -7,6 +7,8 @@ import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyCurrencyRegistry;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyService;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.RewardComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
+import dev.sixik.sdmshop2.tests.economy.TestSDMCoin;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -95,7 +97,11 @@ public class MoneyRewardComponent extends RewardComponent {
         @Override
         public MoneyRewardComponent fromNetwork(FriendlyByteBuf buf) {
             return new MoneyRewardComponent(buf.readResourceLocation(), buf.readDouble());
+        }
 
+        @Override
+        public MoneyRewardComponent createDefault() {
+            return new MoneyRewardComponent();
         }
     }
 }
