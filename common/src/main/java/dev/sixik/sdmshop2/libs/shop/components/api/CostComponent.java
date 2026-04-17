@@ -16,11 +16,7 @@ public abstract class CostComponent extends ShopComponent {
      */
     public abstract boolean canPay(Player player);
 
-    /**
-     * Безопасно выполняет оплату. Проверяет {@link #canPay(Player)} перед вызовом {@link #pay(Player)}.
-     *
-     * @param player Игрок, совершающий оплату
-     */
+
     public final void payInternal(Player player) {
         if(canPay(player))
             pay(player);

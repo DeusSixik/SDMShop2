@@ -12,7 +12,7 @@ import java.util.UUID;
  * Представляет торговое предложение (товар или услугу) в магазине.
  * Наследует {@link ShopEntity} для управления своими компонентами (цена, предмет, лимиты и т.д.).
  */
-public class ShopOffer extends ShopEntity {
+public class ShopOffer extends ShopEntity implements ObjectIdGetter {
 
     /**
      * Создает новый экземпляр торгового предложения.
@@ -76,5 +76,10 @@ public class ShopOffer extends ShopEntity {
         final ShopOffer entry = new ShopOffer(buf.readUUID());
         entry.deserializeNetwork(buf);
         return entry;
+    }
+
+    @Override
+    public UUID getUUID() {
+        return uuid;
     }
 }

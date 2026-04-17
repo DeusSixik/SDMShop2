@@ -2,6 +2,7 @@ package dev.sixik.sdmshop2.libs.shop.register;
 
 import dev.sixik.sdmshop2.libs.shop.components.CommandRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ItemRewardComponent;
+import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.RenderHideComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.CategoryComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
@@ -25,5 +26,6 @@ public class ShopRegister {
         ShopComponentRegistry.register(ItemRewardComponent.TYPE);
         ShopComponentRegistry.register(CommandRewardComponent.TYPE);
         ShopComponentRegistry.register(RenderHideComponent.TYPE);
+        ShopComponentRegistry.register(LimiterComponent.TYPE);
     }
 }

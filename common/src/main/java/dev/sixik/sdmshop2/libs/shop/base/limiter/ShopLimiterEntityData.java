@@ -44,6 +44,50 @@ public class ShopLimiterEntityData {
         this.count = new AtomicInteger(count);
     }
 
+    /**
+     * Атомарно прибавляет указанное значение к счетчику.
+     *
+     * @param amount Значение для прибавления
+     * @return Новое (обновленное) значение счетчика
+     */
+    public int add(int amount) {
+        return count.addAndGet(amount);
+    }
+
+    /**
+     * Атомарно вычитает указанное значение из счетчика.
+     *
+     * @param amount Значение для вычитания
+     * @return Новое (обновленное) значение счетчика
+     */
+    public int minus(int amount) {
+        return count.addAndGet(-amount);
+    }
+
+    /**
+     * Атомарно вычитает значение из счетчика, гарантируя,
+     * что результат не опустится ниже нуля.
+     *
+     * @param amount Значение для вычитания
+     * @return Новое значение счетчика (>= 0)
+     */
+    public int safeMinus(int amount) {
+        return count.updateAndGet(current -> Math.max(0, current - amount));
+    }
+
+    /**
+     * Атомарно устанавливает новое значение счетчика.
+     *
+     * @param newValue Новое значение
+     */
+    public void set(int newValue) {
+        count.set(newValue);
+    }
+
+    public int get() {
+        return count.get();
+    }
+
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.addProperty("entityId", entityId.toString());

@@ -22,20 +22,8 @@ public interface ShopLimiterTable {
      */
     ShopLimiterEntityData getEntityData(UUID entityId);
 
-    /**
-     * Возвращает персональные данные о лимитах указанного игрока.
-     *
-     * @param player Объект игрока
-     * @return Объект персональных данных лимитов игрока
-     */
     ShopLimiterPlayerData getPlayerData(Player player);
 
-    /**
-     * Возвращает персональные данные о лимитах игрока по его UUID.
-     *
-     * @param playerId UUID игрока
-     * @return Объект персональных данных лимитов игрока
-     */
     ShopLimiterPlayerData getPlayerData(UUID playerId);
 
     default void save() {
