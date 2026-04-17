@@ -25,25 +25,44 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
+/**
+ * Глобальный менеджер всех магазинов в системе.
+ * Отвечает за хранение, загрузку, сохранение и удаление экземпляров {@link ShopInstance}.
+ */
 public final class ShopTable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShopTable.class);
 
+    /**
+     * Глобальный экземпляр ShopTable.
+     */
     public static ShopTable Instance;
 
     private final ThreadLocal<Gson> GSON_LOCAL = ThreadLocal.withInitial(() -> new GsonBuilder().setPrettyPrinting().create());
     private final ExecutorService ioExecutor;
     private final ConcurrentHashMap<ResourceLocation, ShopInstance> shops = new ConcurrentHashMap<>();
 
+    /**
+     * Путь к директории магазинов в папке сохранения мира.
+     */
     @Getter
     private final Path shopDirWorld;
 
+    /**
+     * Путь к корневой директории настроек магазина.
+     */
     @Getter
     private final Path shopDirConfig;
 
+    /**
+     * Путь к директории, где хранятся JSON-файлы магазинов.
+     */
     @Getter
     private final Path shopsDir;
 
+    /**
+     * Текущий экземпляр Minecraft сервера.
+     */
     @Getter
     private final MinecraftServer server;
 
@@ -59,27 +78,58 @@ public final class ShopTable {
         reload();
     }
 
+    /**
+     * Создает и регистрирует новый магазин.
+     *
+     * @param shopId Уникальный ID нового магазина
+     */
     public void addShop(ResourceLocation shopId) {
         shops.put(shopId, ShopInstance.createManager(shopId, true));
     }
 
+    /**
+     * Добавляет существующий экземпляр магазина в таблицу.
+     *
+     * @param instance Экземпляр магазина
+     */
     public void addShop(ShopInstance instance) {
         shops.put(instance.getId(), instance);
     }
 
+    /**
+     * Возвращает экземпляр магазина по его ID.
+     *
+     * @param id ID искомого магазина
+     * @return Экземпляр магазина или null, если не найден
+     */
     @Nullable
     public ShopInstance getShop(ResourceLocation id) {
         return shops.get(id);
     }
 
+    /**
+     * Возвращает коллекцию всех зарегистрированных магазинов.
+     *
+     * @return Все магазины
+     */
     public Collection<ShopInstance> getAllShops() {
         return shops.values();
     }
 
+    /**
+     * Удаляет магазин и его файл.
+     *
+     * @param instance Экземпляр магазина для удаления
+     */
     public void deleteShop(ShopInstance instance) {
         deleteShop(instance.getId());
     }
 
+    /**
+     * Удаляет магазин по его ID и удаляет соответствующий файл JSON.
+     *
+     * @param id ID магазина для удаления
+     */
     public void deleteShop(ResourceLocation id) {
         ShopInstance removed = shops.remove(id);
         if (removed != null) {
@@ -93,26 +143,46 @@ public final class ShopTable {
         }
     }
 
+    /**
+     * Синхронно сохраняет все магазины в файлы.
+     */
     public void saveAll() {
         for (ShopInstance value : shops.values()) {
             save(value);
         }
     }
 
+    /**
+     * Асинхронно сохраняет все магазины в файлы.
+     */
     public void saveAllAsync() {
         for (ShopInstance value : shops.values()) {
             saveAsync(value);
         }
     }
 
+    /**
+     * Сохраняет указанный магазин в файл.
+     *
+     * @param instance Экземпляр магазина
+     */
     public void save(ShopInstance instance) {
         saveShopToFile(instance);
     }
 
+    /**
+     * Асинхронно сохраняет указанный магазин в файл.
+     *
+     * @param instance Экземпляр магазина
+     */
     public void saveAsync(ShopInstance instance) {
         ioExecutor.submit(() -> saveShopToFile(instance));
     }
 
+    /**
+     * Перезагружает все данные магазинов из папки {@link #getShopsDir()}.
+     * Все текущие данные в памяти будут очищены и загружены заново.
+     */
     public void reload() {
         if(reloading) return;
 
