@@ -4,8 +4,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.sixik.sdmshop2.SDMShop2;
+import dev.sixik.sdmshop2.libs.platform.ServerOperation;
+import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
+import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
+import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
+import dev.sixik.sdmshop2.utils.exceptions.NotInitializedException;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +36,15 @@ import java.util.concurrent.Executors;
  */
 public final class ShopLimiterTableServer implements ShopLimiterTable {
 
+    private static ShopLimiterTableServer Instance;
+
+    public static ShopLimiterTableServer getInstance() {
+        if(Instance == null)
+            throw new NotInitializedException("ShopLimiterTableServer is not initialized yet.");
+
+        return Instance;
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ShopLimiterTableServer.class);
     private final ThreadLocal<Gson> GSON_LOCAL = ThreadLocal.withInitial(() -> new GsonBuilder().setPrettyPrinting().create());
     private final ExecutorService ioExecutor;
@@ -36,10 +54,25 @@ public final class ShopLimiterTableServer implements ShopLimiterTable {
     private final Map<UUID, ShopLimiterPlayerData> playersData = new HashMap<>();
 
     public ShopLimiterTableServer(Path shopDirWorld) {
+        this(shopDirWorld, false);
+    }
+
+    public ShopLimiterTableServer(MinecraftServer server) {
+        this(server, false);
+    }
+
+    public ShopLimiterTableServer(MinecraftServer server, boolean isInstance) {
+        this(SDMEconomyPlatform.resolveSdmDir(server.getWorldPath(LevelResource.ROOT), "shop"), isInstance);
+    }
+
+    public ShopLimiterTableServer(Path shopDirWorld, boolean isInstance) {
         this.ioExecutor = Executors.newSingleThreadExecutor();
         this.saveFile = shopDirWorld.resolve("limiter_data.json");
 
         load();
+
+        if(isInstance)
+            Instance = this;
     }
 
     public ShopLimiterEntityData getEntityData(UUID entityId) {
@@ -162,5 +195,31 @@ public final class ShopLimiterTableServer implements ShopLimiterTable {
     public void shutdown() {
         save();
         ioExecutor.shutdown();
+    }
+
+    public static class Manager implements ServerOperation, ThreadingOperationTimeSave {
+        @Override
+        public void onServerStart(MinecraftServer server) {
+            new ShopLimiterTableServer(server, true);
+        }
+
+        @Override
+        public void onServerStop(MinecraftServer server) {
+            getInstance().shutdown();
+        }
+
+        @Override
+        public void onReload() { }
+
+        @Override
+        public void onDataStartSave() {
+            getInstance().saveAsync();
+        }
+
+        @Override
+        public int getDataSaveTimeSeconds() {
+            final ShopConfig config = SDMShop2.getConfig();
+            return config.autoSaveShopLimiterData ? config.saveShopLimiterDataIntervalSeconds : -1;
+        }
     }
 }

@@ -5,6 +5,7 @@ import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.platform.Platform;
 import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
+import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.sdmeconomy.custom_currency.ExternalItemCurrency;
 import dev.sixik.sdmshop2.libs.sdmeconomy.network.SDMEconomyNetwork;
 import dev.sixik.sdmshop2.libs.sdmeconomy.network.packets.SendDynamicCurrencyS2C;
@@ -89,7 +90,13 @@ public class SDMEconomyPlatform {
     }
 
     public static void init() {
-        SDMPlatform.addReloading(SDMEconomyPlatform::onReload);
+        SDMPlatform.addOperation(new ServerOperation() {
+            @Override
+            public void onReload() {
+                SDMEconomyPlatform.onReload();
+            }
+        });
+
         SDMEconomyPlatform.loadConfigDir(Platform.getConfigFolder());
 
         SDMEconomyCurrencyRegistry.registerType(ResourceLocation.tryBuild("minecraft", "item"), new ExternalItemCurrency.ExternalItemCurrencyType());

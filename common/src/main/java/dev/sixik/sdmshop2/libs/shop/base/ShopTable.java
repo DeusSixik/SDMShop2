@@ -5,10 +5,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.architectury.platform.Platform;
+import dev.sixik.sdmshop2.SDMShop2;
+import dev.sixik.sdmshop2.libs.platform.ServerOperation;
+import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
+import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
 import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -239,6 +244,38 @@ public final class ShopTable {
             }
         } catch (Exception e) {
             LOGGER.error("Failed to save shop {}", shop.getId(), e);
+        }
+    }
+
+    public static class Manager implements ServerOperation, ThreadingOperationTimeSave {
+
+        @Override
+        public void onReload() {
+            if(ShopTable.Instance != null) {
+                ShopTable.Instance.reload();
+            }
+        }
+
+        @Override
+        public void onServerStart(MinecraftServer server) {
+            ShopTable.Instance = new ShopTable(server);
+        }
+
+        @Override
+        public void onServerStop(MinecraftServer server) {
+            ShopTable.Instance.saveAll();
+        }
+
+        @Override
+        public void onDataStartSave() {
+            if(ShopTable.Instance == null) return;
+            ShopTable.Instance.saveAll();
+        }
+
+        @Override
+        public int getDataSaveTimeSeconds() {
+            final ShopConfig config = SDMShop2.getConfig();
+            return config.autoSaveShopData ? config.saveShopDataIntervalSeconds : -1;
         }
     }
 }
