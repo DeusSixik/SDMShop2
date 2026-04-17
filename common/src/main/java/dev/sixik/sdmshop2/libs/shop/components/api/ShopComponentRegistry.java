@@ -1,5 +1,6 @@
 package dev.sixik.sdmshop2.libs.shop.components.api;
 
+import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.network.FriendlyByteBuf;
@@ -7,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ShopComponentRegistry {
 
@@ -14,6 +16,14 @@ public class ShopComponentRegistry {
 
     public static void register(IComponentType<?> type) {
         TYPES.put(type.getId(), type);
+    }
+
+    public static Optional<IComponentType<?>> getType(ResourceLocation id) {
+        return Optional.ofNullable(TYPES.get(id));
+    }
+
+    public static Map<ResourceLocation, IComponentType<?>> getTypes() {
+        return Maps.newHashMap(TYPES);
     }
 
     public static JsonObject toJson(ShopComponent component) {

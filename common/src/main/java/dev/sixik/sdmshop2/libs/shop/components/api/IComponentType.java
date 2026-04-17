@@ -15,4 +15,6 @@ public interface IComponentType<T extends ShopComponent> {
     void toNetwork(FriendlyByteBuf buf, T component);
 
     T fromNetwork(FriendlyByteBuf buf);
+
+    T createDefault();
 }

@@ -78,5 +78,10 @@ public class CategoryComponent extends ShopComponent {
         public void toNetwork(FriendlyByteBuf buf, CategoryComponent component) {
             buf.writeUtf(component.getId());
         }
+
+        @Override
+        public CategoryComponent createDefault() {
+            return new CategoryComponent();
+        }
     }
 }

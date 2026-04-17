@@ -23,6 +23,23 @@ public class ShopScreenManager {
             final var entityPlayer = minecraft.player;
 
             ModularUI ui = new ModularUI(createGui(), IUIHolder.EMPTY, entityPlayer);
+            ui.setFullScreen();
+            ui.initWidgets();
+            ModularUIGuiContainer ModularUIGuiContainer = new ModularUIGuiContainer(ui, entityPlayer.containerMenu.containerId);
+
+            minecraft.setScreen(ModularUIGuiContainer);
+            entityPlayer.containerMenu = ModularUIGuiContainer.getMenu();
+        });
+    }
+
+    public void openGui(WidgetGroup panel) {
+
+        RenderSystem.recordRenderCall(() -> {
+            final var minecraft = Minecraft.getInstance();
+            final var entityPlayer = minecraft.player;
+
+            ModularUI ui = new ModularUI(panel, IUIHolder.EMPTY, entityPlayer);
+            ui.setFullScreen();
             ui.initWidgets();
             ModularUIGuiContainer ModularUIGuiContainer = new ModularUIGuiContainer(ui, entityPlayer.containerMenu.containerId);
 

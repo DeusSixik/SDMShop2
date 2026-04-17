@@ -90,6 +90,11 @@ public class CommandRewardComponent extends RewardComponent {
         public CommandRewardComponent fromNetwork(FriendlyByteBuf buf) {
             return new CommandRewardComponent(DEFAULT_COMMAND, buf.readUtf());
         }
+
+        @Override
+        public CommandRewardComponent createDefault() {
+            return new CommandRewardComponent();
+        }
     }
 
     protected static String formatCommand(String command, ServerPlayer player) {

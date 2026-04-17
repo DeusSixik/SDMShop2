@@ -15,6 +15,12 @@ public class ShopColors {
     /** Фон при наведении на элемент списка (Hover) */
     public static final int BG_HOVER = 0xFF333342;
 
+    /** Фон кнопки */
+    public static final int BG_BUTTON = 0xFF333342;
+
+    /** Фон кнопки при наведении (Hover)*/
+    public static final int HOV_BUTTON = 0xFF525269;
+
     /** Полупрозрачный черный фон для кнопок цены (Alpha ~30%) */
     public static final int PRICE_BG = 0x4C000000;
 
@@ -38,7 +44,11 @@ public class ShopColors {
 
     /** Альтернативный акцент (Оранжево-золотой, для второй цены или "ИЛИ") */
     public static final int ACCENT_ORANGE = 0xFFFFB74D;
+    public static final int BG_ORANGE = 0xFF96722D;
 
     /** Альтернативный акцент (Синий, для других вариантов кнопок) */
     public static final int ACCENT_BLUE = 0xFF2196F3;
+
+    // Фон кнопок в атем селекторе
+    public static final int ITEM_SElECTOR_BUTTONS = 0xFF3F3F5D;
 }

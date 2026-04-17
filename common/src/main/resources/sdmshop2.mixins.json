@@ -5,7 +5,8 @@
   "minVersion": "0.8",
   "client": [
     "ldlib.MixinDrawerHelper$inject_loading",
-    "ldlib.MixinShaders$inject_loading"
+    "ldlib.MixinShaders$inject_loading",
+    "minecraft.MixinEditBox"
   ],
   "mixins": [
     "MixinReloadableServerResources"

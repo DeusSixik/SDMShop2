@@ -46,5 +46,10 @@ public final class RenderHideComponent extends ShopComponent {
         public RenderHideComponent fromNetwork(FriendlyByteBuf buf) {
             return new RenderHideComponent();
         }
+
+        @Override
+        public RenderHideComponent createDefault() {
+            return new RenderHideComponent();
+        }
     }
 }

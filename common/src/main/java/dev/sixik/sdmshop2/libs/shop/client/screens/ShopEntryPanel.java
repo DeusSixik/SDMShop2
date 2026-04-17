@@ -3,7 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.client.screens;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
-import dev.sixik.sdmshop2.libs.shop.base.ShopEntry;
+import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ShopEntryCardWidget;
 
@@ -38,8 +38,8 @@ public class ShopEntryPanel extends DraggableScrollableWidgetGroup {
         int index = 0;
 
         // 4. Добавляем карточки и расставляем их по сетке
-        for (Map.Entry<UUID, ShopEntry> mapEntry : instance.getEntries().getEntryMap().entrySet()) {
-            ShopEntry entry = mapEntry.getValue();
+        for (Map.Entry<UUID, ShopOffer> mapEntry : instance.getEntries().getEntryMap().entrySet()) {
+            ShopOffer entry = mapEntry.getValue();
 
             // Создаем виджет твоей карточки (передаем размеры, если они не заданы внутри)
             ShopEntryCardWidget cardWidget = new ShopEntryCardWidget();
@@ -70,7 +70,7 @@ public class ShopEntryPanel extends DraggableScrollableWidgetGroup {
         int availableWidth = this.getSizeWidth() - 14;
         int columns = Math.max(1, (availableWidth + PADDING) / (CARD_WIDTH + PADDING));
 
-        for (Widget containedWidget : getContainedWidgets(true)) {
+        for (Widget containedWidget : widgets) {
             int col = index % columns; // Остаток от деления (0, 1, 2...)
             int row = index / columns; // Целочисленное деление (0, 0, 0, 1, 1, 1...)
 

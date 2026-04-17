@@ -118,5 +118,10 @@ public class MoneyCostComponent extends CostComponent {
             buf.writeResourceLocation(component.moneyId);
             buf.writeDouble(component.amount);
         }
+
+        @Override
+        public MoneyCostComponent createDefault() {
+            return new MoneyCostComponent();
+        }
     }
 }
