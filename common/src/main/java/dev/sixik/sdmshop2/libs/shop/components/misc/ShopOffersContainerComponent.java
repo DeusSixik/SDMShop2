@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ShopEntriesContainerComponent extends ShopComponent {
+public class ShopOffersContainerComponent extends ShopComponent {
 
-    public static final IComponentType<ShopEntriesContainerComponent> TYPE = new Type();
+    public static final IComponentType<ShopOffersContainerComponent> TYPE = new Type();
 
     @Getter
     protected final Map<UUID, ShopOffer> entryMap = new ConcurrentHashMap<>();
@@ -41,9 +41,9 @@ public class ShopEntriesContainerComponent extends ShopComponent {
         return entryMap.get(entryId);
     }
 
-    private static class Type implements IComponentType<ShopEntriesContainerComponent> {
+    private static class Type implements IComponentType<ShopOffersContainerComponent> {
 
-        public static final ResourceLocation ID = ResourceLocation.tryBuild("sdm", "entries_container");
+        public static final ResourceLocation ID = ResourceLocation.tryBuild("sdm", "offers_container");
 
         @Override
         public ResourceLocation getId() {
@@ -51,26 +51,26 @@ public class ShopEntriesContainerComponent extends ShopComponent {
         }
 
         @Override
-        public JsonObject serialize(ShopEntriesContainerComponent component) {
+        public JsonObject serialize(ShopOffersContainerComponent component) {
             JsonObject json = new JsonObject();
 
             JsonArray entryArray = new JsonArray();
             component.entryMap.forEach((id, entry) -> entryArray.add(entry.serialize()));
-            json.add("entries", entryArray);
+            json.add("offers", entryArray);
 
             return json;
         }
 
         @Override
-        public ShopEntriesContainerComponent deserialize(JsonObject json) {
-            ShopEntriesContainerComponent component = new ShopEntriesContainerComponent();
+        public ShopOffersContainerComponent deserialize(JsonObject json) {
+            ShopOffersContainerComponent component = new ShopOffersContainerComponent();
 
-            if(!json.has("entries"))
+            if(!json.has("offers"))
                 throw new NullPointerException("Not found 'entries' key!");
 
             final Map<UUID, ShopOffer> map = component.getEntryMap();
 
-            final JsonArray entryArray = json.get("entries").getAsJsonArray();
+            final JsonArray entryArray = json.get("offers").getAsJsonArray();
             for (JsonElement element : entryArray) {
                 final JsonObject entryJson = element.getAsJsonObject();
 
@@ -83,7 +83,7 @@ public class ShopEntriesContainerComponent extends ShopComponent {
         }
 
         @Override
-        public void toNetwork(FriendlyByteBuf buf, ShopEntriesContainerComponent component) {
+        public void toNetwork(FriendlyByteBuf buf, ShopOffersContainerComponent component) {
             final Map<UUID, ShopOffer> map = component.getEntryMap();
 
             buf.writeVarInt(map.size());
@@ -91,8 +91,8 @@ public class ShopEntriesContainerComponent extends ShopComponent {
         }
 
         @Override
-        public ShopEntriesContainerComponent fromNetwork(FriendlyByteBuf buf) {
-            ShopEntriesContainerComponent component = new ShopEntriesContainerComponent();
+        public ShopOffersContainerComponent fromNetwork(FriendlyByteBuf buf) {
+            ShopOffersContainerComponent component = new ShopOffersContainerComponent();
 
             int size = buf.readVarInt();
 
@@ -104,8 +104,8 @@ public class ShopEntriesContainerComponent extends ShopComponent {
         }
 
         @Override
-        public ShopEntriesContainerComponent createDefault() {
-            return new ShopEntriesContainerComponent();
+        public ShopOffersContainerComponent createDefault() {
+            return new ShopOffersContainerComponent();
         }
     }
 }

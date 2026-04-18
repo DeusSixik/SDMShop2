@@ -15,11 +15,9 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
 import dev.sixik.sdmshop2.libs.shop.components.CommandRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ItemRewardComponent;
-import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
-import dev.sixik.sdmshop2.libs.shop.components.api.RewardComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.CategoryComponent;
+import dev.sixik.sdmshop2.libs.shop.components.misc.CatalogComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.ShopEntriesContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.components.misc.ShopOffersContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
 import dev.sixik.sdmshop2.libs.shop.components.promo.conditions.PromoTimeComponent;
 import dev.sixik.sdmshop2.libs.shop.components.promo.effects.DiscountComponent;
@@ -65,12 +63,12 @@ public class EconomyTest {
 
             ShopInstance manager = ShopInstance.createManager(debug, true);
 
-            ShopEntriesContainerComponent entriesComponent = manager
-                    .getComponent(ShopEntriesContainerComponent.class).get();
+            ShopOffersContainerComponent entriesComponent = manager
+                    .getComponent(ShopOffersContainerComponent.class).get();
 
             // Собираем товар который игрок покупает
             ShopOffer entry = ShopOffer.create(UUID.randomUUID(), true);
-            entry.getComponent(CategoryComponent.class).get().setUuid(UUID.randomUUID());
+            entry.getComponent(CatalogComponent.class).get().setUuid(UUID.randomUUID());
             entriesComponent.addEntry(entry);
 
             // Игрок платит
@@ -92,13 +90,13 @@ public class EconomyTest {
 
         ShopInstance manager = ShopInstance.createManager(ResourceLocation.tryBuild("sdm", "test_manager"), false);
 
-        ShopEntriesContainerComponent entriesComponent = manager.getComponent(ShopEntriesContainerComponent.class).get();
+        ShopOffersContainerComponent entriesComponent = manager.getComponent(ShopOffersContainerComponent.class).get();
 
         UUID categoryId = UUID.randomUUID();
 
         for (int i = 0; i < 20; i++) {
             ShopOffer entry = ShopOffer.create(UUID.randomUUID(), true);
-            entry.getComponent(CategoryComponent.class).get().setUuid(categoryId);
+            entry.getComponent(CatalogComponent.class).get().setUuid(categoryId);
             entriesComponent.addEntry(entry);
         }
         manager.initializeServerOnlyComponents();

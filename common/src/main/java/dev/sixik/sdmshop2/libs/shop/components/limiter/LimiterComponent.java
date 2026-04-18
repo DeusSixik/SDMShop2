@@ -84,12 +84,12 @@ public class LimiterComponent extends ShopComponent {
             limiterTable.getPlayerData(player).getData(this.rootId).add(amount);
         } else {
             limiterTable.getEntityData(this.rootId).add(amount);
+
         }
     }
 
     /**
      * Уменьшает счетчик покупок на указанное значение.
-     * Рекомендуется использовать safeMinus, если вы добавили его защиту от отрицательных чисел.
      */
     public void minusLimit(Player player, int amount) {
         final ShopLimiterTable limiterTable = ShopUtils.getLimiterTable(false).get();

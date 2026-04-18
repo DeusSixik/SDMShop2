@@ -4,9 +4,9 @@ import dev.sixik.sdmshop2.libs.shop.components.CommandRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ItemRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.RenderHideComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.CategoryComponent;
+import dev.sixik.sdmshop2.libs.shop.components.misc.CatalogComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.ShopEntriesContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.components.misc.ShopOffersContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyRewardComponent;
@@ -22,8 +22,8 @@ public class ShopRegister {
     private static void initComponents() {
         ShopComponentRegistry.register(MoneyCostComponent.TYPE);
         ShopComponentRegistry.register(MoneyRewardComponent.TYPE);
-        ShopComponentRegistry.register(CategoryComponent.TYPE);
-        ShopComponentRegistry.register(ShopEntriesContainerComponent.TYPE);
+        ShopComponentRegistry.register(CatalogComponent.TYPE);
+        ShopComponentRegistry.register(ShopOffersContainerComponent.TYPE);
         ShopComponentRegistry.register(ShopCategoriesContainerComponent.TYPE);
         ShopComponentRegistry.register(ItemRewardComponent.TYPE);
         ShopComponentRegistry.register(CommandRewardComponent.TYPE);

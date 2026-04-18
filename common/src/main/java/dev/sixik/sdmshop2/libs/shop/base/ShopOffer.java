@@ -2,8 +2,7 @@ package dev.sixik.sdmshop2.libs.shop.base;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.sixik.sdmshop2.libs.shop.components.misc.CategoryComponent;
-import lombok.Getter;
+import dev.sixik.sdmshop2.libs.shop.components.misc.CatalogComponent;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
@@ -62,7 +61,7 @@ public class ShopOffer extends ShopEntity implements ObjectIdGetter {
 
     @Override
     protected void customInitializeServerOnlyComponents() {
-        addComponent(new CategoryComponent("none"));
+        addComponent(new CatalogComponent("none"));
     }
 
     /**

@@ -36,18 +36,18 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
      * А кэш позволяет получить отсортированный товары по категории
      */
     public void reindex() {
-        Optional<ShopEntriesContainerComponent> opt = getRoot().getComponent(ShopEntriesContainerComponent.class);
+        Optional<ShopOffersContainerComponent> opt = getRoot().getComponent(ShopOffersContainerComponent.class);
         if(opt.isEmpty()) return;
 
-        ShopEntriesContainerComponent container = opt.get();
+        ShopOffersContainerComponent container = opt.get();
 
         indexedEntries.clear();
         for (ShopOffer entry : container.getEntryMap().values()) {
-            Optional<CategoryComponent> opt2 = entry.getComponent(CategoryComponent.class);
+            Optional<CatalogComponent> opt2 = entry.getComponent(CatalogComponent.class);
 
             if(opt2.isEmpty()) throw new NullPointerException("ShopEntry didn't have 'CategoryComponent'!");
 
-            CategoryComponent categoryComponent = opt2.get();
+            CatalogComponent categoryComponent = opt2.get();
             indexedEntries.computeIfAbsent(categoryComponent.getUuid(), (id) -> new ArrayList<>())
                     .add(entry);
         }

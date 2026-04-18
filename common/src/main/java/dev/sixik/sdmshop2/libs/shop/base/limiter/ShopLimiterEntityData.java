@@ -78,6 +78,7 @@ public class ShopLimiterEntityData {
      * @return Новое (обновленное) значение счетчика
      */
     public int add(int amount) {
+        markPurchased();
         return count.addAndGet(amount);
     }
 

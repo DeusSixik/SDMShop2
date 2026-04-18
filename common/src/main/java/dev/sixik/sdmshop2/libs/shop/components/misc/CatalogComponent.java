@@ -10,9 +10,9 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
-public class CategoryComponent extends ShopComponent {
+public class CatalogComponent extends ShopComponent {
 
-    public static final IComponentType<CategoryComponent> TYPE = new Type();
+    public static final IComponentType<CatalogComponent> TYPE = new Type();
 
     protected static final String NULL = "none";
 
@@ -24,15 +24,15 @@ public class CategoryComponent extends ShopComponent {
     @Setter
     private UUID uuid;
 
-    public CategoryComponent() {
+    public CatalogComponent() {
         this(NULL);
     }
 
-    public CategoryComponent(String id) {
+    public CatalogComponent(String id) {
         this(id, UUID.randomUUID());
     }
 
-    public CategoryComponent(String id, UUID uuid) {
+    public CatalogComponent(String id, UUID uuid) {
         this.id = id;
         this.uuid = uuid;
     }
@@ -42,9 +42,9 @@ public class CategoryComponent extends ShopComponent {
         return TYPE;
     }
 
-    private static class Type implements IComponentType<CategoryComponent> {
+    private static class Type implements IComponentType<CatalogComponent> {
 
-        public static final ResourceLocation ID = ResourceLocation.tryBuild("sdm", "category");
+        public static final ResourceLocation ID = ResourceLocation.tryBuild("sdm", "catalog");
 
         @Override
         public ResourceLocation getId() {
@@ -52,36 +52,36 @@ public class CategoryComponent extends ShopComponent {
         }
 
         @Override
-        public CategoryComponent deserialize(JsonObject json) {
-            return new CategoryComponent(
-                    (json.has("category_id") ?
-                            json.get("category_id").getAsString() :
+        public CatalogComponent deserialize(JsonObject json) {
+            return new CatalogComponent(
+                    (json.has("catalog_id") ?
+                            json.get("catalog_id").getAsString() :
                             NULL),
-                    UUID.fromString(json.get("uuid").getAsString())
+                    json.has("uuid") ? UUID.fromString(json.get("uuid").getAsString()) : UUID.randomUUID()
             );
         }
 
         @Override
-        public JsonObject serialize(CategoryComponent component) {
+        public JsonObject serialize(CatalogComponent component) {
             JsonObject object = new JsonObject();
-            object.addProperty("category_id", component.id);
+            object.addProperty("catalog_id", component.id);
             object.addProperty("uuid", component.uuid.toString());
             return object;
         }
 
         @Override
-        public CategoryComponent fromNetwork(FriendlyByteBuf buf) {
-            return new CategoryComponent(buf.readUtf());
+        public CatalogComponent fromNetwork(FriendlyByteBuf buf) {
+            return new CatalogComponent(buf.readUtf());
         }
 
         @Override
-        public void toNetwork(FriendlyByteBuf buf, CategoryComponent component) {
+        public void toNetwork(FriendlyByteBuf buf, CatalogComponent component) {
             buf.writeUtf(component.getId());
         }
 
         @Override
-        public CategoryComponent createDefault() {
-            return new CategoryComponent();
+        public CatalogComponent createDefault() {
+            return new CatalogComponent();
         }
     }
 }
