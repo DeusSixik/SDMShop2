@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.ShopEntriesContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.components.misc.ShopOffersContainerComponent;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -45,7 +45,7 @@ public class ShopInstance extends ShopEntity {
 
     @Override
     protected void customInitializeServerOnlyComponents() {
-        addComponent(new ShopEntriesContainerComponent());
+        addComponent(new ShopOffersContainerComponent());
         addComponent(new ShopCategoriesContainerComponent());
     }
 
@@ -118,8 +118,8 @@ public class ShopInstance extends ShopEntity {
      * @return Контейнер записей
      * @throws IllegalStateException если компонент отсутствует
      */
-    public ShopEntriesContainerComponent getEntries() {
-        return getComponent(ShopEntriesContainerComponent.class)
+    public ShopOffersContainerComponent getEntries() {
+        return getComponent(ShopOffersContainerComponent.class)
                 .orElseThrow(() -> new IllegalStateException("Shop " + id + " corrupted: missing EntriesComponent"));
     }
 
