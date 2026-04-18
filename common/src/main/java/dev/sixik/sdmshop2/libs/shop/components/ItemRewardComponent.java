@@ -36,8 +36,8 @@ public class ItemRewardComponent extends RewardComponent {
     }
 
     @Override
-    public void reward(ServerPlayer player) {
-        ShopItemHelper.giveItems(player, rewardItem, amount);
+    public void reward(ServerPlayer player, int inAmount) {
+        ShopItemHelper.giveItems(player, rewardItem, (long) amount * inAmount);
     }
 
     @Override

@@ -32,33 +32,41 @@ public class MoneyCostComponent extends CostComponent {
     }
 
     public MoneyCostComponent(ResourceLocation moneyId, double amount) {
-        this.moneyId = moneyId;
+        this.moneyId = moneyId == null ? EMPTY : moneyId;
         this.amount = amount;
     }
 
     @Override
-    public boolean canPay(Player player) {
+    public boolean canPay(Player player, double actualPrice) {
         final Map<ResourceLocation, IExternalCurrency> currencies = player.isLocalPlayer() ?
                 SDMEconomyServiceClient.getAllCurrencies()
                 : SDMEconomyCurrencyRegistry.getCurrenciesMap();
 
         if(currencies.containsKey(moneyId))
-            return currencies.get(moneyId).getBalance(player).doubleValue() >= amount;
+            /*
+                Проверяем, хватает ли баланса на актуальную цену (actualPrice), а не на базовую (amount)
+             */
+            return currencies.get(moneyId).getBalance(player).doubleValue() >= actualPrice;
 
         final BankAccount account = player.isLocalPlayer()
                 ? SDMEconomyServiceClient.getInstanceClient().getBankAccount()
                 : SDMEconomyService.getInstance().getAccount(player.getGameProfile().getId());
-        return account.getBalance(DYNAMIC_CURRENCY.get().setId(moneyId)).doubleValue() >= amount;
+
+        return account.getBalance(DYNAMIC_CURRENCY.get().setId(moneyId)).doubleValue() >= actualPrice;
     }
 
     @Override
-    public void pay(Player player) {
+    public void pay(Player player, double actualPrice) {
         if (player.isLocalPlayer()) {
             SDMShop2.LOGGER.warn("Call Pay methods on client!");
             return;
         }
 
-        final BigDecimal value = BigDecimal.valueOf(amount);
+        /*
+            Мы конвертируем в BigDecimal именно actualPrice,
+            Чтобы списать ровно ту сумму, которую насчитал процессор скидок.
+         */
+        final BigDecimal value = BigDecimal.valueOf(actualPrice);
         Map<ResourceLocation, IExternalCurrency> currencies = SDMEconomyCurrencyRegistry.getCurrenciesMap();
 
         if (currencies.containsKey(moneyId)) {
@@ -69,6 +77,11 @@ public class MoneyCostComponent extends CostComponent {
         SDMEconomyService.getInstance()
                 .getAccount(player.getGameProfile().getId())
                 .modify(DYNAMIC_CURRENCY.get().setId(moneyId), value.negate());
+    }
+
+    @Override
+    public double getBaseAmount() {
+        return amount;
     }
 
     @Override

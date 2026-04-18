@@ -18,7 +18,6 @@ public class SDMShopCommands {
                         .then(Commands.literal("open_shop")
                         )
                         .then(Commands.literal("test")
-                                .requires(s -> s.hasPermission(2))
                                 .executes(s -> {
                                     EconomyTest.commandTest(s.getSource().getPlayerOrException());
                                     return 0;

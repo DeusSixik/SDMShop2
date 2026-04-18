@@ -37,8 +37,8 @@ public class MoneyRewardComponent extends RewardComponent {
     }
 
     @Override
-    public void reward(ServerPlayer player) {
-        final BigDecimal value = BigDecimal.valueOf(amount);
+    public void reward(ServerPlayer player, int inAmount) {
+        final BigDecimal value = BigDecimal.valueOf(amount * inAmount);
         Map<ResourceLocation, IExternalCurrency> currencies = SDMEconomyCurrencyRegistry.getCurrenciesMap();
 
         if (currencies.containsKey(moneyId)) {

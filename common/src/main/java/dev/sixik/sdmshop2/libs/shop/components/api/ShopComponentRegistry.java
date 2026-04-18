@@ -3,6 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.components.api;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
@@ -57,6 +58,7 @@ public class ShopComponentRegistry {
         IComponentType type = component.getType();
 
         final JsonObject json = type.serialize(component);
+        component.additionalSerialize(json);
         json.addProperty("type", type.getId().toString());
         return json;
     }
@@ -74,8 +76,9 @@ public class ShopComponentRegistry {
 
         IComponentType<?> type = TYPES.get(id);
         if (type == null) throw new JsonSyntaxException("Unknown component type: " + id);
-
-        return type.deserialize(json);
+        final ShopComponent component = type.deserialize(json);
+        component.additionalDeserialize(json);
+        return component;
     }
 
     /**
@@ -89,6 +92,7 @@ public class ShopComponentRegistry {
         IComponentType type = component.getType();
         buf.writeResourceLocation(type.getId());
         type.toNetwork(buf, component);
+        component.additionalToNetwork(buf);
     }
 
     /**
@@ -101,7 +105,8 @@ public class ShopComponentRegistry {
     public static ShopComponent fromNetwork(FriendlyByteBuf buf) {
         ResourceLocation id = buf.readResourceLocation();
         IComponentType<?> type = TYPES.get(id);
-
-        return type.fromNetwork(buf);
+        final ShopComponent component = type.fromNetwork(buf);
+        component.additionalFromNetwork(buf);
+        return component;
     }
 }

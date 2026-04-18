@@ -32,7 +32,6 @@ public class ShopOffer extends ShopEntity implements ObjectIdGetter {
     /**
      * Уникальный идентификатор предложения.
      */
-    @Getter
     private final UUID uuid;
 
     protected ShopOffer(UUID uuid) {

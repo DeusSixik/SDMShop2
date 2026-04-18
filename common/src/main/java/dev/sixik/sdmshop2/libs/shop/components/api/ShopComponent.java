@@ -1,7 +1,9 @@
 package dev.sixik.sdmshop2.libs.shop.components.api;
 
+import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.base.ShopEntity;
 import dev.sixik.sdmshop2.libs.shop.components.api.exceptions.ValidationException;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -96,4 +98,12 @@ public abstract class ShopComponent {
     public static boolean isEmpty(ResourceLocation id) {
         return EMPTY.equals(id);
     }
+
+    public void additionalSerialize(JsonObject json) { }
+
+    public void additionalDeserialize(JsonObject json) { }
+
+    public void additionalToNetwork(FriendlyByteBuf buf) { }
+
+    public void additionalFromNetwork(FriendlyByteBuf buf) { }
 }

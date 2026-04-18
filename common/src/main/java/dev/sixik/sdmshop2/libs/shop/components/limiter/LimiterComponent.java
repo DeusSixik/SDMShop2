@@ -1,6 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop.components.limiter;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import dev.sixik.sdmshop2.SDMShop2;
 import dev.sixik.sdmshop2.libs.shop.base.ObjectIdGetter;
 import dev.sixik.sdmshop2.libs.shop.base.ShopEntity;
@@ -19,12 +20,18 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
 public class LimiterComponent extends ShopComponent {
 
     public static final IComponentType<LimiterComponent> TYPE = new Type();
+
+    public enum LimiterType {
+        World, // Лимит у всех игроков един
+        Player // Лимит только у конкретного игрока
+    }
 
     private UUID rootId;
 
@@ -56,26 +63,15 @@ public class LimiterComponent extends ShopComponent {
         }
     }
 
-    public boolean isChecked(Player player) {
-        final Optional<ShopLimiterTable> limiterTableOpt = ShopUtils.getLimiterTable(player.isLocalPlayer());
+    public boolean isChecked(Player player, int purchaseAmount) {
+        final ShopLimiterTable limiterTable = ShopUtils.getLimiterTable(player.isLocalPlayer()).orElse(null);
+        if (limiterTable == null) return false;
 
-        if(limiterTableOpt.isEmpty()) {
-            final String side = player.isLocalPlayer() ? "Client" : "Server";
-            SDMShop2.LOGGER.error("LimiterTable is not initialized! Side: {}", side);
-            return false;
-        }
+        int currentPurchases = (limiterType == LimiterType.Player)
+                ? limiterTable.getPlayerData(player).get(this.rootId)
+                : limiterTable.getEntityData(this.rootId).getCount().get();
 
-        final ShopLimiterTable limiterTable = limiterTableOpt.get();
-        int currentPurchases;
-
-        if (limiterType == LimiterType.Player) {
-            currentPurchases = limiterTable.getPlayerData(player).get(this.rootId);
-        } else {
-            currentPurchases = limiterTable.getEntityData(this.rootId).getCount().get();
-        }
-
-        // Покупка разрешена только если текущее число покупок СТРОГО МЕНЬШЕ установленного лимита (this.count)
-        return currentPurchases >= 0 && currentPurchases < this.count;
+        return (currentPurchases + purchaseAmount) <= this.count;
     }
 
     /**
@@ -123,11 +119,6 @@ public class LimiterComponent extends ShopComponent {
         return TYPE;
     }
 
-    public enum LimiterType {
-        World,
-        Player
-    }
-
     private static class Type implements IComponentType<LimiterComponent> {
 
         private static final ResourceLocation ID = ResourceLocation.tryBuild("sdm", "condition_limiter");
@@ -147,12 +138,28 @@ public class LimiterComponent extends ShopComponent {
 
         @Override
         public LimiterComponent deserialize(JsonObject json) {
-            if(json.has("type") && json.has("count")) {
-                LimiterType type = LimiterType.valueOf(json.get("type").getAsString());
+            if (!json.has("type")) {
+                throw new JsonParseException("[LimiterComponent] Missing required parameter: 'type'");
+            }
+            if (!json.has("count")) {
+                throw new JsonParseException("[LimiterComponent] Missing required parameter: 'count'");
+            }
+
+            LimiterType type;
+            String typeStr = json.get("type").getAsString();
+            try {
+                type = LimiterType.valueOf(typeStr);
+            } catch (IllegalArgumentException e) {
+                throw new JsonParseException("[LimiterComponent] Invalid 'type': '" + typeStr +
+                        "'. Expected one of: " + Arrays.toString(LimiterType.values()));
+            }
+
+            try {
                 int count = json.get("count").getAsInt();
                 return new LimiterComponent(type, count);
+            } catch (NumberFormatException | UnsupportedOperationException e) {
+                throw new JsonParseException("[LimiterComponent] Parameter 'count' must be a valid integer number!");
             }
-            throw new NullPointerException("Param with id 'type' or 'count' not exists!");
         }
 
         @Override
