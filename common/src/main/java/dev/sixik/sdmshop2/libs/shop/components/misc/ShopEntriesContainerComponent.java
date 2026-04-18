@@ -33,7 +33,7 @@ public class ShopEntriesContainerComponent extends ShopComponent {
     }
 
     public void addEntry(ShopOffer entry) {
-        entryMap.put(entry.getUuid(), entry);
+        entryMap.put(entry.getUUID(), entry);
     }
 
     @Nullable
@@ -76,7 +76,7 @@ public class ShopEntriesContainerComponent extends ShopComponent {
 
                 ShopOffer entry = ShopOffer.create(UUID.fromString(entryJson.get("uuid").getAsString()), true);
                 entry.deserialize(entryJson);
-                map.put(entry.getUuid(), entry);
+                map.put(entry.getUUID(), entry);
             }
 
             return component;

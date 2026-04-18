@@ -1,5 +1,8 @@
 package dev.sixik.sdmshop2.utils;
 
+import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTable;
+import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableClient;
+import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableServer;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
@@ -10,6 +13,10 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ShopUtils {
+
+    public static Optional<ShopLimiterTable> getLimiterTable(boolean isClient) {
+        return Optional.ofNullable(isClient ? ShopLimiterTableClient.INSTANCE : ShopLimiterTableServer.getInstance());
+    }
 
     public static Map<ResourceLocation, ShopComponent> createDefaultComponentsMap(Class<? extends ShopComponent> include) {
         Map<ResourceLocation, ShopComponent> componentMap = new HashMap<>();

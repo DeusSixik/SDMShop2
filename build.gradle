@@ -71,6 +71,9 @@ subprojects {
             name "firstdarkdev"
             url "https://maven.firstdark.dev/snapshots"
         }
+        maven {
+            url "https://cursemaven.com"
+        }
     }
 
     dependencies {

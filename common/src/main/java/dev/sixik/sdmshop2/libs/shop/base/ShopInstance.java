@@ -9,10 +9,21 @@ import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
+/**
+ * Представляет экземпляр магазина.
+ * Является наследником {@link ShopEntity} и содержит компоненты для управления записями и категориями.
+ */
 public class ShopInstance extends ShopEntity {
 
     public static final ResourceLocation NULL_MANAGER = ResourceLocation.tryBuild("sdm", "null");
 
+    /**
+     * Создает новый экземпляр магазина.
+     *
+     * @param shopId               Уникальный ID магазина
+     * @param initializeComponents Нужно ли сразу инициализировать компоненты сервера
+     * @return Новый экземпляр ShopInstance
+     */
     public static ShopInstance createManager(ResourceLocation shopId, boolean initializeComponents) {
         ShopInstance manager = new ShopInstance(shopId);
 
@@ -22,6 +33,9 @@ public class ShopInstance extends ShopEntity {
         return manager;
     }
 
+    /**
+     * Уникальный идентификатор магазина.
+     */
     @Getter
     protected final ResourceLocation id;
 
@@ -64,6 +78,12 @@ public class ShopInstance extends ShopEntity {
         super.serializeNetwork(buf);
     }
 
+    /**
+     * Создает экземпляр магазина из данных, полученных по сети.
+     *
+     * @param buf Буфер сетевого пакета
+     * @return Восстановленный экземпляр ShopInstance
+     */
     public static ShopInstance fromNetwork(FriendlyByteBuf buf) {
         final ResourceLocation id = buf.readResourceLocation();
 
@@ -72,6 +92,13 @@ public class ShopInstance extends ShopEntity {
         return shopInstance;
     }
 
+    /**
+     * Создает экземпляр магазина из данных JSON.
+     *
+     * @param element Элемент JSON
+     * @return Восстановленный экземпляр ShopInstance
+     * @throws JsonParseException если поле 'id' отсутствует
+     */
     public static ShopInstance fromJson(JsonElement element) {
         JsonObject json = element.getAsJsonObject();
 
@@ -85,16 +112,33 @@ public class ShopInstance extends ShopEntity {
         return shop;
     }
 
+    /**
+     * Возвращает компонент-контейнер для записей (офферов) магазина.
+     *
+     * @return Контейнер записей
+     * @throws IllegalStateException если компонент отсутствует
+     */
     public ShopEntriesContainerComponent getEntries() {
         return getComponent(ShopEntriesContainerComponent.class)
                 .orElseThrow(() -> new IllegalStateException("Shop " + id + " corrupted: missing EntriesComponent"));
     }
 
+    /**
+     * Возвращает компонент-контейнер для категорий магазина.
+     *
+     * @return Контейнер категорий
+     * @throws IllegalStateException если компонент отсутствует
+     */
     public ShopCategoriesContainerComponent getCategories() {
         return getComponent(ShopCategoriesContainerComponent.class)
                 .orElseThrow(() -> new IllegalStateException("Shop " + id + " corrupted: missing CategoriesComponent"));
     }
 
+    /**
+     * Проверяет, является ли этот экземпляр магазина "пустым".
+     *
+     * @return true, если это NULL_MANAGER, иначе false
+     */
     public final boolean isNull() {
         return id.equals(NULL_MANAGER);
     }

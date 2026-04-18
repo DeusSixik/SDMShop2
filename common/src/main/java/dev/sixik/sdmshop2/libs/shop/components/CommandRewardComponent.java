@@ -32,11 +32,15 @@ public class CommandRewardComponent extends RewardComponent {
     }
 
     @Override
-    public void reward(ServerPlayer player) {
+    public void reward(ServerPlayer player, int amount) {
         CommandSourceStack source = player.createCommandSourceStack();
         source.withPermission(2);
         source.withSuppressedOutput();
-        player.getServer().getCommands().performPrefixedCommand(source, formatCommand(command, player));
+
+        String format = formatCommand(command, player);
+        for (int i = 0; i < amount; i++) {
+            player.getServer().getCommands().performPrefixedCommand(source, format);
+        }
     }
 
     @Override

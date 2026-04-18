@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.PlayerEvent;
+import dev.sixik.sdmshop2.SDMShop2;
 import dev.sixik.sdmshop2.libs.sdmeconomy.BankAccount;
 import dev.sixik.sdmshop2.libs.sdmeconomy.DynamicStoredCurrency;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
@@ -20,6 +21,8 @@ import dev.sixik.sdmshop2.libs.shop.components.misc.CategoryComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopEntriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
+import dev.sixik.sdmshop2.libs.shop.components.promo.conditions.PromoTimeComponent;
+import dev.sixik.sdmshop2.libs.shop.components.promo.effects.DiscountComponent;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncBridge;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
 import net.minecraft.resources.ResourceLocation;
@@ -51,34 +54,43 @@ public class EconomyTest {
 
     public static void commandTest(ServerPlayer player) {
 
-        ResourceLocation debug = ResourceLocation.tryBuild("sdm", "debug");
+        try {
+            ResourceLocation debug = ResourceLocation.tryBuild("sdm", "debug");
 
-        DynamicStoredCurrency cur = new DynamicStoredCurrency(debug);
-        BankAccount account = SDMEconomyService.getInstance().getAccount(player.getGameProfile().getId());
+            DynamicStoredCurrency cur = new DynamicStoredCurrency(debug);
+            BankAccount account = SDMEconomyService.getInstance().getAccount(player.getGameProfile().getId());
 
-        if(!account.hasMoney(cur))
-            account.setBalance(cur, BigDecimal.valueOf(300));
+            if (!account.hasMoney(cur))
+                account.setBalance(cur, BigDecimal.valueOf(300));
 
-        ShopInstance manager = ShopInstance.createManager(debug, true);
+            ShopInstance manager = ShopInstance.createManager(debug, true);
 
-        ShopEntriesContainerComponent entriesComponent = manager
-                .getComponent(ShopEntriesContainerComponent.class).get();
+            ShopEntriesContainerComponent entriesComponent = manager
+                    .getComponent(ShopEntriesContainerComponent.class).get();
 
-        // Собираем товар который игрок покупает
-        ShopOffer entry = ShopOffer.create(UUID.randomUUID(), false);
-        entry.getComponent(CategoryComponent.class).get().setUuid(UUID.randomUUID());
-        entriesComponent.addEntry(entry);
+            // Собираем товар который игрок покупает
+            ShopOffer entry = ShopOffer.create(UUID.randomUUID(), true);
+            entry.getComponent(CategoryComponent.class).get().setUuid(UUID.randomUUID());
+            entriesComponent.addEntry(entry);
 
-        // Игрок платит
-        entry.addComponent(new MoneyCostComponent(debug, 5));
-        entry.addComponent(new MoneyCostComponent(null, 50));
-        entry.addComponent(new ItemRewardComponent(Items.BEDROCK.getDefaultInstance(), 5));
-        entry.addComponent(new CommandRewardComponent("/give {player} diamond", "test"));
+            // Игрок платит
+            entry.addComponent(new MoneyCostComponent(debug, 5));
+            entry.addComponent(new MoneyCostComponent(null, 50)).setGroupId("group1");
+            entry.addComponent(new ItemRewardComponent(Items.BEDROCK.getDefaultInstance(), 5));
+            entry.addComponent(new CommandRewardComponent("/give {player} diamond", "test"));
+
+            entry.addComponent(new PromoTimeComponent(PromoTimeComponent.TimeMode.SERVER_TICKS, 1000, 5000));
+            entry.addComponent(new DiscountComponent(50)).applyGroup("group1S");
+
+            save(manager);
+        } catch (Exception e) {
+            SDMShop2.LOGGER.error("Error while command test", e);
+        }
     }
 
     public static void test() {
 
-        ShopInstance manager = ShopInstance.createManager(ResourceLocation.tryBuild("sdm", "test_manager"), true);
+        ShopInstance manager = ShopInstance.createManager(ResourceLocation.tryBuild("sdm", "test_manager"), false);
 
         ShopEntriesContainerComponent entriesComponent = manager.getComponent(ShopEntriesContainerComponent.class).get();
 
@@ -89,9 +101,10 @@ public class EconomyTest {
             entry.getComponent(CategoryComponent.class).get().setUuid(categoryId);
             entriesComponent.addEntry(entry);
         }
+        manager.initializeServerOnlyComponents();
 
         ShopCategoriesContainerComponent categoryManager = manager.getComponent(ShopCategoriesContainerComponent.class).get();
-        categoryManager.reindex();
+//        categoryManager.reindex();
 
         System.out.println("Categorise Entries: " + categoryManager.getCategoriesEntry(categoryId).size());
 

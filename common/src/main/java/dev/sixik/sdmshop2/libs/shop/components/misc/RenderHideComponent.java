@@ -1,6 +1,9 @@
-package dev.sixik.sdmshop2.libs.shop.components.api;
+package dev.sixik.sdmshop2.libs.shop.components.misc;
 
 import com.google.gson.JsonObject;
+import dev.sixik.sdmshop2.libs.shop.components.api.ConditionComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
+import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.exceptions.NoSuchComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
