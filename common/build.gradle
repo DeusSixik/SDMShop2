@@ -17,6 +17,8 @@ dependencies {
 
     modCompileOnly("dev.latvian.mods:kubejs-fabric:${kjs_version}")
 
+    modCompileOnly("curse.maven:shadow-config-1421861:7922236")
+
     minecraftLibraries("com.github.ben-manes.caffeine:caffeine:3.2.3")
     include(minecraftRuntimeLibraries("com.github.ben-manes.caffeine:caffeine:3.2.3"))
 }

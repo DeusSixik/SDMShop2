@@ -60,6 +60,7 @@ dependencies {
 
     modImplementation("com.lowdragmc.ldlib:ldlib-forge-${minecraft_version}:${ldlib_version}") { transitive = false }
     modImplementation("dev.latvian.mods:kubejs-forge:${kjs_version}")
+    modImplementation("curse.maven:shadow-config-1421861:7922236")
 
     minecraftClientRuntimeLibraries("com.github.ben-manes.caffeine:caffeine:3.2.3")
 }

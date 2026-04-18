@@ -45,7 +45,12 @@ public class ShopLimiterPlayerData {
     }
 
     public boolean add(UUID entityId, int count) {
-        return dataMap.putIfAbsent(entityId, new ShopLimiterEntityData(entityId, count)) == null;
+        final ShopLimiterEntityData data = dataMap.putIfAbsent(entityId, new ShopLimiterEntityData(entityId, count));
+
+        if(data != null)
+            data.markPurchased();
+
+        return data == null;
     }
 
     public boolean remove(UUID entityId) {
@@ -65,11 +70,17 @@ public class ShopLimiterPlayerData {
      * @return Количество покупок до выполнения операции
      */
     public int getAndUpdate(UUID userId, int count) {
-        return dataMap.computeIfAbsent(userId, ShopLimiterEntityData::new).getCount().getAndUpdate(i -> i + count);
+        final ShopLimiterEntityData data = dataMap.computeIfAbsent(userId, ShopLimiterEntityData::new);
+        int value = data.getCount().getAndUpdate(i -> i + count);
+        data.markPurchased();
+        return value;
     }
 
     public int getAndAdd(UUID userId, int count) {
-        return dataMap.computeIfAbsent(userId, ShopLimiterEntityData::new).getCount().getAndAdd(count);
+        final ShopLimiterEntityData data = dataMap.computeIfAbsent(userId, ShopLimiterEntityData::new);
+        int value = data.getCount().getAndAdd(count);
+        data.markPurchased();
+        return value;
     }
 
     /**

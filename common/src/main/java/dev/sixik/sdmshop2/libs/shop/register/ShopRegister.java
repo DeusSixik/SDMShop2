@@ -10,6 +10,7 @@ import dev.sixik.sdmshop2.libs.shop.components.misc.ShopEntriesContainerComponen
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyRewardComponent;
+import dev.sixik.sdmshop2.libs.shop.components.promo.conditions.PromoCooldownComponent;
 import dev.sixik.sdmshop2.libs.shop.components.promo.effects.DiscountComponent;
 
 public class ShopRegister {
@@ -29,5 +30,6 @@ public class ShopRegister {
         ShopComponentRegistry.register(RenderHideComponent.TYPE);
         ShopComponentRegistry.register(LimiterComponent.TYPE);
         ShopComponentRegistry.register(DiscountComponent.TYPE);
+        ShopComponentRegistry.register(PromoCooldownComponent.TYPE);
     }
 }
