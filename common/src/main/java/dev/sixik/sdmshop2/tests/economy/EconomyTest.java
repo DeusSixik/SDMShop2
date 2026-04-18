@@ -23,6 +23,9 @@ import dev.sixik.sdmshop2.libs.shop.components.promo.conditions.PromoTimeCompone
 import dev.sixik.sdmshop2.libs.shop.components.promo.effects.DiscountComponent;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncBridge;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
+import dev.sixik.sdmshop2.libs.shop.processors.ShopTransactionProcessor;
+import dev.sixik.sdmshop2.libs.shop.scripting.ScriptConditionComponent;
+import dev.sixik.sdmshop2.libs.shop.scripting.ScriptRewardComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -79,6 +82,12 @@ public class EconomyTest {
 
             entry.addComponent(new PromoTimeComponent(PromoTimeComponent.TimeMode.SERVER_TICKS, 1000, 5000));
             entry.addComponent(new DiscountComponent(50)).applyGroup("group1S");
+
+            entry.addComponent(new ScriptRewardComponent("test_script_1"));
+            entry.addComponent(new ScriptConditionComponent("test_script_2"));
+
+            boolean result = ShopTransactionProcessor.executePlayerPurchase(entry, player, "", 1);
+            System.out.println("Result: " + result);
 
             save(manager);
         } catch (Exception e) {

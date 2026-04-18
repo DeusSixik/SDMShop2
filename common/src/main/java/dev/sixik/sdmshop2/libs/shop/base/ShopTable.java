@@ -10,10 +10,10 @@ import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
+import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -214,6 +214,8 @@ public final class ShopTable {
                 LOGGER.error("Failed to load shops", e);
             }
 
+            ShopScriptEvents.SCRIPT_SHOP_LOAD_EVENT.invoker().invoke(server, this);
+
             LOGGER.info("Loaded {} shops.", shops.size());
         } finally {
             reloading = false;
@@ -232,6 +234,8 @@ public final class ShopTable {
     }
 
     private void saveShopToFile(ShopInstance shop) {
+        if(!shop.shouldSave()) return;
+
         try {
             Path path = shopsDir.resolve(shop.getId().getPath() + ".json");
 

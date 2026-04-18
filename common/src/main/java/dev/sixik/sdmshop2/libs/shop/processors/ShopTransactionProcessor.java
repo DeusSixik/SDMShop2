@@ -3,6 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.processors;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.components.api.*;
 import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
+import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -181,6 +182,8 @@ public class ShopTransactionProcessor {
 
             finalCosts.put(cost, currentPrice);
         }
+
+        ShopScriptEvents.SCRIPT_CALCULATE_PRICE_EVENT.invoker().invoke(offer, server, chosenGroupId, finalCosts);
 
         return finalCosts;
     }

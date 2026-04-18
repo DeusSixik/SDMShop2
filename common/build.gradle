@@ -19,6 +19,8 @@ dependencies {
 
     modCompileOnly("curse.maven:shadow-config-1421861:7922236")
 
+    modCompileOnly('com.blamejared.crafttweaker:CraftTweaker-common-1.20.1:14.0.60')
+
     minecraftLibraries("com.github.ben-manes.caffeine:caffeine:3.2.3")
     include(minecraftRuntimeLibraries("com.github.ben-manes.caffeine:caffeine:3.2.3"))
 }

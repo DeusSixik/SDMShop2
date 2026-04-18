@@ -74,7 +74,7 @@ public class ShopOffersContainerComponent extends ShopComponent {
             for (JsonElement element : entryArray) {
                 final JsonObject entryJson = element.getAsJsonObject();
 
-                ShopOffer entry = ShopOffer.create(UUID.fromString(entryJson.get("uuid").getAsString()), true);
+                ShopOffer entry = ShopOffer.create(entryJson.has("uuid") ? UUID.fromString(entryJson.get("uuid").getAsString()) : UUID.randomUUID(), true);
                 entry.deserialize(entryJson);
                 map.put(entry.getUUID(), entry);
             }

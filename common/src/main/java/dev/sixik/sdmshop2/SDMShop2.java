@@ -2,7 +2,6 @@ package dev.sixik.sdmshop2;
 
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
-import dev.architectury.event.events.common.LifecycleEvent;
 import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.commands.SDMEconomyCommands;
@@ -12,6 +11,7 @@ import dev.sixik.sdmshop2.libs.shop.commands.SDMShopCommands;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
 import dev.sixik.sdmshop2.libs.shop.network.SDMShopNetwork;
 import dev.sixik.sdmshop2.libs.shop.register.ShopRegister;
+import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import dev.sixik.sdmshop2.tests.economy.EconomyTest;
 import org.slf4j.Logger;
 
@@ -21,12 +21,14 @@ public final class SDMShop2 {
 
     private static final ShopTable.Manager SHOP_TABLE_MANAGER = new ShopTable.Manager();
     private static final ShopLimiterTableServer.Manager SHOP_LIMITER_TABLE_MANAGER = new ShopLimiterTableServer.Manager();
+    private static final ShopScriptEvents.Manager SHOP_SCRIPTS_CONTAINER_MANAGER = new ShopScriptEvents.Manager();
 
     public static void init() {
         EconomyTest.init();
 
         SDMPlatform.addTask(SHOP_TABLE_MANAGER);
         SDMPlatform.addTask(SHOP_LIMITER_TABLE_MANAGER);
+        SDMPlatform.addTask(SHOP_SCRIPTS_CONTAINER_MANAGER);
 
         SDMEconomyPlatform.init();
         ShopRegister.init();

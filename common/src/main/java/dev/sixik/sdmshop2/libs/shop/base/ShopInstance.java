@@ -142,4 +142,8 @@ public class ShopInstance extends ShopEntity {
     public final boolean isNull() {
         return id.equals(NULL_MANAGER);
     }
+
+    public boolean shouldSave() {
+        return true;
+    }
 }

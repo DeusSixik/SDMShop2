@@ -43,23 +43,32 @@ public class LimiterComponent extends ShopComponent {
     @Setter
     private int count;
 
+    @Getter
+    @Setter
+    private long resetIntervalMs;
+
     public LimiterComponent() {
-        this(LimiterType.World, 1);
+        this(LimiterType.World, 1, 0L);
     }
 
     public LimiterComponent(LimiterType type, int count) {
+        this(type, count, 0L);
+    }
+
+    public LimiterComponent(LimiterType type, int count, long resetIntervalMs) {
         this.limiterType = type;
         this.count = count;
+        this.resetIntervalMs = resetIntervalMs;
     }
 
     @Override
     public void init() {
         final ShopEntity root = getRoot();
 
-        if(root instanceof ObjectIdGetter objectIdGetter)
-            this.rootId = objectIdGetter.getUUID();
-        else {
-            throw new RuntimeException("[LimiterComponent] Root entity must implement ObjectIdGetter!");
+        if(root != null) {
+            this.rootId = ((ShopOffer) root).getUUID();
+        } else {
+            throw new RuntimeException("[LimiterComponent] Root entity is missing!");
         }
     }
 
@@ -67,9 +76,21 @@ public class LimiterComponent extends ShopComponent {
         final ShopLimiterTable limiterTable = ShopUtils.getLimiterTable(player.isLocalPlayer()).orElse(null);
         if (limiterTable == null) return false;
 
-        int currentPurchases = (limiterType == LimiterType.Player)
-                ? limiterTable.getPlayerData(player).get(this.rootId)
-                : limiterTable.getEntityData(this.rootId).getCount().get();
+        ShopLimiterEntityData data = (limiterType == LimiterType.Player)
+                ? limiterTable.getPlayerData(player).getData(this.rootId)
+                : limiterTable.getEntityData(this.rootId);
+
+        int currentPurchases = data.getCount().get();
+        long lastTime = data.getLastPurchaseTime().get();
+
+        /*
+            Если задан интервал и время ожидания вышло - виртуально "обнуляем" текущие покупки для проверки
+         */
+        if (this.resetIntervalMs > 0 && lastTime > 0) {
+            if ((System.currentTimeMillis() - lastTime) >= this.resetIntervalMs) {
+                currentPurchases = 0;
+            }
+        }
 
         return (currentPurchases + purchaseAmount) <= this.count;
     }
@@ -80,11 +101,17 @@ public class LimiterComponent extends ShopComponent {
     public void addLimit(Player player, int amount) {
         final ShopLimiterTable limiterTable = ShopUtils.getLimiterTable(false).get();
 
-        if (limiterType == LimiterType.Player) {
-            limiterTable.getPlayerData(player).getData(this.rootId).add(amount);
-        } else {
-            limiterTable.getEntityData(this.rootId).add(amount);
+        ShopLimiterEntityData data = (limiterType == LimiterType.Player)
+                ? limiterTable.getPlayerData(player).getData(this.rootId)
+                : limiterTable.getEntityData(this.rootId);
 
+        long lastTime = data.getLastPurchaseTime().get();
+
+        if (this.resetIntervalMs > 0 && lastTime > 0 && (System.currentTimeMillis() - lastTime) >= this.resetIntervalMs) {
+            data.set(amount);
+            data.markPurchased();
+        } else {
+            data.add(amount);
         }
     }
 
@@ -131,8 +158,12 @@ public class LimiterComponent extends ShopComponent {
         @Override
         public JsonObject serialize(LimiterComponent component) {
             JsonObject json = new JsonObject();
-            json.addProperty("type", component.limiterType.name());
+            json.addProperty("limiter_type", component.limiterType.name());
             json.addProperty("count", component.count);
+
+            if (component.resetIntervalMs > 0) {
+                json.addProperty("reset_interval_ms", component.resetIntervalMs);
+            }
             return json;
         }
 
@@ -146,7 +177,7 @@ public class LimiterComponent extends ShopComponent {
             }
 
             LimiterType type;
-            String typeStr = json.get("type").getAsString();
+            String typeStr = json.get("limiter_type").getAsString();
             try {
                 type = LimiterType.valueOf(typeStr);
             } catch (IllegalArgumentException e) {
@@ -156,9 +187,12 @@ public class LimiterComponent extends ShopComponent {
 
             try {
                 int count = json.get("count").getAsInt();
-                return new LimiterComponent(type, count);
+
+                long resetInterval = json.has("reset_interval_ms") ? json.get("reset_interval_ms").getAsLong() : 0L;
+
+                return new LimiterComponent(type, count, resetInterval);
             } catch (NumberFormatException | UnsupportedOperationException e) {
-                throw new JsonParseException("[LimiterComponent] Parameter 'count' must be a valid integer number!");
+                throw new JsonParseException("[LimiterComponent] Parameter 'count' or 'reset_interval_ms' must be a valid number!");
             }
         }
 
@@ -166,13 +200,15 @@ public class LimiterComponent extends ShopComponent {
         public void toNetwork(FriendlyByteBuf buf, LimiterComponent component) {
             buf.writeEnum(component.limiterType);
             buf.writeInt(component.count);
+            buf.writeLong(component.resetIntervalMs);
         }
 
         @Override
         public LimiterComponent fromNetwork(FriendlyByteBuf buf) {
             LimiterType type = buf.readEnum(LimiterType.class);
             int count = buf.readInt();
-            return new LimiterComponent(type, count);
+            long resetInterval = buf.readLong();
+            return new LimiterComponent(type, count, resetInterval);
         }
 
         @Override
