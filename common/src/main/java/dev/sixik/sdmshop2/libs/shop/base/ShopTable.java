@@ -25,6 +25,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -71,6 +72,7 @@ public final class ShopTable {
     @Getter
     private final MinecraftServer server;
 
+    @Getter
     private volatile boolean reloading = false;
 
     public ShopTable(MinecraftServer server) {
@@ -119,6 +121,15 @@ public final class ShopTable {
      */
     public Collection<ShopInstance> getAllShops() {
         return shops.values();
+    }
+
+    /**
+     * Возвращает коллекцию IDs всех зарегистрированных магазинов.
+     *
+     * @return Коллекция строковых ID магазинов
+     */
+    public List<ResourceLocation> getShopsId() {
+        return shops.keySet().stream().toList();
     }
 
     /**
@@ -229,7 +240,7 @@ public final class ShopTable {
             final ShopInstance shopIds = ShopInstance.fromJson(json);
             shops.put(shopIds.getId(), shopIds);
         } catch (Exception e) {
-            LOGGER.error("Error loading shop: " + path, e);
+            LOGGER.error("Error loading shop: {}", path, e);
         }
     }
 

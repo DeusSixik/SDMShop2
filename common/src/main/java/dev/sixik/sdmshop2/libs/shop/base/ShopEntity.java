@@ -161,7 +161,9 @@ public class ShopEntity {
         componentCache.clear();
 
         for (JsonElement compJson : array) {
-            components.add(ShopComponentRegistry.fromJson(compJson.getAsJsonObject()));
+            final ShopComponent component = ShopComponentRegistry.fromJson(compJson.getAsJsonObject());
+            component.setRoot(this);
+            components.add(component);
         }
 
         initializeServerOnlyComponents();
@@ -221,7 +223,9 @@ public class ShopEntity {
         components.clear();
         componentCache.clear();
         for (int i = 0; i < count; i++) {
-            addComponent(ShopComponentRegistry.fromNetwork(buf));
+            final ShopComponent component = ShopComponentRegistry.fromNetwork(buf);
+            component.setRoot(this);
+            addComponent(component);
         }
 
         initializeClientOnlyComponents();

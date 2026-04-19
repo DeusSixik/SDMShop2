@@ -10,4 +10,8 @@ public class SDMShopClient {
     public static void init() {
         AsyncClientTasks.init();
     }
+
+    public static void openShopGui() {
+
+    }
 }
