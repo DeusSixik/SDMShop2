@@ -1,6 +1,8 @@
 package dev.sixik.sdmshop2.libs.shop.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
 import dev.sixik.sdmshop2.tests.economy.EconomyTest;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -23,6 +25,14 @@ public class SDMShopCommands {
                                     return 0;
                                 })
                         )
+                        .then(Commands.literal("synchronization").requires(s -> s.hasPermission(2)).then(synchronizationCommands()))
         );
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> synchronizationCommands() {
+        return Commands.literal("limiter_data").executes(commandContext -> {
+            ShopNetworkManager.sendLimiterData(commandContext.getSource().getPlayerOrException());
+            return 0;
+        });
     }
 }

@@ -192,16 +192,19 @@ public class ShopEntity {
      * @param buf Буфер сетевого пакета
      */
     public final void serializeComponentsNetwork(FriendlyByteBuf buf) {
-        List<ShopComponent> syncList = new ArrayList<>();
-        for (ShopComponent component : components) {
+        final List<ShopComponent> syncList = new ArrayList<>();
+        final List<ShopComponent> comps = components;
+        for (int i = 0; i < comps.size(); i++) {
+            final ShopComponent component = comps.get(i);
             if (component.shouldSync()) {
                 syncList.add(component);
             }
         }
 
-        buf.writeVarInt(syncList.size());
-        for (ShopComponent component : syncList) {
-            ShopComponentRegistry.toNetwork(buf, component);
+        final int size = syncList.size();
+        buf.writeVarInt(size);
+        for (int i = 0; i < size; i++) {
+            ShopComponentRegistry.toNetwork(buf, syncList.get(i));
         }
     }
 
