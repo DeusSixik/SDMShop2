@@ -126,7 +126,6 @@ public class AsyncBridge {
 
                 context.queue(() -> {
                     FriendlyByteBuf responsePayload = null;
-                    boolean success = false;
                     try {
 
                         /*
@@ -167,7 +166,7 @@ public class AsyncBridge {
                             }
                         }
                     } catch (Exception e) {
-                        SDMShop2.LOGGER.error(e.getMessage(), e);
+                        SDMShop2.LOGGER.error("Error processing AsyncBridge request: " + subject, e);
                     } finally {
                         inputCopy.release();
                         /*
@@ -175,7 +174,7 @@ public class AsyncBridge {
                             it should also be released, but Netty usually handles GC
                             if it is a heap buffer.
                          */
-                        if (!success && responsePayload != null) {
+                        if (responsePayload != null && responsePayload != inputCopy) {
                             responsePayload.release();
                         }
                     }

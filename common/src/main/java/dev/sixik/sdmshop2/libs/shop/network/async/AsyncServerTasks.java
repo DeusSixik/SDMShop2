@@ -1,5 +1,16 @@
 package dev.sixik.sdmshop2.libs.shop.network.async;
 
+import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
+import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
+import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
+import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
+import dev.sixik.sdmshop2.libs.shop.processors.ShopTransactionProcessor;
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+
+import java.util.*;
+
 public class AsyncServerTasks {
 
     public static final String SEND_SHOP_DATA = "send_shop_data";
@@ -7,8 +18,79 @@ public class AsyncServerTasks {
 
     public static final String SEND_SHOP_LIMITER_DATA = "send_shop_limiter_data";
 
+    public static final String SEND_GET_CLIENT_SHOP_ID = "send_get_client_shop_id";
+    public static final String SEND_NEW_COMPONENT_DATA_TO_CLIENT = "send_new_component_data_to_client";
+
     public static void init() {
         AsyncBridge.initServer();
         BlobTransfer.initServer();
+
+        AsyncBridge.registerHandler(AsyncClientTasks.GET_PRICES_FOR_OFFER, request -> {
+            if (!request.isReadable()) return null;
+
+            final var shopId = request.readResourceLocation();
+            final var isBatch = request.readBoolean();
+            final var chosenGroupId = request.readUtf();
+
+            final ShopInstance shopInstance = ShopTable.Instance.getShop(shopId);
+            if (shopInstance == null) return null;
+
+            final MinecraftServer server = ShopTable.Instance.getServer();
+
+            FriendlyByteBuf reply = new FriendlyByteBuf(Unpooled.buffer());
+
+            if (isBatch) {
+                final int shopOffersCount = request.readVarInt();
+                final UUID[] in_data = new UUID[shopOffersCount];
+                for (int i = 0; i < shopOffersCount; i++) {
+                    in_data[i] = request.readUUID();
+                }
+
+                final ShopOffer[] offers = new ShopOffer[shopOffersCount];
+                shopInstance.getEntries().getEntries(in_data, offers);
+
+                Map<UUID, Map<CostComponent, Double>> outMap = new HashMap<>();
+                for (int i = 0; i < offers.length; i++) {
+                    if (offers[i] != null) {
+                        outMap.put(in_data[i], ShopTransactionProcessor.calculateFinalCosts(offers[i], server, chosenGroupId));
+                    }
+                }
+
+                reply.writeVarInt(outMap.size());
+                for (int i = 0; i < in_data.length; i++) {
+                    UUID offerUuid = in_data[i];
+                    ShopOffer offer = offers[i];
+
+                    if (offer == null || !outMap.containsKey(offerUuid)) continue;
+
+                    Map<CostComponent, Double> prices = outMap.get(offerUuid);
+                    getPricesForOfferWriteOfferData(reply, offerUuid, offer, prices);
+                }
+            }
+            else {
+                final UUID offerId = request.readUUID();
+                final ShopOffer offer = shopInstance.getEntries().getEntry(offerId);
+
+                if (offer == null) return null;
+
+                Map<CostComponent, Double> prices = ShopTransactionProcessor
+                        .calculateFinalCosts(offer, server, chosenGroupId);
+                getPricesForOfferWriteOfferData(reply, offerId, offer, prices);
+            }
+            return reply;
+        });
     }
+
+    private static void getPricesForOfferWriteOfferData(FriendlyByteBuf reply, UUID offerId, ShopOffer offer, Map<CostComponent, Double> prices) {
+        reply.writeUUID(offerId);
+        reply.writeVarInt(prices.size());
+        final List<CostComponent> allCosts = offer.getComponents(CostComponent.class);
+        for (Map.Entry<CostComponent, Double> entry : prices.entrySet()) {
+            int componentIndex = allCosts.indexOf(entry.getKey());
+            reply.writeVarInt(componentIndex);
+            reply.writeDouble(entry.getValue());
+        }
+    }
+
+
 }

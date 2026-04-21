@@ -2,9 +2,16 @@ package dev.sixik.sdmshop2.libs.shop.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import dev.architectury.platform.Platform;
+import dev.sixik.sdmshop2.libs.shop.SDMShopPlatform;
+import dev.sixik.sdmshop2.libs.shop.base.ShopEntity;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
+import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
+import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
+import dev.sixik.sdmshop2.libs.shop.client.SDMShopClientEvents;
 import dev.sixik.sdmshop2.libs.shop.commands.builder.CommandBuilder;
+import dev.sixik.sdmshop2.libs.shop.components.CommandRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
 import dev.sixik.sdmshop2.tests.economy.EconomyTest;
 import net.minecraft.ChatFormatting;
@@ -20,6 +27,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class SDMShopCommands {
 
@@ -107,5 +115,8 @@ public class SDMShopCommands {
                     ctx.getSource().sendSuccess(() -> Component.literal("Shops reloaded successfully").withStyle(ChatFormatting.GREEN), true);
                 })
                 .register(dispatcher);
+
+        if(Platform.isDevelopmentEnvironment())
+            SDMShopCommandsDebug.init(dispatcher);
     }
 }

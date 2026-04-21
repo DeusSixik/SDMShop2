@@ -119,7 +119,7 @@ public class BlobTransfer {
         /*
             If this is the last piece
          */
-        if (chunkIndex == totalChunks) {
+        if (receiver.receivedChunks == totalChunks) {
             INCOMING_BUFFERS.remove(id);
 
             /*

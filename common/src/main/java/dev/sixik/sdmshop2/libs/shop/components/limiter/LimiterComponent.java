@@ -2,15 +2,10 @@ package dev.sixik.sdmshop2.libs.shop.components.limiter;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import dev.sixik.sdmshop2.SDMShop2;
-import dev.sixik.sdmshop2.libs.shop.base.ObjectIdGetter;
 import dev.sixik.sdmshop2.libs.shop.base.ShopEntity;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterEntityData;
-import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterPlayerData;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTable;
-import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableClient;
-import dev.sixik.sdmshop2.libs.shop.components.api.ConditionComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.utils.ShopUtils;
@@ -21,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.UUID;
 
 public class LimiterComponent extends ShopComponent {

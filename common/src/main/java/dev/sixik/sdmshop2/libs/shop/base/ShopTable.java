@@ -10,6 +10,7 @@ import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
+import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
@@ -226,6 +227,7 @@ public final class ShopTable {
             }
 
             ShopScriptEvents.SCRIPT_SHOP_LOAD_EVENT.invoker().invoke(server, this);
+            ShopServerEvents.SHOP_LOAD_EVENT.invoker().invoke(server, this);
 
             LOGGER.info("Loaded {} shops.", shops.size());
         } finally {

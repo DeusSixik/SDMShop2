@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
+import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import lombok.Getter;
@@ -39,6 +40,12 @@ public class ShopOffersContainerComponent extends ShopComponent {
     @Nullable
     public ShopOffer getEntry(UUID entryId) {
         return entryMap.get(entryId);
+    }
+
+    public void getEntries(UUID[] entryIds, ShopOffer[] outArray) {
+        for (int i = 0; i < entryIds.length; i++) {
+            outArray[i] = entryMap.get(entryIds[i]);
+        }
     }
 
     private static class Type implements IComponentType<ShopOffersContainerComponent> {
