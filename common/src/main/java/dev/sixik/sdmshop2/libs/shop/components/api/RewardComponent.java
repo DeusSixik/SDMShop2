@@ -15,15 +15,4 @@ public abstract class RewardComponent extends ShopComponent {
      * @param player Игрок, получающий награду
      */
     public abstract void reward(ServerPlayer player, int amount);
-
-    /**
-     * Награды обычно не должны синхронизироваться с клиентом,
-     * так как их логика выполняется исключительно на сервере.
-     *
-     * @return false по умолчанию
-     */
-    @Override
-    public boolean shouldSync() {
-        return false;
-    }
 }

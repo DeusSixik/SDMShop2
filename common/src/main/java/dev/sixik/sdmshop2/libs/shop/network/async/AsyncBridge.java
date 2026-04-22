@@ -12,13 +12,14 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class AsyncBridge {
     public static final ResourceLocation CHANNEL = new ResourceLocation(SDMShop2.MODID, "async_bridge");
 
     private static final Map<Long, CompletableFuture<FriendlyByteBuf>> PENDING = new ConcurrentHashMap<>();
-    private static final Map<String, Function<FriendlyByteBuf, FriendlyByteBuf>> HANDLERS = new ConcurrentHashMap<>();
+    private static final Map<String, BiFunction<FriendlyByteBuf, NetworkManager.PacketContext, FriendlyByteBuf>> HANDLERS = new ConcurrentHashMap<>();
     private static final AtomicLong ID_GEN = new AtomicLong();
     private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
 
@@ -63,7 +64,7 @@ public class AsyncBridge {
      */
     public static void registerHandler(
             final String subject,
-            final Function<FriendlyByteBuf, FriendlyByteBuf> processor
+            final BiFunction<FriendlyByteBuf, NetworkManager.PacketContext, FriendlyByteBuf> processor
     ) {
         HANDLERS.put(subject, processor);
     }
@@ -115,7 +116,7 @@ public class AsyncBridge {
 
         if (isRequest) {
             final String subject = buf.readUtf();
-            final Function<FriendlyByteBuf, FriendlyByteBuf> handler = HANDLERS.get(subject);
+            final BiFunction<FriendlyByteBuf, NetworkManager.PacketContext, FriendlyByteBuf> handler = HANDLERS.get(subject);
 
             if (handler != null) {
 
@@ -131,7 +132,7 @@ public class AsyncBridge {
                         /*
                             Execute logic (may return null here)
                          */
-                        responsePayload = handler.apply(inputCopy);
+                        responsePayload = handler.apply(inputCopy, context);
 
                         /*
                             If the response is HUGE (and not null) -> helmet via BlobTransfer

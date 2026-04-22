@@ -7,6 +7,7 @@ import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopOffersContainerComponent;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
@@ -39,6 +40,9 @@ public class ShopInstance extends ShopEntity {
      */
     @Getter
     protected final ResourceLocation id;
+
+    @Setter
+    protected boolean shouldSave = true;
 
     private ShopInstance(ResourceLocation shopId) {
         this.id = shopId;
@@ -145,6 +149,6 @@ public class ShopInstance extends ShopEntity {
     }
 
     public boolean shouldSave() {
-        return true;
+        return shouldSave;
     }
 }

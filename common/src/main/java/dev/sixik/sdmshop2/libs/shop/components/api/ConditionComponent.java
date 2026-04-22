@@ -15,4 +15,13 @@ public abstract class ConditionComponent extends ShopComponent {
      * @return true, если условие выполнено, иначе false
      */
     public abstract boolean isChecked(Player player);
+
+    /**
+     * Отвечает за то, может ли проверка проходить на клиенте или она может произойти только со стороны сервера
+     *
+     * @return true, если условие может быть проверено на клинте
+     */
+    public boolean verifiedOnClient() {
+        return true;
+    }
 }

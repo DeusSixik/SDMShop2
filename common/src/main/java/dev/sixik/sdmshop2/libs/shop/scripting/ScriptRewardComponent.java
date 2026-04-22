@@ -64,17 +64,6 @@ public class ScriptRewardComponent extends RewardComponent {
     }
 
     /**
-     * Определяет, нужно ли синхронизировать этот компонент с клиентом.
-     * Скриптовые награды выполняются на сервере, поэтому синхронизация не требуется.
-     *
-     * @return false.
-     */
-    @Override
-    public boolean shouldSync() {
-        return false;
-    }
-
-    /**
      * Класс для регистрации типа компонента в системе магазинов.
      */
     private static class Type implements IComponentType<ScriptRewardComponent> {
@@ -117,24 +106,22 @@ public class ScriptRewardComponent extends RewardComponent {
 
         /**
          * Записывает данные компонента в сетевой буфер.
-         * Не поддерживается, так как компонент не синхронизируется.
          *
          * @throws UnsupportedOperationException всегда.
          */
         @Override
         public void toNetwork(FriendlyByteBuf buf, ScriptRewardComponent component) {
-            throw new UnsupportedOperationException();
+            buf.writeUtf(component.scripId);
         }
 
         /**
          * Читает данные компонента из сетевого буфера.
-         * Не поддерживается, так как компонент не синхронизируется.
          *
          * @throws UnsupportedOperationException всегда.
          */
         @Override
         public ScriptRewardComponent fromNetwork(FriendlyByteBuf buf) {
-            throw new UnsupportedOperationException();
+            return new ScriptRewardComponent(buf.readUtf());
         }
 
         /**

@@ -63,14 +63,8 @@ public class ScriptConditionComponent extends ConditionComponent {
         return TYPE;
     }
 
-    /**
-     * Определяет, нужно ли синхронизировать этот компонент с клиентом.
-     * Скриптовые условия выполняются на сервере, поэтому синхронизация не требуется.
-     *
-     * @return false.
-     */
     @Override
-    public boolean shouldSync() {
+    public boolean verifiedOnClient() {
         return false;
     }
 
@@ -116,24 +110,22 @@ public class ScriptConditionComponent extends ConditionComponent {
 
         /**
          * Записывает данные компонента в сетевой буфер.
-         * Не поддерживается, так как компонент не синхронизируется.
          *
          * @throws UnsupportedOperationException всегда.
          */
         @Override
         public void toNetwork(FriendlyByteBuf buf, ScriptConditionComponent component) {
-            throw new UnsupportedOperationException();
+            buf.writeUtf(component.scripId);
         }
 
         /**
          * Читает данные компонента из сетевого буфера.
-         * Не поддерживается, так как компонент не синхронизируется.
          *
          * @throws UnsupportedOperationException всегда.
          */
         @Override
         public ScriptConditionComponent fromNetwork(FriendlyByteBuf buf) {
-            throw new UnsupportedOperationException();
+            return new ScriptConditionComponent(buf.readUtf());
         }
 
         /**

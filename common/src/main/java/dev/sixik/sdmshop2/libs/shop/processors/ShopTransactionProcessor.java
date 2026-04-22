@@ -4,6 +4,7 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.components.api.*;
 import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
 import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
+import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -101,9 +102,9 @@ public class ShopTransactionProcessor {
         return true;
     }
 
-    // TODO: Добавить логику синхронизации лимитов между клиентами и сервером
-    private static void syncLimitersNetwork(List<LimiterComponent> limiters, ServerPlayer player) { }
-
+    private static void syncLimitersNetwork(List<LimiterComponent> limiters, ServerPlayer player) {
+        ShopNetworkManager.sendLimiterData(player);
+    }
 
     /**
      * Рассчитывает финальную стоимость для выбранной группы оплаты (chosenGroupId).
