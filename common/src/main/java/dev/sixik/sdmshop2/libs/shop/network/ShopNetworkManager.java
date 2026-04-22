@@ -126,7 +126,7 @@ public class ShopNetworkManager {
                     buf -> {
                         int index = buf.readVarInt();
                         if (index < 0 || index >= localCosts.size()) {
-                            SDMShop2.LOGGER.error("Desync! Component index {} out of bounds for offer {}.", index, offerUUID);
+                            SDMShop2.LOGGER.error("[ShopPriceClientApi] Desync! Component index {} out of bounds for offer {}.", index, offerUUID);
                             return null;
                         }
                         return localCosts.get(index);
@@ -138,7 +138,6 @@ public class ShopNetworkManager {
 
     /**
      * Запросить цены для списка товаров (например, при открытии страницы магазина)
-     * Изменил Iterable на Collection, чтобы можно было легко получить .size()
      */
     @Environment(EnvType.CLIENT)
     public static CompletableFuture<Map<UUID, Map<CostComponent, Double>>> getOffersPrice(Collection<ShopOffer> shopOffers, @Nullable String chosenGroupId, boolean serializeComponentsFromServer) {
@@ -173,7 +172,7 @@ public class ShopNetworkManager {
                         buf -> {
                             int index = buf.readVarInt();
                             if (index < 0 || index >= localCosts.size()) {
-                                SDMShop2.LOGGER.error("Desync! Component index {} out of bounds for offer {}.", index, offerUUID);
+                                SDMShop2.LOGGER.error("[ShopPriceClientApi] Desync! Component index {} out of bounds for offer {}.", index, offerUUID);
                                 return null;
                             }
                             return localCosts.get(index);
