@@ -125,17 +125,18 @@ public class AsyncBridge {
                 final FriendlyByteBuf inputCopy = new FriendlyByteBuf(buf.copy());
 
                 context.queue(() -> {
+                    FriendlyByteBuf responsePayload = null;
                     try {
 
                         /*
                             Execute logic (may return null here)
                          */
-                        FriendlyByteBuf responsePayload = handler.apply(inputCopy);
+                        responsePayload = handler.apply(inputCopy);
 
                         /*
                             If the response is HUGE (and not null) -> helmet via BlobTransfer
                          */
-                        if (responsePayload != null && responsePayload.readableBytes() > 2_000_000) {
+                        if (responsePayload != null && responsePayload.readableBytes() > 500_000) {
                             if (context.getPlayer() instanceof ServerPlayer sp) {
                                 BlobTransfer.sendToPlayer(sp, id, responsePayload);
                             } else {
@@ -165,7 +166,7 @@ public class AsyncBridge {
                             }
                         }
                     } catch (Exception e) {
-                        SDMShop2.LOGGER.error(e.getMessage(), e);
+                        SDMShop2.LOGGER.error("Error processing AsyncBridge request: " + subject, e);
                     } finally {
                         inputCopy.release();
                         /*
@@ -173,6 +174,9 @@ public class AsyncBridge {
                             it should also be released, but Netty usually handles GC
                             if it is a heap buffer.
                          */
+                        if (responsePayload != null && responsePayload != inputCopy) {
+                            responsePayload.release();
+                        }
                     }
                 });
             }

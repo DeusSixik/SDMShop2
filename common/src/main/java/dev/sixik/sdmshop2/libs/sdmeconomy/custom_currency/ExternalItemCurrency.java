@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import dev.sixik.sdmshop2.libs.sdmeconomy.ICurrencyType;
 import dev.sixik.sdmshop2.libs.sdmeconomy.IExternalCurrency;
+import dev.sixik.sdmshop2.libs.sdmeconomy.icons.CurrencyIcon;
+import dev.sixik.sdmshop2.libs.sdmeconomy.icons.IconType;
 import dev.sixik.sdmshop2.utils.ShopItemHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -23,11 +25,13 @@ public class ExternalItemCurrency implements IExternalCurrency {
     private final ResourceLocation id;
     private final Component displayName;
     private final ItemStack itemType;
+    private final CurrencyIcon currencyIcon;
 
     public ExternalItemCurrency(ResourceLocation id, ItemStack itemType) {
         this.id = id;
         this.displayName = Component.translatable(id.toString().replace(":", "_"));
         this.itemType = itemType;
+        this.currencyIcon = new CurrencyIcon(IconType.ITEM, itemType);
     }
 
     @Override
@@ -73,6 +77,11 @@ public class ExternalItemCurrency implements IExternalCurrency {
     @Override
     public int getColor() {
         return 0;
+    }
+
+    @Override
+    public CurrencyIcon getIcon() {
+        return currencyIcon;
     }
 
     public static class ExternalItemCurrencyType implements ICurrencyType<ExternalItemCurrency> {

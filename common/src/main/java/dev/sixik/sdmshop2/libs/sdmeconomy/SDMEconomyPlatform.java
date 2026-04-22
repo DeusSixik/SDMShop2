@@ -1,6 +1,5 @@
 package dev.sixik.sdmshop2.libs.sdmeconomy;
 
-import com.google.gson.Gson;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.platform.Platform;
@@ -32,8 +31,6 @@ public class SDMEconomyPlatform {
     public static final String MODID = "sdmeconomy";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SDMEconomyPlatform.class);
-
-    public static final Gson GSON = new Gson();
 
     private static Path CONFIG_DIR;
     private static Path CURRENCIES_DIR;

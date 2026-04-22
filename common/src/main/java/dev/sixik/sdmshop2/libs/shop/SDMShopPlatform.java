@@ -11,6 +11,8 @@ import java.util.Optional;
 
 public class SDMShopPlatform {
 
+    public static Runnable invokeKubeJSEvent = () -> {};
+
     @Environment(EnvType.CLIENT)
     public static ShopInstance getClientShopInstance() {
         return SDMShopClient.Shop;

@@ -6,11 +6,14 @@ import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableServer;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class ShopUtils {
 
@@ -43,5 +46,11 @@ public class ShopUtils {
 
     public static <T extends ShopComponent> T createDefaultComponent(IComponentType<T> type) {
         return type.createDefault();
+    }
+
+    public static FriendlyByteBuf createResponse(Consumer<FriendlyByteBuf> writer) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        writer.accept(buf);
+        return buf;
     }
 }

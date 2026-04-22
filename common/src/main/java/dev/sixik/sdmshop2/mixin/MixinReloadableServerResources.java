@@ -17,8 +17,8 @@ import java.util.concurrent.Executor;
 @Mixin(ReloadableServerResources.class)
 public class MixinReloadableServerResources {
 
-    @Inject(method = "loadResources", at = @At("RETURN"))
+    @Inject(method = "loadResources", at = @At("HEAD"))
     private static void bts$loadResources(ResourceManager resourceManager, RegistryAccess.Frozen frozen, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, int i, Executor executor, Executor executor2, CallbackInfoReturnable<CompletableFuture<ReloadableServerResources>> cir) {
-        cir.getReturnValue().thenRun(SDMPlatform::onReload);
+        SDMPlatform.onReload();
     }
 }

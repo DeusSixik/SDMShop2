@@ -12,6 +12,9 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class BlobTransfer {
@@ -24,7 +27,27 @@ public class BlobTransfer {
      */
     private static final int CHUNK_SIZE = 50 * 1024;
 
-    private static final Map<Long, ByteBuf> INCOMING_BUFFERS = new ConcurrentHashMap<>();
+    private static class BlobReceiver {
+        final ByteBuf buffer = Unpooled.buffer();
+        int receivedChunks = 0;
+        long lastUpdateTime = System.currentTimeMillis();
+    }
+
+    private static final Map<Long, BlobReceiver> INCOMING_BUFFERS = new ConcurrentHashMap<>();
+    private static final ScheduledExecutorService CLEANUP_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+
+    static {
+        CLEANUP_SCHEDULER.scheduleAtFixedRate(() -> {
+            long now = System.currentTimeMillis();
+            INCOMING_BUFFERS.entrySet().removeIf(entry -> {
+                if (now - entry.getValue().lastUpdateTime > 30000) {
+                    entry.getValue().buffer.release();
+                    return true;
+                }
+                return false;
+            });
+        }, 10, 10, TimeUnit.SECONDS);
+    }
 
     public static void initServer() {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, CHANNEL, BlobTransfer::onPacket);
@@ -70,6 +93,8 @@ public class BlobTransfer {
 
             sender.accept(packet);
         }
+
+        data.release();
     }
 
     private static void onPacket(FriendlyByteBuf buf, NetworkManager.PacketContext context) {
@@ -80,26 +105,27 @@ public class BlobTransfer {
         /*
             Obtain or create a buffer for assembly
          */
-        ByteBuf accumulator = INCOMING_BUFFERS.computeIfAbsent(id, k -> Unpooled.buffer());
+        BlobReceiver receiver = INCOMING_BUFFERS.computeIfAbsent(id, k -> new BlobReceiver());
+        receiver.lastUpdateTime = System.currentTimeMillis();
 
         /*
             IMPORTANT: Netty packets may arrive out of order (rarely, but it happens in UDP; in TCP, MC
             guarantees order, but it is better to write to the end, relying on sequential sending).
             Here, we simply write to the end, since TCP guarantees byte order.
          */
-        accumulator.writeBytes(buf);
+        receiver.buffer.writeBytes(buf);
+        receiver.receivedChunks++;
 
         /*
             If this is the last piece
          */
-        if (chunkIndex == totalChunks - 1) {
-            INCOMING_BUFFERS.remove(id); // Remove from map
-
-            FriendlyByteBuf fullData = new FriendlyByteBuf(accumulator);
+        if (receiver.receivedChunks == totalChunks) {
+            INCOMING_BUFFERS.remove(id);
 
             /*
                 If this was a response to our AsyncBridge request -> we complete it
              */
+            FriendlyByteBuf fullData = new FriendlyByteBuf(receiver.buffer);
             context.queue(() -> completeBridgeRequest(id, fullData));
         }
     }

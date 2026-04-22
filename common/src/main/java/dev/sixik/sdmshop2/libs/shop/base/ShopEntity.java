@@ -161,7 +161,9 @@ public class ShopEntity {
         componentCache.clear();
 
         for (JsonElement compJson : array) {
-            components.add(ShopComponentRegistry.fromJson(compJson.getAsJsonObject()));
+            final ShopComponent component = ShopComponentRegistry.fromJson(compJson.getAsJsonObject());
+            component.setRoot(this);
+            components.add(component);
         }
 
         initializeServerOnlyComponents();
@@ -192,16 +194,19 @@ public class ShopEntity {
      * @param buf Буфер сетевого пакета
      */
     public final void serializeComponentsNetwork(FriendlyByteBuf buf) {
-        List<ShopComponent> syncList = new ArrayList<>();
-        for (ShopComponent component : components) {
+        final List<ShopComponent> syncList = new ArrayList<>();
+        final List<ShopComponent> comps = components;
+        for (int i = 0; i < comps.size(); i++) {
+            final ShopComponent component = comps.get(i);
             if (component.shouldSync()) {
                 syncList.add(component);
             }
         }
 
-        buf.writeVarInt(syncList.size());
-        for (ShopComponent component : syncList) {
-            ShopComponentRegistry.toNetwork(buf, component);
+        final int size = syncList.size();
+        buf.writeVarInt(size);
+        for (int i = 0; i < size; i++) {
+            ShopComponentRegistry.toNetwork(buf, syncList.get(i));
         }
     }
 
@@ -218,7 +223,9 @@ public class ShopEntity {
         components.clear();
         componentCache.clear();
         for (int i = 0; i < count; i++) {
-            addComponent(ShopComponentRegistry.fromNetwork(buf));
+            final ShopComponent component = ShopComponentRegistry.fromNetwork(buf);
+            component.setRoot(this);
+            addComponent(component);
         }
 
         initializeClientOnlyComponents();

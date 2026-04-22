@@ -5,6 +5,7 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTable;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.PromoComponent;
+import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
 import dev.sixik.sdmshop2.utils.ShopUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,12 +24,17 @@ public class PromoCooldownComponent extends PromoComponent {
     @Setter
     private long cooldownMs;
 
+    @Getter
+    @Setter
+    private LimiterComponent.LimiterType limiterType;
+
     public PromoCooldownComponent() {
-        this(0L);
+        this(0L, LimiterComponent.LimiterType.Player);
     }
 
-    public PromoCooldownComponent(long cooldownMs) {
+    public PromoCooldownComponent(long cooldownMs, LimiterComponent.LimiterType limiterType) {
         this.cooldownMs = cooldownMs;
+        this.limiterType = limiterType;
     }
 
     @Override
@@ -40,11 +46,13 @@ public class PromoCooldownComponent extends PromoComponent {
         }
 
         UUID offerId = ((ShopOffer) getRoots()).getUUID();
+        long lastTime = 0;
 
-        long lastTime = tableOpt.get()
-                .getPlayerData(player)
-                .getData(offerId)
-                .getLastPurchaseTime().get();
+        if (limiterType == LimiterComponent.LimiterType.Player) {
+            lastTime = tableOpt.get().getPlayerData(player).getData(offerId).getLastPurchaseTime().get();
+        } else {
+            lastTime = tableOpt.get().getEntityData(offerId).getLastPurchaseTime().get();
+        }
 
         return lastTime == 0 || (System.currentTimeMillis() - lastTime) >= cooldownMs;
     }
@@ -67,22 +75,24 @@ public class PromoCooldownComponent extends PromoComponent {
         public JsonObject serialize(PromoCooldownComponent component) {
             JsonObject json = new JsonObject();
             json.addProperty("cooldown_ms", component.cooldownMs);
+            json.addProperty("side", component.limiterType.name());
             return json;
         }
 
         @Override
         public PromoCooldownComponent deserialize(JsonObject json) {
-            return new PromoCooldownComponent(json.get("cooldown_ms").getAsLong());
+            return new PromoCooldownComponent(json.get("cooldown_ms").getAsLong(), LimiterComponent.LimiterType.valueOf(json.get("side").getAsString()));
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf buf, PromoCooldownComponent component) {
             buf.writeLong(component.cooldownMs);
+            buf.writeEnum(component.limiterType);
         }
 
         @Override
         public PromoCooldownComponent fromNetwork(FriendlyByteBuf buf) {
-            return new PromoCooldownComponent(buf.readLong());
+            return new PromoCooldownComponent(buf.readLong(), buf.readEnum(LimiterComponent.LimiterType.class));
         }
 
         @Override

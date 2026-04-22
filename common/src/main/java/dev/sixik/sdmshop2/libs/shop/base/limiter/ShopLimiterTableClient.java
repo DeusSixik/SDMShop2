@@ -1,6 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop.base.limiter;
 
 import com.google.gson.JsonObject;
+import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -70,6 +71,8 @@ public final class ShopLimiterTableClient implements ShopLimiterTable {
             ShopLimiterEntityData data = new ShopLimiterEntityData(buf);
             entitiesData.put(data.getEntityId(), data);
         }
+
+        SDMShopClient.ACCEPT_LIMITER_DATA_EVENT.invoker().onAcceptLimiterDataEvent(this);
     }
 
     @Override

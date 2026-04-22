@@ -10,10 +10,11 @@ import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
+import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
+import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -71,6 +73,7 @@ public final class ShopTable {
     @Getter
     private final MinecraftServer server;
 
+    @Getter
     private volatile boolean reloading = false;
 
     public ShopTable(MinecraftServer server) {
@@ -119,6 +122,15 @@ public final class ShopTable {
      */
     public Collection<ShopInstance> getAllShops() {
         return shops.values();
+    }
+
+    /**
+     * Возвращает коллекцию IDs всех зарегистрированных магазинов.
+     *
+     * @return Коллекция строковых ID магазинов
+     */
+    public List<ResourceLocation> getShopsId() {
+        return shops.keySet().stream().toList();
     }
 
     /**
@@ -214,6 +226,9 @@ public final class ShopTable {
                 LOGGER.error("Failed to load shops", e);
             }
 
+            ShopScriptEvents.SCRIPT_SHOP_LOAD_EVENT.invoker().invoke(server, this);
+            ShopServerEvents.SHOP_LOAD_EVENT.invoker().invoke(server, this);
+
             LOGGER.info("Loaded {} shops.", shops.size());
         } finally {
             reloading = false;
@@ -227,11 +242,13 @@ public final class ShopTable {
             final ShopInstance shopIds = ShopInstance.fromJson(json);
             shops.put(shopIds.getId(), shopIds);
         } catch (Exception e) {
-            LOGGER.error("Error loading shop: " + path, e);
+            LOGGER.error("Error loading shop: {}", path, e);
         }
     }
 
     private void saveShopToFile(ShopInstance shop) {
+        if(!shop.shouldSave()) return;
+
         try {
             Path path = shopsDir.resolve(shop.getId().getPath() + ".json");
 
