@@ -7,7 +7,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
-import dev.sixik.sdmshop2.libs.shop.client.screens.test.ItemStackSelector;
+import dev.sixik.sdmshop2.libs.shop.client.screens.ui.ItemStackSelector;
 import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.utils.ShopUtils;

@@ -1,11 +1,11 @@
-package dev.sixik.sdmshop2.libs.shop.client.screens.test;
+package dev.sixik.sdmshop2.libs.shop.client.screens.ui;
 
+import com.lowdragmc.lowdraglib.gui.animation.Transform;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.gui.texture.*;
-import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Align;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
+import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMTextLabel;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
@@ -15,12 +15,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
-import net.minecraft.client.gui.GuiGraphics;
-import org.jetbrains.annotations.NotNull;
 
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.function.Consumer;
@@ -31,6 +28,7 @@ public class ItemStackSelector extends WidgetGroup {
     private ItemStack itemStack;
     private DraggableScrollableWidgetGroup grid;
     private TextFieldWidget searchField;
+    private SDMTextLabel itemNameLabel;
     private boolean isAll = true;
     private ButtonWidget changButton = new ButtonWidget();
     private List<ItemStack> allItems;
@@ -52,7 +50,7 @@ public class ItemStackSelector extends WidgetGroup {
     @Override
     public void initWidget() {
 
-        System.out.println("Init widgets ItemStackSelector");
+        setSize(panelSize,panelSize);
         drawDialogPanel();
         calculateWidgetSize();
         super.initWidget();
@@ -60,11 +58,17 @@ public class ItemStackSelector extends WidgetGroup {
 
     private void drawDialogPanel() {
 
-        Widget img = new WidgetGroup(2,2,50,50);
-        img.setBackground(new GuiTextureGroup(new ColorRectAndBorderTexture(ShopColors.ITEM_SElECTOR_BUTTONS,ShopColors.BORDER,1).setRadius(2),new ItemStackTexture(itemStack)));
 
+        //Иконка выдбаного предмета
+        Widget selectedItem = new WidgetGroup(2,2,50,50);
+        selectedItem.setBackground(new GuiTextureGroup(new ColorRectAndBorderTexture(ShopColors.ITEM_SElECTOR_BUTTONS,ShopColors.BORDER,1).setRadius(2),new ItemStackTexture(itemStack != null ? itemStack : ItemStack.EMPTY )));
+
+        itemNameLabel = new SDMTextLabel(56,2,Component.literal(itemStack != null ? itemStack.getItem().getName(itemStack).getString() : ""));
+
+        addWidget(itemNameLabel);
+        addWidget(selectedItem);
         // 2. Поле поиска
-        searchField = new TextFieldWidget(10, 10, panelSize - 20, 10, null, null) {
+        searchField = new TextFieldWidget(12, 56, panelSize - 20, 10, null, null) {
             @Override
             protected void onTextChanged(String newTextString) {
                 if(searchText.equals(newTextString)) return;
@@ -72,6 +76,7 @@ public class ItemStackSelector extends WidgetGroup {
                 rebuildGrid(newTextString.toLowerCase());
             }
         };
+
         searchField.setCurrentString(searchText);
 
         this.addWidget(searchField);
@@ -140,7 +145,7 @@ public class ItemStackSelector extends WidgetGroup {
 
     private void rebuildGrid(String searchText) {
         grid.clearAllWidgets();
-        grid.setBackground(new ColorRectTexture(ShopColors.BG_ORANGE));
+        grid.setBackground(new ColorRectAndBorderTexture(ShopColors.ITEM_SElECTOR_GRID,ShopColors.BORDER,1));
 
         // Быстрая фильтрация по локализованному названию
         List<ItemStack> filtered = allItems.stream()
@@ -152,8 +157,6 @@ public class ItemStackSelector extends WidgetGroup {
         final int padding = 2;
         int columns = grid.getSizeWidth() / (itemSize + padding);
         if (columns <= 0) columns = 1;
-
-        // УДАЛЕНО: grid.setSelfPositionX((panelSize-20*columns)/2);
 
         // ВЫЧИСЛЯЕМ отступ для центрирования элементов ВНУТРИ сетки
         int totalContentWidth = columns * (itemSize + padding) - padding;
@@ -177,14 +180,17 @@ public class ItemStackSelector extends WidgetGroup {
      * Пересчитывает параметры виджетов (Размер, Позиция)
      */
     private void calculateWidgetSize() {
-        searchField.setSelfPosition(10, 10);
+        // FIXME: При обновлении окна некоректно отрабатывает скеил
+        if(itemNameLabel.getSizeWidth() > panelSize - 56) itemNameLabel.setScale((float) (panelSize - 56) / itemNameLabel.getSizeWidth() - 0.02f);
+        else itemNameLabel.setScale(1f);
+
         searchField.setSize(panelSize - 20, 10);
 
         changButton.setSelfPosition(panelSize, 0);
         changButton.setSize(18, 18);
 
-        grid.setSelfPosition(10, 24);
-        grid.setSize(panelSize - 20, panelSize - 26);
+        grid.setSelfPosition(10, 70);
+        grid.setSize(panelSize - 20, panelSize - 71);
 
         rebuildGrid();
     }
@@ -211,13 +217,11 @@ public class ItemStackSelector extends WidgetGroup {
 
     public void onScreenSizeUpdate(int screenWidth, int screenHeight) {
 
-//        setSize(parent.getSize());
+        setSize(panelSize, panelSize);
         super.onScreenSizeUpdate(screenWidth, screenHeight);
-        int a = Math.min(screenHeight,screenWidth);
-        panelSize = (int) (a*0.7);
+        int factor = Math.min(screenHeight,screenWidth);
+        panelSize = (int) (factor*0.7);
         calculateWidgetSize();
-//        clearAllWidgets();
-//        drawDialogPanel();
     }
 
     public enum InventoryType {
