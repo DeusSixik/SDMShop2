@@ -1,17 +1,14 @@
-package dev.sixik.sdmshop2.libs.shop.client.screens.test;
+package dev.sixik.sdmshop2.libs.shop.client.screens.ui;
 
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
-import com.lowdragmc.lowdraglib.gui.widget.layout.Align;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopEntryPanel;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
-import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ItemStackSelectorButton;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class ShopMainPanel extends WidgetGroup {
@@ -123,7 +120,7 @@ public class ShopMainPanel extends WidgetGroup {
         catalogGrid = new ShopEntryPanel(sidebarWidth + 20, topBarHeight + 10, getSizeWidth() - sidebarWidth - 40, getSizeHeight() - topBarHeight - 20);
 
         // Заполняем тестовыми данными
-        catalogGrid.addWidget(new ShopEntryCardWidget(200, 200)); // Карточка 1
+        catalogGrid.addWidget(new ShopEntryCard(200, 200)); // Карточка 1
         //catalogGrid.addWidget(new ShopEntryCardWidget(200, 200)); // Карточка 2
 
         // Вызываем метод, который мы писали ранее, чтобы он расставил их по сетке (Grid Layout)

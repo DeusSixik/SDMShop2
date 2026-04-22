@@ -1,8 +1,7 @@
-package dev.sixik.sdmshop2.libs.shop.client.screens.test;
+package dev.sixik.sdmshop2.libs.shop.client.screens.ui;
 
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.layout.Align;
 import com.mojang.blaze3d.platform.Window;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ItemStackSelectorButton;

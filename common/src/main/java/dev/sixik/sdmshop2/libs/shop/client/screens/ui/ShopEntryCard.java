@@ -1,10 +1,8 @@
-package dev.sixik.sdmshop2.libs.shop.client.screens.test;
+package dev.sixik.sdmshop2.libs.shop.client.screens.ui;
 
-import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
-import com.lowdragmc.lowdraglib.gui.widget.layout.Align;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.MarqueeScrollWidgetGroup;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
@@ -12,15 +10,16 @@ import dev.sixik.sdmshop2.libs.shop.client.textures.GradientTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.Items;
 
-public class ShopEntryCardWidget extends WidgetGroup {
+public class ShopEntryCard extends WidgetGroup {
 
     private int w;
+
     private int h;
     private LabelWidget title;
     private DraggableScrollableWidgetGroup preview;
     private GradientTexture progresTexture= new GradientTexture(0xFF08215C,0xFF9156B8,true);
 
-    public ShopEntryCardWidget(int width, int height) {
+    public ShopEntryCard(int width, int height) {
         super(0, 0, width, height);
 
         w = width;

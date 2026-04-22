@@ -51,4 +51,6 @@ public class ShopColors {
 
     // Фон кнопок в атем селекторе
     public static final int ITEM_SElECTOR_BUTTONS = 0xFF3F3F5D;
+    //Фон сетки селектора предметов
+    public static final int ITEM_SElECTOR_GRID = 0xFF1C1C23;
 }
