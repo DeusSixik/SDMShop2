@@ -10,6 +10,7 @@ import dev.sixik.sdmshop2.libs.shop.components.api.*;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncBridge;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncClientTasks;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
+import dev.sixik.sdmshop2.utils.NetworkExtern;
 import dev.sixik.sdmshop2.utils.ShopUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -118,17 +119,8 @@ class ShopNetworkManagerNative {
             UUID offerUUID = response.readUUID();
             ShopOffer localOffer = SDMShopClient.Shop.getEntries().getEntry(offerUUID);
             List<CostComponent> localCosts = localOffer != null ? localOffer.getComponents(CostComponent.class) : Collections.emptyList();
-
-            return response.readMap(
-                    buf -> {
-                        int index = buf.readVarInt();
-                        if (index < 0 || index >= localCosts.size()) {
-                            SDMShop2.LOGGER.error("[ShopPriceClientApi] Desync! Component index {} out of bounds for offer {}.", index, offerUUID);
-                            return null;
-                        }
-                        return localCosts.get(index);
-                    },
-                    FriendlyByteBuf::readDouble
+            return NetworkExtern.readMap(
+                    response, localCosts, FriendlyByteBuf::readDouble, "ShopPriceClientApi"
             );
         });
     }
@@ -142,10 +134,7 @@ class ShopNetworkManagerNative {
             buf.writeResourceLocation(SDMShopClient.Shop.getId());
             buf.writeBoolean(true); // isBatch = true
             buf.writeUtf(chosenGroupId != null ? chosenGroupId : "");
-            buf.writeVarInt(shopOffers.size());
-            for (ShopOffer offer : shopOffers) {
-                buf.writeUUID(offer.getUUID());
-            }
+            NetworkExtern.writeOffersUUIDs(buf, shopOffers);
             return buf;
         }).thenApply((response) -> {
             if (!response.isReadable()) {
@@ -165,16 +154,8 @@ class ShopNetworkManagerNative {
                 ShopOffer localOffer = SDMShopClient.Shop.getEntries().getEntry(offerUUID);
                 List<CostComponent> localCosts = localOffer != null ? localOffer.getComponents(CostComponent.class) : Collections.emptyList();
 
-                Map<CostComponent, Double> prices = response.readMap(
-                        buf -> {
-                            int index = buf.readVarInt();
-                            if (index < 0 || index >= localCosts.size()) {
-                                SDMShop2.LOGGER.error("[ShopPriceClientApi] Desync! Component index {} out of bounds for offer {}.", index, offerUUID);
-                                return null;
-                            }
-                            return localCosts.get(index);
-                        },
-                        FriendlyByteBuf::readDouble
+                Map<CostComponent, Double> prices = NetworkExtern.readMap(
+                        response, localCosts, FriendlyByteBuf::readDouble, "ShopPriceClientApi"
                 );
                 result.put(offerUUID, prices);
             }
@@ -206,16 +187,8 @@ class ShopNetworkManagerNative {
             ShopOffer localOffer = SDMShopClient.Shop.getEntries().getEntry(offerUUID);
             List<ConditionComponent> localConditions = localOffer != null ? localOffer.getComponents(ConditionComponent.class) : Collections.emptyList();
 
-            return response.readMap(
-                    buf -> {
-                        int index = buf.readVarInt();
-                        if (index < 0 || index >= localConditions.size()) {
-                            SDMShop2.LOGGER.error("[ShopConditionClientApi] Desync! Component index {} out of bounds for offer {}.", index, offerUUID);
-                            return null;
-                        }
-                        return localConditions.get(index);
-                    },
-                    FriendlyByteBuf::readBoolean
+            return NetworkExtern.readMap(
+                    response, localConditions, FriendlyByteBuf::readBoolean, "ShopConditionClientApi"
             );
         });
     }
@@ -228,10 +201,7 @@ class ShopNetworkManagerNative {
         return AsyncBridge.askServer(AsyncClientTasks.GET_CONDITIONS_FOR_OFFER, buf -> {
             buf.writeResourceLocation(SDMShopClient.Shop.getId());
             buf.writeBoolean(true); // isBatch = true
-            buf.writeVarInt(shopOffers.size());
-            for (ShopOffer offer : shopOffers) {
-                buf.writeUUID(offer.getUUID());
-            }
+            NetworkExtern.writeOffersUUIDs(buf, shopOffers);
             return buf;
         }).thenApply((response) -> {
             if (!response.isReadable()) {
@@ -251,17 +221,8 @@ class ShopNetworkManagerNative {
                 ShopOffer localOffer = SDMShopClient.Shop.getEntries().getEntry(offerUUID);
 
                 List<ConditionComponent> localConditions = localOffer != null ? localOffer.getComponents(ConditionComponent.class) : Collections.emptyList();
-
-                Map<ConditionComponent, Boolean> conditions = response.readMap(
-                        buf -> {
-                            int index = buf.readVarInt();
-                            if (index < 0 || index >= localConditions.size()) {
-                                SDMShop2.LOGGER.error("[ShopConditionClientApi] Desync! Component index {} out of bounds for offer {}.", index, offerUUID);
-                                return null;
-                            }
-                            return localConditions.get(index);
-                        },
-                        FriendlyByteBuf::readBoolean
+                Map<ConditionComponent, Boolean> conditions = NetworkExtern.readMap(
+                        response, localConditions, FriendlyByteBuf::readBoolean, "ShopConditionClientApi"
                 );
                 result.put(offerUUID, conditions);
             }

@@ -7,6 +7,7 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.components.api.ConditionComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
 import dev.sixik.sdmshop2.libs.shop.processors.ShopTransactionProcessor;
+import dev.sixik.sdmshop2.utils.NetworkExtern;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -163,24 +164,12 @@ public class AsyncServerTasks {
 
     private static void getConditionForOfferWriteOfferData(UUID offerId, Map<ConditionComponent, Boolean> conditionMap, List<ConditionComponent> components, FriendlyByteBuf reply) {
         reply.writeUUID(offerId);
-        reply.writeVarInt(conditionMap.size());
-
-        for (Map.Entry<ConditionComponent, Boolean> entry : conditionMap.entrySet()) {
-            int componentIndex = components.indexOf(entry.getKey());
-            reply.writeVarInt(componentIndex);
-            reply.writeBoolean(entry.getValue());
-        }
+        NetworkExtern.writeMap(reply, conditionMap, components, FriendlyByteBuf::writeBoolean);
     }
 
     private static void getPricesForOfferWriteOfferData(FriendlyByteBuf reply, UUID offerId, ShopOffer offer, Map<CostComponent, Double> prices) {
         reply.writeUUID(offerId);
-        reply.writeVarInt(prices.size());
-        final List<CostComponent> allCosts = offer.getComponents(CostComponent.class);
-        for (Map.Entry<CostComponent, Double> entry : prices.entrySet()) {
-            int componentIndex = allCosts.indexOf(entry.getKey());
-            reply.writeVarInt(componentIndex);
-            reply.writeDouble(entry.getValue());
-        }
+        NetworkExtern.writeMap(reply, prices, offer.getComponents(CostComponent.class), FriendlyByteBuf::writeDouble);
     }
 
 
