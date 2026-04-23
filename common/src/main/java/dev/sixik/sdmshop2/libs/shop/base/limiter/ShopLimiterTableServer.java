@@ -14,7 +14,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public final class ShopLimiterTableServer implements ShopLimiterTable {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShopLimiterTableServer.class);
-    private final ThreadLocal<Gson> GSON_LOCAL = ThreadLocal.withInitial(() -> new GsonBuilder().setPrettyPrinting().create());
+    private final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final ExecutorService ioExecutor;
     private final Path saveFile;
 
@@ -170,7 +169,7 @@ public final class ShopLimiterTableServer implements ShopLimiterTable {
             }
 
             try (Writer writer = Files.newBufferedWriter(saveFile)) {
-                GSON_LOCAL.get().toJson(this.toJson(), writer);
+                GSON.toJson(this.toJson(), writer);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to save shop limiter data", e);

@@ -12,6 +12,8 @@ import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
 import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -45,9 +47,10 @@ public final class ShopTable {
      */
     public static ShopTable Instance;
 
-    private final ThreadLocal<Gson> GSON_LOCAL = ThreadLocal.withInitial(() -> new GsonBuilder().setPrettyPrinting().create());
+    private final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final ExecutorService ioExecutor;
-    private final ConcurrentHashMap<ResourceLocation, ShopInstance> shops = new ConcurrentHashMap<>();
+    private volatile Object2ObjectMap<ResourceLocation, ShopInstance> shops = new Object2ObjectOpenHashMap<>();
+    private final Object writeLock = new Object();
 
     /**
      * Путь к директории магазинов в папке сохранения мира.
@@ -92,7 +95,7 @@ public final class ShopTable {
      * @param shopId Уникальный ID нового магазина
      */
     public void addShop(ResourceLocation shopId) {
-        shops.put(shopId, ShopInstance.createManager(shopId, true));
+        addShop(ShopInstance.createManager(shopId, true));
     }
 
     /**
@@ -101,7 +104,12 @@ public final class ShopTable {
      * @param instance Экземпляр магазина
      */
     public void addShop(ShopInstance instance) {
-        shops.put(instance.getId(), instance);
+        synchronized (writeLock) {
+            Object2ObjectMap<ResourceLocation, ShopInstance> newMap = new Object2ObjectOpenHashMap<>(shops);
+            newMap.put(instance.getId(), instance);
+
+            shops = newMap;
+        }
     }
 
     /**
@@ -148,15 +156,21 @@ public final class ShopTable {
      * @param id ID магазина для удаления
      */
     public void deleteShop(ResourceLocation id) {
-        ShopInstance removed = shops.remove(id);
-        if (removed != null) {
-            ioExecutor.submit(() -> {
-                try {
-                    Files.deleteIfExists(shopsDir.resolve(id.getPath() + ".json"));
-                } catch (IOException e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
-            });
+        synchronized (writeLock) {
+            Object2ObjectMap<ResourceLocation, ShopInstance> newMap = new Object2ObjectOpenHashMap<>(shops);
+            ShopInstance removed = newMap.remove(id);
+
+            shops = newMap;
+
+            if (removed != null) {
+                ioExecutor.submit(() -> {
+                    try {
+                        Files.deleteIfExists(shopsDir.resolve(id.getPath() + ".json"));
+                    } catch (IOException e) {
+                        LOGGER.error(e.getMessage(), e);
+                    }
+                });
+            }
         }
     }
 
@@ -198,7 +212,7 @@ public final class ShopTable {
 
     /**
      * Перезагружает все данные магазинов из папки {@link #getShopsDir()}.
-     * Все текущие данные в памяти будут очищены и загружены заново.
+     * Все текущие данные будут перезаписанны через подмену ссылок
      */
     public void reload() {
         if(reloading) return;
@@ -207,40 +221,38 @@ public final class ShopTable {
         try {
             LOGGER.info("Start reloading shops data!");
 
-            shops.clear();
+            Object2ObjectMap<ResourceLocation, ShopInstance> loadedShops = new Object2ObjectOpenHashMap<>();
 
             if (!Files.exists(shopsDir)) {
-                try {
-                    Files.createDirectories(shopsDir);
-                } catch (IOException e) {
-                    LOGGER.error("Can't create shops dir. {}", e.getMessage(), e);
-                    return;
-                }
+                Files.createDirectories(shopsDir);
             }
 
             try (Stream<Path> files = Files.walk(shopsDir)) {
                 files.filter(Files::isRegularFile)
                         .filter(p -> p.toString().endsWith(".json"))
-                        .forEach(this::loadShopFromFile);
-            } catch (IOException e) {
-                LOGGER.error("Failed to load shops", e);
+                        .forEach(path -> loadShopFromFile(path, loadedShops));
+            }
+
+            synchronized (writeLock) {
+                shops = loadedShops;
             }
 
             ShopScriptEvents.SCRIPT_SHOP_LOAD_EVENT.invoker().invoke(server, this);
             ShopServerEvents.SHOP_LOAD_EVENT.invoker().invoke(server, this);
 
             LOGGER.info("Loaded {} shops.", shops.size());
+        } catch (Exception e) {
+            LOGGER.error("Failed to load shops", e);
         } finally {
             reloading = false;
         }
     }
 
-    private void loadShopFromFile(Path path) {
+    private void loadShopFromFile(Path path, Object2ObjectMap<ResourceLocation, ShopInstance> mapToFill) {
         try (Reader reader = Files.newBufferedReader(path)) {
             JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
-
-            final ShopInstance shopIds = ShopInstance.fromJson(json);
-            shops.put(shopIds.getId(), shopIds);
+            final ShopInstance shop = ShopInstance.fromJson(json);
+            mapToFill.put(shop.getId(), shop);
         } catch (Exception e) {
             LOGGER.error("Error loading shop: {}", path, e);
         }
@@ -257,7 +269,7 @@ public final class ShopTable {
             }
 
             try (Writer writer = Files.newBufferedWriter(path)) {
-                GSON_LOCAL.get().toJson(shop.serialize(), writer);
+                GSON.toJson(shop.serialize(), writer);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to save shop {}", shop.getId(), e);

@@ -1,6 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop.base.limiter;
 
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -24,7 +25,7 @@ public class ShopLimiterPlayerData {
     public ShopLimiterPlayerData(UUID userId, FriendlyByteBuf buf) {
         this.userId = userId;
         int size = buf.readVarInt();
-        dataMap = new HashMap<>();
+        dataMap = new Object2ObjectOpenHashMap<>();
         for (int i = 0; i < size; i++) {
             dataMap.put(buf.readUUID(), new ShopLimiterEntityData(buf));
         }
