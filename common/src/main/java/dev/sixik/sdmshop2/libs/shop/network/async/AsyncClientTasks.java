@@ -16,31 +16,32 @@ import static dev.sixik.sdmshop2.libs.shop.client.SDMShopClient.*;
 
 public class AsyncClientTasks {
 
-    public static final String GET_PRICES_FOR_OFFER = "gen_prices_for_offer";
+    public static final String GET_PRICES_FOR_OFFER = "get_prices_for_offer";
+    public static final String GET_CONDITIONS_FOR_OFFER = "get_conditions_for_offer";
 
     public static void init() {
         AsyncBridge.initClient();
         BlobTransfer.initClient();
 
-        AsyncBridge.registerHandler(AsyncServerTasks.SEND_SHOP_DATA, buf -> {
+        AsyncBridge.registerHandler(AsyncServerTasks.SEND_SHOP_DATA, (buf, ctx) -> {
             SDMShopClient.Shop = ShopInstance.fromNetwork(buf);
             ACCEPT_SHOP_EVENT.invoker().onAcceptShopEvent(SDMShopClient.Shop);
             return null;
         });
 
-        AsyncBridge.registerHandler(AsyncServerTasks.SEND_SHOP_DATA_AND_OPEN, buf -> {
+        AsyncBridge.registerHandler(AsyncServerTasks.SEND_SHOP_DATA_AND_OPEN, (buf, ctx) -> {
             SDMShopClient.Shop = ShopInstance.fromNetwork(buf);
             ACCEPT_SHOP_EVENT.invoker().onAcceptShopEvent(SDMShopClient.Shop);
             SDMShopClient.openShopGui();
             return null;
         });
 
-        AsyncBridge.registerHandler(AsyncServerTasks.SEND_SHOP_LIMITER_DATA, buf -> {
+        AsyncBridge.registerHandler(AsyncServerTasks.SEND_SHOP_LIMITER_DATA, (buf, ctx) -> {
             ShopUtils.getLimiterTable(true).ifPresent(limiterTable -> limiterTable.fromNetwork(buf));
             return null;
         });
 
-        AsyncBridge.registerHandler(AsyncServerTasks.SEND_GET_CLIENT_SHOP_ID, buf -> {
+        AsyncBridge.registerHandler(AsyncServerTasks.SEND_GET_CLIENT_SHOP_ID, (buf, ctx) -> {
             boolean result = false;
 
             if(buf.isReadable() && SDMShopClient.Shop != null) {
@@ -53,7 +54,7 @@ public class AsyncClientTasks {
             return reply;
         });
 
-        AsyncBridge.registerHandler(AsyncServerTasks.SEND_NEW_COMPONENT_DATA_TO_CLIENT, buf -> {
+        AsyncBridge.registerHandler(AsyncServerTasks.SEND_NEW_COMPONENT_DATA_TO_CLIENT, (buf, ctx) -> {
             if(!buf.isReadable()) return null;
 
             final UUID entityId = buf.readUUID();
