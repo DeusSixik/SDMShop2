@@ -51,6 +51,11 @@ dependencies {
     modImplementation('com.blamejared.crafttweaker:CraftTweaker-fabric-1.20.1:14.0.60')
 
     minecraftClientRuntimeLibraries("com.github.ben-manes.caffeine:caffeine:3.2.3")
+    minecraftClientRuntimeLibraries("org.mongodb:mongodb-driver-sync:5.6.5")
+
+    include("com.github.ben-manes.caffeine:caffeine:3.2.3")
+    include("org.mongodb:mongodb-driver-sync:5.6.5")
+
 }
 
 processResources {

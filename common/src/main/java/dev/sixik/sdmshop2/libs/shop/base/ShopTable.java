@@ -1,14 +1,13 @@
 package dev.sixik.sdmshop2.libs.shop.base;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import dev.architectury.platform.Platform;
 import dev.sixik.sdmshop2.SDMShop2;
 import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
+import dev.sixik.sdmshop2.libs.shop.base.storage.MongoDbShopStorage;
+import dev.sixik.sdmshop2.libs.shop.base.storage.ShopStorage;
+import dev.sixik.sdmshop2.libs.shop.base.storage.ShopStorageCreator;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
 import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
@@ -22,23 +21,17 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 /**
  * Глобальный менеджер всех магазинов в системе.
  * Отвечает за хранение, загрузку, сохранение и удаление экземпляров {@link ShopInstance}.
  */
-public final class ShopTable {
+public final class ShopTable implements ShopServerGetter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShopTable.class);
 
@@ -47,7 +40,6 @@ public final class ShopTable {
      */
     public static ShopTable Instance;
 
-    private final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final ExecutorService ioExecutor;
     private volatile Object2ObjectMap<ResourceLocation, ShopInstance> shops = new Object2ObjectOpenHashMap<>();
     private final Object writeLock = new Object();
@@ -79,13 +71,17 @@ public final class ShopTable {
     @Getter
     private volatile boolean reloading = false;
 
-    public ShopTable(MinecraftServer server) {
+    private final ShopStorage storage;
+
+    public ShopTable(MinecraftServer server, ShopStorage storage) {
         this.ioExecutor = Executors.newSingleThreadExecutor();
         this.server = server;
         this.shopDirWorld = SDMEconomyPlatform.resolveSdmDir(server.getWorldPath(LevelResource.ROOT), "shop");
         this.shopDirConfig = SDMEconomyPlatform.resolveSdmDir(Platform.getConfigFolder(), "shop");
         this.shopsDir = SDMEconomyPlatform.resolveSdmDir(Platform.getConfigFolder(), "shop/shops");
-
+        this.storage = storage;
+        this.storage.setServerGetter(this);
+        this.storage.init();
         reload();
     }
 
@@ -163,13 +159,7 @@ public final class ShopTable {
             shops = newMap;
 
             if (removed != null) {
-                ioExecutor.submit(() -> {
-                    try {
-                        Files.deleteIfExists(shopsDir.resolve(id.getPath() + ".json"));
-                    } catch (IOException e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                });
+                ioExecutor.submit(() -> storage.delete(id));
             }
         }
     }
@@ -221,17 +211,9 @@ public final class ShopTable {
         try {
             LOGGER.info("Start reloading shops data!");
 
-            Object2ObjectMap<ResourceLocation, ShopInstance> loadedShops = new Object2ObjectOpenHashMap<>();
-
-            if (!Files.exists(shopsDir)) {
-                Files.createDirectories(shopsDir);
-            }
-
-            try (Stream<Path> files = Files.walk(shopsDir)) {
-                files.filter(Files::isRegularFile)
-                        .filter(p -> p.toString().endsWith(".json"))
-                        .forEach(path -> loadShopFromFile(path, loadedShops));
-            }
+            Object2ObjectMap<ResourceLocation, ShopInstance> loadedShops = new Object2ObjectOpenHashMap<>(
+                    storage.loadAll()
+            );
 
             synchronized (writeLock) {
                 shops = loadedShops;
@@ -248,32 +230,42 @@ public final class ShopTable {
         }
     }
 
-    private void loadShopFromFile(Path path, Object2ObjectMap<ResourceLocation, ShopInstance> mapToFill) {
-        try (Reader reader = Files.newBufferedReader(path)) {
-            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
-            final ShopInstance shop = ShopInstance.fromJson(json);
-            mapToFill.put(shop.getId(), shop);
-        } catch (Exception e) {
-            LOGGER.error("Error loading shop: {}", path, e);
+    /**
+     * Перезагружает данные только одного магазина из хранилища.
+     */
+    public void reloadShop(ResourceLocation id) {
+        if (storage == null) return;
+
+        ShopInstance updatedShop = storage.load(id);
+
+        if (updatedShop != null) {
+            synchronized (writeLock) {
+                Object2ObjectMap<ResourceLocation, ShopInstance> newMap = new Object2ObjectOpenHashMap<>(shops);
+                newMap.put(id, updatedShop); // Добавит новый или перезапишет старый
+                shops = newMap;
+            }
+            LOGGER.info("Shop '{}' seamlessly updated from storage.", id);
+
+            // TODO: Shop update event
+            // ShopServerEvents.SHOP_UPDATED_EVENT.invoker().invoke(server, updatedShop);
         }
+    }
+
+    /**
+     * Удаляет магазин из кэша.
+     */
+    public void removeShopFromCache(ResourceLocation id) {
+        synchronized (writeLock) {
+            Object2ObjectMap<ResourceLocation, ShopInstance> newMap = new Object2ObjectOpenHashMap<>(shops);
+            newMap.remove(id);
+            shops = newMap;
+        }
+        LOGGER.info("Shop '{}' removed from cache.", id);
     }
 
     private void saveShopToFile(ShopInstance shop) {
         if(!shop.shouldSave()) return;
-
-        try {
-            Path path = shopsDir.resolve(shop.getId().getPath() + ".json");
-
-            if (shop.getId().getPath().contains("/")) {
-                Files.createDirectories(path.getParent());
-            }
-
-            try (Writer writer = Files.newBufferedWriter(path)) {
-                GSON.toJson(shop.serialize(), writer);
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed to save shop {}", shop.getId(), e);
-        }
+        storage.save(shop);
     }
 
     public static class Manager implements ServerOperation, ThreadingOperationTimeSave {
@@ -287,12 +279,13 @@ public final class ShopTable {
 
         @Override
         public void onServerStart(MinecraftServer server) {
-            ShopTable.Instance = new ShopTable(server);
+            ShopTable.Instance = new ShopTable(server, ShopStorageCreator.createStorage());
         }
 
         @Override
         public void onServerStop(MinecraftServer server) {
             ShopTable.Instance.saveAll();
+            ShopTable.Instance.storage.close();
         }
 
         @Override

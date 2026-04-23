@@ -32,7 +32,6 @@ public class SDMShopCommandsDebug {
 
     private static ShopInstance create() {
         ShopInstance debugShop = ShopInstance.createManager(new ResourceLocation("sdm", "test"), true);;
-        debugShop.setShouldSave(false);
         shopOffer = ShopOffer.create(UUID.randomUUID(), true);
         shopOffer.addComponent(new ScriptConditionComponent("test_script"));
 
@@ -40,6 +39,7 @@ public class SDMShopCommandsDebug {
         debugShop.getCategories().reindex();
 
         ShopTable.Instance.addShop(debugShop);
+        ShopTable.Instance.save(debugShop);
         return debugShop;
     }
 
