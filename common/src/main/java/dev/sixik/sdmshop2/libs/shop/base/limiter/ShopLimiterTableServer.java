@@ -4,7 +4,6 @@ import dev.sixik.sdmshop2.SDMShop2;
 import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
-import dev.sixik.sdmshop2.libs.shop.base.repository.JsonGenericRepository;
 import dev.sixik.sdmshop2.libs.shop.base.repository.RepositoryStorage;
 import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.RepoDefinition;
 import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.RepositoryManager;
@@ -17,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -44,6 +44,7 @@ public final class ShopLimiterTableServer implements ShopLimiterTable {
 
     private RepositoryStorage<UUID, ShopLimiterOfferData> offersRepository;
     private RepositoryStorage<UUID, ShopLimiterPlayerData> playersRepository;
+    private RepositoryStorage<String, DailyOfferStats> dailyStatsRepository;
 
     public ShopLimiterTableServer(MinecraftServer server, Path shopDirWorld) {
         this(server, shopDirWorld, false);
@@ -95,6 +96,22 @@ public final class ShopLimiterTableServer implements ShopLimiterTable {
                         })
         ), Object2ObjectOpenHashMap::new, ioExecutor);
 
+        dailyStatsRepository = new RepositoryStorage<>(repositoryManager.createRepository(
+                shopDirWorld,
+                "daily_stats",
+                new RepoDefinition<>(
+                        s -> s,
+                        s -> s,
+                        DailyOfferStats::getDate,
+                        DailyOfferStats::toJson,
+                        s -> {
+                            DailyOfferStats stats = new DailyOfferStats(s);
+                            stats.setUpdate(() -> dailyStatsRepository.update(stats.getDate()));
+                            return stats;
+                        }
+                )
+        ), Object2ObjectOpenHashMap::new, ioExecutor);
+
         offersRepository.loadAll();
         playersRepository.loadAll();
     }
@@ -117,6 +134,14 @@ public final class ShopLimiterTableServer implements ShopLimiterTable {
             playerData.setUpdate(() -> playersRepository.update(playerId));
             return playerData;
         });
+    }
+
+    public DailyOfferStats getDailyOfferStats() {
+        return getDailyOfferStats(LocalDate.now().toString());
+    }
+
+    public DailyOfferStats getDailyOfferStats(String timeData) {
+        return dailyStatsRepository.getOrCreate(timeData, DailyOfferStats::new);
     }
 
     /**

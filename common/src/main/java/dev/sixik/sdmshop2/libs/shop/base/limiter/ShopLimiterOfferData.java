@@ -44,7 +44,7 @@ public class ShopLimiterOfferData {
 
     public ShopLimiterOfferData(JsonObject jsonObject) {
         this(
-                UUID.fromString(jsonObject.get("entityId").getAsString()),
+                UUID.fromString(jsonObject.has("entityId") ?  jsonObject.get("entityId").getAsString() : jsonObject.get("offerId").getAsString()),
                 jsonObject.has("count") ? jsonObject.get("count").getAsInt() : 0,
                 jsonObject.has("lastPurchaseTime") ? jsonObject.get("lastPurchaseTime").getAsLong() : 0L
         );
@@ -129,15 +129,13 @@ public class ShopLimiterOfferData {
 
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("entityId", offerId.toString());
+        json.addProperty("offerId", offerId.toString());
         json.addProperty("count", count.get());
-        json.addProperty("lastPurchaseTime", lastPurchaseTime.get());
-        return json;
-    }
 
-    public void fromJson(JsonObject json) {
-        count.set(json.has("count") ? json.get("count").getAsInt() : 0);
-        lastPurchaseTime.set(json.has("lastPurchaseTime") ? json.get("lastPurchaseTime").getAsLong() : 0L);
+        long value = lastPurchaseTime.get();
+        if(value !=0)
+            json.addProperty("lastPurchaseTime", value);
+        return json;
     }
 
     public void toNetwork(FriendlyByteBuf buf) {

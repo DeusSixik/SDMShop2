@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
-import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.MongoDbRepositoryManager;
+import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.MongoRepositoryManager;
 import org.bson.Document;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class MongoGenericRepository<K, V> implements Repository<K, V>, MongoDbRepositoryManager.MongoChangeListener {
+public class MongoGenericRepository<K, V> implements Repository<K, V>, MongoRepositoryManager.MongoChangeListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoGenericRepository.class);
 
@@ -33,7 +33,7 @@ public class MongoGenericRepository<K, V> implements Repository<K, V>, MongoDbRe
     private Consumer<K> onDeleteCallback;
 
     public MongoGenericRepository(
-            MongoDbRepositoryManager manager,
+            MongoRepositoryManager manager,
             String collectionName,
             Function<K, String> keyToString,
             Function<String, K> stringToKey,
@@ -41,7 +41,7 @@ public class MongoGenericRepository<K, V> implements Repository<K, V>, MongoDbRe
             Function<V, JsonObject> serializer,
             Function<JsonObject, V> deserializer
     ) {
-        MongoDbRepositoryManager.MongoRef ref = manager.createRef(collectionName, this);
+        MongoRepositoryManager.MongoRef ref = manager.createRef(collectionName, this);
         this.collection = ref.collection();
         this.serverIdentifier = manager.getServerIdentifier();
         this.keyToString = keyToString;

@@ -9,7 +9,7 @@ import dev.sixik.sdmshop2.libs.sdmeconomy.commands.SDMEconomyCommands;
 import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableServer;
 import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.JsonRepositoryManager;
-import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.MongoDbRepositoryManager;
+import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.MongoRepositoryManager;
 import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.RepositoryManager;
 import dev.sixik.sdmshop2.libs.shop.commands.SDMShopCommands;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
@@ -39,7 +39,7 @@ public final class SDMShop2 {
             final var config = SDMShop2.getDataStorageConfig().getCurrentConfig();
             instance = switch (config.type) {
                 case JSON, CUSTOM -> new JsonRepositoryManager(server);
-                case MONGODB -> new MongoDbRepositoryManager(config.mongodb);
+                case MONGODB -> new MongoRepositoryManager(config.mongodb);
             };
         }
 

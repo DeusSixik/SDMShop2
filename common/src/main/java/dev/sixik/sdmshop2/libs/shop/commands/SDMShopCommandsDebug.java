@@ -51,10 +51,7 @@ public class SDMShopCommandsDebug {
         CommandBuilder.create("sdm_shop tests send_new_component")
                 .requires(2)
                 .executesVoid(ctx -> {
-
-
-
-                    ShopLimiterTableServer.getInstance().getOfferDatga(shopOffer.getUUID()).set(50);
+//                    ShopLimiterTableServer.getInstance().getOfferDatga(shopOffer.getUUID()).set(50);
 
 //                    ShopNetworkManager.requestShopAndOpen(new ResourceLocation("sdm", "test"));
 

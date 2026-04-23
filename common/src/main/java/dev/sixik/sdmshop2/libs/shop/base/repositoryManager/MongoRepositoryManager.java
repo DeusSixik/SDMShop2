@@ -23,9 +23,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class MongoDbRepositoryManager extends RepositoryManager{
+public class MongoRepositoryManager extends RepositoryManager{
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(MongoDbRepositoryManager.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(MongoRepositoryManager.class);
 
     protected MongoClient client;
     private MongoDatabase database;
@@ -38,11 +38,11 @@ public class MongoDbRepositoryManager extends RepositoryManager{
 
     private final Map<String, List<MongoChangeListener>> listeners = new ConcurrentHashMap<>();
 
-    public MongoDbRepositoryManager(ShopDataStorageConfig.MongoConfig config) {
+    public MongoRepositoryManager(ShopDataStorageConfig.MongoConfig config) {
         this(config.uri, config.database, config.serverName);
     }
 
-    public MongoDbRepositoryManager(String uri, String db, String name) {
+    public MongoRepositoryManager(String uri, String db, String name) {
         this.connectionString = uri;
         this.dbName = db;
 
@@ -82,7 +82,6 @@ public class MongoDbRepositoryManager extends RepositoryManager{
 
     private void startWatchingDatabase() {
         Thread watchThread = new Thread(() -> {
-            // ВАЖНО: Вызываем watch() не у collection, а у database!
             try (MongoCursor<ChangeStreamDocument<Document>> cursor = database.watch()
                     .fullDocument(FullDocument.UPDATE_LOOKUP)
                     .cursor()) {
@@ -92,20 +91,16 @@ public class MongoDbRepositoryManager extends RepositoryManager{
                 while (cursor.hasNext()) {
                     ChangeStreamDocument<Document> change = cursor.next();
 
-                    // 1. Узнаем, в какой коллекции произошло изменение
                     if (change.getNamespace() == null) continue;
                     String changedCollection = change.getNamespace().getCollectionName();
 
-                    // 2. Есть ли у нас репозитории, которым это интересно?
                     List<MongoChangeListener> targets = listeners.get(changedCollection);
                     if (targets == null || targets.isEmpty()) continue;
 
-                    // 3. Достаем ID
                     BsonDocument documentKey = change.getDocumentKey();
                     if (documentKey == null || !documentKey.containsKey("_id")) continue;
                     String rawId = documentKey.getString("_id").getValue().toString();
 
-                    // 4. Защита от "эха"
                     Document fullDoc = change.getFullDocument();
                     if (fullDoc != null && fullDoc.containsKey("last_updated_by")) {
                         if (serverIdentifier.equals(fullDoc.getString("last_updated_by"))) {
@@ -113,7 +108,6 @@ public class MongoDbRepositoryManager extends RepositoryManager{
                         }
                     }
 
-                    // 5. Рассылаем уведомления репозиториям
                     OperationType opType = change.getOperationType();
                     for (MongoChangeListener listener : targets) {
                         if (opType == OperationType.INSERT || opType == OperationType.REPLACE || opType == OperationType.UPDATE) {
@@ -152,7 +146,7 @@ public class MongoDbRepositoryManager extends RepositoryManager{
         );
     }
 
-    public record MongoRef(MongoDbRepositoryManager manager, MongoCollection<Document> collection, String collectionName) { }
+    public record MongoRef(MongoRepositoryManager manager, MongoCollection<Document> collection, String collectionName) { }
 
     public interface MongoChangeListener {
         void onRemoteUpdate(String rawId);
