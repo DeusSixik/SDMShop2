@@ -2,6 +2,7 @@ package dev.sixik.sdmshop2.libs.shop.base.limiter;
 
 import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ShopLimiterTableClient implements ShopLimiterTable {
 
-    private final Map<UUID, ShopLimiterEntityData> entitiesData = new ConcurrentHashMap<>();
+    private final Map<UUID, ShopLimiterOfferData> entitiesData = new Object2ObjectOpenHashMap<>();
     private ShopLimiterPlayerData localPlayerData;
 
     public static final ShopLimiterTableClient INSTANCE = new ShopLimiterTableClient();
@@ -25,8 +26,8 @@ public final class ShopLimiterTableClient implements ShopLimiterTable {
     public ShopLimiterTableClient() { }
 
     @Override
-    public ShopLimiterEntityData getEntityData(UUID entityId) {
-        return entitiesData.computeIfAbsent(entityId, ShopLimiterEntityData::new);
+    public ShopLimiterOfferData getOfferDatga(UUID entityId) {
+        return entitiesData.computeIfAbsent(entityId, ShopLimiterOfferData::new);
     }
 
     public ShopLimiterPlayerData getPlayerData() {
@@ -56,6 +57,11 @@ public final class ShopLimiterTableClient implements ShopLimiterTable {
         return localPlayerData;
     }
 
+    @Override
+    public void toNetwork(UUID player, FriendlyByteBuf buf) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Читает данные, присланные сервером, и обновляет локальный кэш клиента.
      *
@@ -68,25 +74,10 @@ public final class ShopLimiterTableClient implements ShopLimiterTable {
 
         int entitiesSize = buf.readVarInt();
         for (int i = 0; i < entitiesSize; i++) {
-            ShopLimiterEntityData data = new ShopLimiterEntityData(buf);
-            entitiesData.put(data.getEntityId(), data);
+            ShopLimiterOfferData data = new ShopLimiterOfferData(buf);
+            entitiesData.put(data.getOfferId(), data);
         }
 
         SDMShopClient.ACCEPT_LIMITER_DATA_EVENT.invoker().onAcceptLimiterDataEvent(this);
-    }
-
-    @Override
-    public void toNetwork(UUID player, FriendlyByteBuf buf) {
-        throw new UnsupportedOperationException("Client cannot send full table to server");
-    }
-
-    @Override
-    public JsonObject toJson() {
-        throw new UnsupportedOperationException("Client does not save to JSON");
-    }
-
-    @Override
-    public void fromJson(JsonObject json) {
-        throw new UnsupportedOperationException("Client does not load from JSON");
     }
 }

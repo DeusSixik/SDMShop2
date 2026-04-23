@@ -5,8 +5,9 @@ import dev.sixik.sdmshop2.SDMShop2;
 import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
-import dev.sixik.sdmshop2.libs.shop.base.storage.ShopStorage;
-import dev.sixik.sdmshop2.libs.shop.base.storage.ShopStorageCreator;
+import dev.sixik.sdmshop2.libs.shop.base.repository.RepositoryStorage;
+import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.RepoDefinition;
+import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.RepositoryManager;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
 import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
@@ -40,8 +41,10 @@ public final class ShopTable implements ShopServerGetter{
     public static ShopTable Instance;
 
     private final ExecutorService ioExecutor;
-    private volatile Object2ObjectMap<ResourceLocation, ShopInstance> shops = new Object2ObjectOpenHashMap<>();
-    private final Object writeLock = new Object();
+    private RepositoryStorage<ResourceLocation, ShopInstance> shopsRepository;
+
+//    private volatile Object2ObjectMap<ResourceLocation, ShopInstance> shops = new Object2ObjectOpenHashMap<>();
+//    private final Object writeLock = new Object();
 
     /**
      * Путь к директории магазинов в папке сохранения мира.
@@ -70,17 +73,33 @@ public final class ShopTable implements ShopServerGetter{
     @Getter
     private volatile boolean reloading = false;
 
-    private final ShopStorage storage;
+    private final RepositoryManager manager;
 
-    public ShopTable(MinecraftServer server, ShopStorage storage) {
+    public ShopTable(MinecraftServer server, RepositoryManager manager) {
         this.ioExecutor = Executors.newSingleThreadExecutor();
         this.server = server;
         this.shopDirWorld = SDMEconomyPlatform.resolveSdmDir(server.getWorldPath(LevelResource.ROOT), "shop");
         this.shopDirConfig = SDMEconomyPlatform.resolveSdmDir(Platform.getConfigFolder(), "shop");
         this.shopsDir = SDMEconomyPlatform.resolveSdmDir(Platform.getConfigFolder(), "shop/shops");
-        this.storage = storage;
-        this.storage.setServerGetter(this);
-        this.storage.init();
+        this.manager = manager;
+        this.manager.setServerGetter(this);
+        this.manager.init();
+
+        shopsRepository = new RepositoryStorage<>(
+                manager.createRepository(
+                        shopsDir,
+                        "shops",
+                        new RepoDefinition<>(
+                                ResourceLocation::toString,
+                                ResourceLocation::new,
+                                ShopInstance::getId,
+                                shop -> shop.serialize().getAsJsonObject(),
+                                ShopInstance::fromJson
+                        )
+                ), Object2ObjectOpenHashMap::new, ioExecutor
+        );
+
+
         reload();
     }
 
@@ -99,12 +118,7 @@ public final class ShopTable implements ShopServerGetter{
      * @param instance Экземпляр магазина
      */
     public void addShop(ShopInstance instance) {
-        synchronized (writeLock) {
-            Object2ObjectMap<ResourceLocation, ShopInstance> newMap = new Object2ObjectOpenHashMap<>(shops);
-            newMap.put(instance.getId(), instance);
-
-            shops = newMap;
-        }
+        shopsRepository.putValue(instance.getId(), instance);
     }
 
     /**
@@ -115,7 +129,7 @@ public final class ShopTable implements ShopServerGetter{
      */
     @Nullable
     public ShopInstance getShop(ResourceLocation id) {
-        return shops.get(id);
+        return shopsRepository.getValue(id);
     }
 
     /**
@@ -124,7 +138,7 @@ public final class ShopTable implements ShopServerGetter{
      * @return Все магазины
      */
     public Collection<ShopInstance> getAllShops() {
-        return shops.values();
+        return shopsRepository.getAllValues();
     }
 
     /**
@@ -133,7 +147,7 @@ public final class ShopTable implements ShopServerGetter{
      * @return Коллекция строковых ID магазинов
      */
     public List<ResourceLocation> getShopsId() {
-        return shops.keySet().stream().toList();
+        return shopsRepository.getAllKeys().stream().toList();
     }
 
     /**
@@ -151,34 +165,7 @@ public final class ShopTable implements ShopServerGetter{
      * @param id ID магазина для удаления
      */
     public void deleteShop(ResourceLocation id) {
-        synchronized (writeLock) {
-            Object2ObjectMap<ResourceLocation, ShopInstance> newMap = new Object2ObjectOpenHashMap<>(shops);
-            ShopInstance removed = newMap.remove(id);
-
-            shops = newMap;
-
-            if (removed != null) {
-                ioExecutor.submit(() -> storage.delete(id));
-            }
-        }
-    }
-
-    /**
-     * Синхронно сохраняет все магазины в файлы.
-     */
-    public void saveAll() {
-        for (ShopInstance value : shops.values()) {
-            save(value);
-        }
-    }
-
-    /**
-     * Асинхронно сохраняет все магазины в файлы.
-     */
-    public void saveAllAsync() {
-        for (ShopInstance value : shops.values()) {
-            saveAsync(value);
-        }
+        shopsRepository.delete(id);
     }
 
     /**
@@ -187,7 +174,8 @@ public final class ShopTable implements ShopServerGetter{
      * @param instance Экземпляр магазина
      */
     public void save(ShopInstance instance) {
-        saveShopToFile(instance);
+//        saveShopToFile(instance);
+        shopsRepository.save(instance.getId(), instance);
     }
 
     /**
@@ -196,7 +184,7 @@ public final class ShopTable implements ShopServerGetter{
      * @param instance Экземпляр магазина
      */
     public void saveAsync(ShopInstance instance) {
-        ioExecutor.submit(() -> saveShopToFile(instance));
+        ioExecutor.submit(() -> save(instance));
     }
 
     /**
@@ -210,18 +198,12 @@ public final class ShopTable implements ShopServerGetter{
         try {
             LOGGER.info("Start reloading shops data!");
 
-            Object2ObjectMap<ResourceLocation, ShopInstance> loadedShops = new Object2ObjectOpenHashMap<>(
-                    storage.loadAll()
-            );
-
-            synchronized (writeLock) {
-                shops = loadedShops;
-            }
+            shopsRepository.loadAll();
 
             ShopScriptEvents.SCRIPT_SHOP_LOAD_EVENT.invoker().invoke(server, this);
             ShopServerEvents.SHOP_LOAD_EVENT.invoker().invoke(server, this);
 
-            LOGGER.info("Loaded {} shops.", shops.size());
+            LOGGER.info("Loaded {} shops.", shopsRepository.size());
         } catch (Exception e) {
             LOGGER.error("Failed to load shops", e);
         } finally {
@@ -233,43 +215,14 @@ public final class ShopTable implements ShopServerGetter{
      * Перезагружает данные только одного магазина из хранилища.
      */
     public void reloadShop(ResourceLocation id) {
-        if (storage == null) return;
-
-        ShopInstance updatedShop = storage.load(id);
-
-        if (updatedShop != null) {
-            synchronized (writeLock) {
-                Object2ObjectMap<ResourceLocation, ShopInstance> newMap = new Object2ObjectOpenHashMap<>(shops);
-                newMap.put(id, updatedShop); // Добавит новый или перезапишет старый
-                shops = newMap;
-            }
-            LOGGER.info("Shop '{}' seamlessly updated from storage.", id);
-
-            // TODO: Shop update event
-            // ShopServerEvents.SHOP_UPDATED_EVENT.invoker().invoke(server, updatedShop);
-        }
-    }
-
-    /**
-     * Удаляет магазин из кэша.
-     */
-    public void removeShopFromCache(ResourceLocation id) {
-        synchronized (writeLock) {
-            Object2ObjectMap<ResourceLocation, ShopInstance> newMap = new Object2ObjectOpenHashMap<>(shops);
-            newMap.remove(id);
-            shops = newMap;
-        }
-        LOGGER.info("Shop '{}' removed from cache.", id);
-    }
-
-    private void saveShopToFile(ShopInstance shop) {
-        if(!shop.shouldSave()) return;
-        storage.save(shop);
+        if (shopsRepository == null) return;
+        shopsRepository.load(id);
+        // TODO: Shop update event
+        // ShopServerEvents.SHOP_UPDATED_EVENT.invoker().invoke(server, updatedShop);
     }
 
     public void shutdown() {
-        saveAll();
-        storage.close();
+        manager.close();
     }
 
     public static class Manager implements ServerOperation, ThreadingOperationTimeSave {
@@ -283,7 +236,7 @@ public final class ShopTable implements ShopServerGetter{
 
         @Override
         public void onServerStart(MinecraftServer server) {
-            ShopTable.Instance = new ShopTable(server, ShopStorageCreator.createStorage());
+            ShopTable.Instance = new ShopTable(server, SDMShop2.getRepositoryManager(server));
         }
 
         @Override
@@ -292,15 +245,11 @@ public final class ShopTable implements ShopServerGetter{
         }
 
         @Override
-        public void onDataStartSave() {
-            if(ShopTable.Instance == null) return;
-            ShopTable.Instance.saveAll();
-        }
+        public void onDataStartSave() { }
 
         @Override
         public int getDataSaveTimeSeconds() {
-            final ShopConfig config = SDMShop2.getConfig();
-            return config.autoSaveShopData ? config.saveShopDataIntervalSeconds : -1;
+            return -1;
         }
     }
 }

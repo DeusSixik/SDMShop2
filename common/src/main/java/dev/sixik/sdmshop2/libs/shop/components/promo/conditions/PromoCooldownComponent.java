@@ -51,7 +51,7 @@ public class PromoCooldownComponent extends PromoComponent {
         if (limiterType == LimiterComponent.LimiterType.Player) {
             lastTime = tableOpt.get().getPlayerData(player).getData(offerId).getLastPurchaseTime().get();
         } else {
-            lastTime = tableOpt.get().getEntityData(offerId).getLastPurchaseTime().get();
+            lastTime = tableOpt.get().getOfferDatga(offerId).getLastPurchaseTime().get();
         }
 
         return lastTime == 0 || (System.currentTimeMillis() - lastTime) >= cooldownMs;

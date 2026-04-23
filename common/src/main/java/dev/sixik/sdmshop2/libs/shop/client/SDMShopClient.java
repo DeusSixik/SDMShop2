@@ -41,7 +41,5 @@ public class SDMShopClient {
 
     public static void openShopGui() {
         System.out.println("Open Shop");
-
-        ShopTable.Instance.save(Shop);
     }
 }

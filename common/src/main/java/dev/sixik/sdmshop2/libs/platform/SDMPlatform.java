@@ -34,6 +34,8 @@ public class SDMPlatform {
     }
 
     public static void onServerOperationLoad(MinecraftServer server) {
+
+
         for (ServerOperation operation : OPERATIONS) {
             operation.onServerStart(server);
         }

@@ -54,7 +54,7 @@ public class CooldownConditionComponent extends ConditionComponent {
         if (limiterType == LimiterComponent.LimiterType.Player) {
             lastTime = table.getPlayerData(player).getData(offerId).getLastPurchaseTime().get();
         } else {
-            lastTime = table.getEntityData(offerId).getLastPurchaseTime().get();
+            lastTime = table.getOfferDatga(offerId).getLastPurchaseTime().get();
         }
 
         return lastTime == 0 || (System.currentTimeMillis() - lastTime) >= cooldownMs;
