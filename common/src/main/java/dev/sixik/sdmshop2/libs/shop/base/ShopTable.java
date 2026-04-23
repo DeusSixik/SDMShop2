@@ -5,7 +5,6 @@ import dev.sixik.sdmshop2.SDMShop2;
 import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
-import dev.sixik.sdmshop2.libs.shop.base.storage.MongoDbShopStorage;
 import dev.sixik.sdmshop2.libs.shop.base.storage.ShopStorage;
 import dev.sixik.sdmshop2.libs.shop.base.storage.ShopStorageCreator;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
@@ -31,7 +30,7 @@ import java.util.concurrent.Executors;
  * Глобальный менеджер всех магазинов в системе.
  * Отвечает за хранение, загрузку, сохранение и удаление экземпляров {@link ShopInstance}.
  */
-public final class ShopTable implements ShopServerGetter {
+public final class ShopTable implements ShopServerGetter{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShopTable.class);
 
@@ -268,6 +267,11 @@ public final class ShopTable implements ShopServerGetter {
         storage.save(shop);
     }
 
+    public void shutdown() {
+        saveAll();
+        storage.close();
+    }
+
     public static class Manager implements ServerOperation, ThreadingOperationTimeSave {
 
         @Override
@@ -284,8 +288,7 @@ public final class ShopTable implements ShopServerGetter {
 
         @Override
         public void onServerStop(MinecraftServer server) {
-            ShopTable.Instance.saveAll();
-            ShopTable.Instance.storage.close();
+            ShopTable.Instance.shutdown();
         }
 
         @Override

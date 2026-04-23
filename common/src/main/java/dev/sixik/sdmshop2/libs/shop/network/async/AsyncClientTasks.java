@@ -18,6 +18,7 @@ public class AsyncClientTasks {
 
     public static final String GET_PRICES_FOR_OFFER = "get_prices_for_offer";
     public static final String GET_CONDITIONS_FOR_OFFER = "get_conditions_for_offer";
+    public static final String REQUEST_SHOP = "request_shop";
 
     public static void init() {
         AsyncBridge.initClient();

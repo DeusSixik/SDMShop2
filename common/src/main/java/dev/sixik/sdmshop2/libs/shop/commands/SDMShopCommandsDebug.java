@@ -54,19 +54,7 @@ public class SDMShopCommandsDebug {
                 .requires(2)
                 .executesVoid(ctx -> {
 
-                    final var player = ctx.getSource().getPlayer();
-
-                    ShopNetworkManager.fetchServerCondition(shopOffer).whenComplete(((data, throwable) -> {
-                        if(throwable != null) {
-                            SDMShop2.LOGGER.error(throwable.getMessage(), throwable);
-                            return;
-                        }
-
-                        for (Map.Entry<ConditionComponent, Boolean> entry :
-                                data.entrySet()) {
-                            player.sendSystemMessage(Component.literal(entry.getKey().toString() + " : " + entry.getValue()));
-                        }
-                    }));
+                    ShopNetworkManager.requestShopAndOpen(new ResourceLocation("sdm", "test"));
 
 //                    final var component = shopOffer.addComponent(new CommandRewardComponent());
 //                    ShopNetworkManager.sendNewComponent(debugShop, shopOffer, component, ctx.getSource().getPlayerOrException());

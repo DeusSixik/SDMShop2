@@ -4,10 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.*;
@@ -66,6 +70,7 @@ public class ShopEntity {
         if(initialized)
             component.init();
 
+        onAddComponent(component);
         return component;
     }
 
@@ -294,4 +299,7 @@ public class ShopEntity {
      * Используется для добавления компонентов, которые должны быть только на стороне сервера.
      */
     protected void customInitializeServerOnlyComponents() { }
+
+    protected void onAddComponent(ShopComponent component) { }
+
 }

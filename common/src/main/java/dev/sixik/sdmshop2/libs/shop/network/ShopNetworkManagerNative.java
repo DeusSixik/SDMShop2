@@ -15,6 +15,7 @@ import dev.sixik.sdmshop2.utils.ShopUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +30,7 @@ class ShopNetworkManagerNative {
     }
 
     public static void sendNewComponent(ShopInstance shop, ShopEntity entity, ShopComponent newComponent, Iterable<ServerPlayer> players) {
-        if(!(entity instanceof ObjectIdGetter idGetter)) {
+        if (!(entity instanceof ObjectIdGetter idGetter)) {
             SDMShop2.LOGGER.error("Entity {} is not instance of ObjectIdGetter", entity.getClass().getName());
             return;
         }
@@ -45,7 +46,7 @@ class ShopNetworkManagerNative {
                 }
 
                 final boolean equal = response.readBoolean();
-                if(!equal) return;
+                if (!equal) return;
 
                 AsyncBridge.askPlayer(player, AsyncServerTasks.SEND_NEW_COMPONENT_DATA_TO_CLIENT, buf -> {
                     buf.writeUUID(uuid);
@@ -97,6 +98,24 @@ class ShopNetworkManagerNative {
         for (ServerPlayer player : players) {
             AsyncBridge.askPlayer(player, task, writer);
         }
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void requestShop(ResourceLocation shopId) {
+        AsyncBridge.askServer(AsyncClientTasks.REQUEST_SHOP, buf -> {
+            buf.writeResourceLocation(shopId);
+            buf.writeBoolean(false); // isOpen: false
+            return buf;
+        });
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void requestShopAndOpen(ResourceLocation shopId) {
+        AsyncBridge.askServer(AsyncClientTasks.REQUEST_SHOP, buf -> {
+            buf.writeResourceLocation(shopId);
+            buf.writeBoolean(true); // isOpen: true
+            return buf;
+        });
     }
 
     /**

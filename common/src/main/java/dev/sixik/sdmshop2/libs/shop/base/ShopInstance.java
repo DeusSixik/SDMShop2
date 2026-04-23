@@ -3,9 +3,11 @@ package dev.sixik.sdmshop2.libs.shop.base;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
+import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopOffersContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
+import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
@@ -44,14 +46,22 @@ public class ShopInstance extends ShopEntity {
     @Setter
     protected boolean shouldSave = true;
 
+    @Getter
+    private byte[] networkCache = null;
+
+    private boolean dirty = false;
+
     private ShopInstance(ResourceLocation shopId) {
         this.id = shopId;
     }
 
     @Override
     protected void customInitializeServerOnlyComponents() {
-        addComponent(new ShopOffersContainerComponent());
-        addComponent(new ShopCategoriesContainerComponent());
+        if(!hasComponent(ShopOffersContainerComponent.class))
+            addComponent(new ShopOffersContainerComponent());
+
+        if(!hasComponent(ShopCategoriesContainerComponent.class))
+            addComponent(new ShopCategoriesContainerComponent());
     }
 
     @Override
@@ -79,8 +89,12 @@ public class ShopInstance extends ShopEntity {
 
     @Override
     public void serializeNetwork(FriendlyByteBuf buf) {
+        if(this.networkCache == null || this.dirty) {
+            updateNetworkCache();
+        }
+
         buf.writeResourceLocation(id);
-        super.serializeNetwork(buf);
+        buf.writeBytes(this.networkCache);
     }
 
     /**
@@ -150,5 +164,30 @@ public class ShopInstance extends ShopEntity {
 
     public boolean shouldSave() {
         return shouldSave;
+    }
+
+    @Override
+    protected void onAddComponent(ShopComponent component) {
+        setDirty();
+    }
+
+    public void setDirty() {
+        dirty = true;
+    }
+
+    private void updateNetworkCache() {
+        final FriendlyByteBuf friendlyTempBuf = new FriendlyByteBuf(Unpooled.buffer());
+
+        try {
+            super.serializeNetwork(friendlyTempBuf);
+
+            final int readableBytes = friendlyTempBuf.readableBytes();
+            this.networkCache = new byte[readableBytes];
+            friendlyTempBuf.readBytes(this.networkCache);
+
+            this.dirty = false;
+        } finally {
+            friendlyTempBuf.release();
+        }
     }
 }

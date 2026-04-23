@@ -7,4 +7,7 @@ public class ShopConfig {
 
     public boolean autoSaveShopLimiterData = true;
     public int saveShopLimiterDataIntervalSeconds = 1800;
+
+    // Позволяет кэшировать данные магазина без неообходимости постоянно их сериалазировать. Повышает потребеление ОЗУ
+    public boolean cacheShopNetwork = true;
 }

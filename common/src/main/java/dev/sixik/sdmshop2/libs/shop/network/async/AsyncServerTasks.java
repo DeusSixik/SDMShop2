@@ -6,12 +6,14 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.components.api.ConditionComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
+import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
 import dev.sixik.sdmshop2.libs.shop.processors.ShopTransactionProcessor;
 import dev.sixik.sdmshop2.utils.NetworkExtern;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.*;
@@ -159,6 +161,19 @@ public class AsyncServerTasks {
                 getConditionForOfferWriteOfferData(offerId, conditionMap, components, reply);
                 return reply;
             }
+        });
+
+        AsyncBridge.registerHandler(AsyncClientTasks.REQUEST_SHOP, (request, ctx) -> {
+            if (!request.isReadable()) return null;
+            final ResourceLocation shopId = request.readResourceLocation();
+            final ShopInstance shopInstance = ShopTable.Instance.getShop(shopId);
+            if(shopInstance == null) return null;
+
+            final boolean isOpen = request.readBoolean();
+            if(isOpen) ShopNetworkManager.sendShopDataAndOpen(shopInstance, (ServerPlayer) ctx.getPlayer());
+            else       ShopNetworkManager.sendShopData(shopInstance, (ServerPlayer) ctx.getPlayer());
+
+            return null;
         });
     }
 
