@@ -57,4 +57,13 @@ public interface IComponentType<T extends ShopComponent> {
      * @return Экземпляр компонента по умолчанию
      */
     T createDefault();
+
+    /**
+     * Создаёт экземпляр компонента на основе переданных аргументов
+
+     * @return Экземпляр компонента
+     */
+    default T createFromBuilder(Object... args) {
+        return createDefault();
+    }
 }

@@ -103,5 +103,14 @@ public class MoneyRewardComponent extends RewardComponent {
         public MoneyRewardComponent createDefault() {
             return new MoneyRewardComponent();
         }
+
+        @Override
+        public MoneyRewardComponent createFromBuilder(Object... args) {
+            if(args.length != 2)
+                throw new IllegalArgumentException("MoneyRewardComponent.createFromBuilder() takes 2 arguments (String/ResourceLocation, double)");
+
+            Object obj = args[0];
+            return new MoneyRewardComponent(obj instanceof ResourceLocation ? (ResourceLocation) obj : ResourceLocation.tryParse((String) obj), (double) args[1]);
+        }
     }
 }

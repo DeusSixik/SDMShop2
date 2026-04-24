@@ -6,7 +6,6 @@ import com.google.gson.JsonParseException;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.ShopOffersContainerComponent;
-import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
 import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,6 +49,10 @@ public class ShopInstance extends ShopEntity {
     private byte[] networkCache = null;
 
     private boolean dirty = false;
+
+    @Getter
+    @Setter
+    private Runnable onUpdate = () -> {};
 
     private ShopInstance(ResourceLocation shopId) {
         this.id = shopId;
@@ -173,6 +176,7 @@ public class ShopInstance extends ShopEntity {
 
     public void setDirty() {
         dirty = true;
+        onUpdate.run();
     }
 
     private void updateNetworkCache() {

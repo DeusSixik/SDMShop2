@@ -99,5 +99,17 @@ public class PromoCooldownComponent extends PromoComponent {
         public PromoCooldownComponent createDefault() {
             return new PromoCooldownComponent();
         }
+
+        @Override
+        public PromoCooldownComponent createFromBuilder(Object... args) {
+            if(args.length != 2 && args.length != 3)
+                throw new IllegalArgumentException("PromoCooldownComponent.createFromBuilder() takes 2 or 3 arguments (long, String, (Optional) String)");
+
+            final var promo = new PromoCooldownComponent((long) args[0], LimiterComponent.LimiterType.valueOf((String) args[1]));
+            if(args.length == 3)
+                promo.setPromoId((String) args[2]);
+
+            return promo;
+        }
     }
 }

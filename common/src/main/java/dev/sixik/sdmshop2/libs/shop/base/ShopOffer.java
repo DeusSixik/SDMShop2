@@ -61,7 +61,8 @@ public class ShopOffer extends ShopEntity implements ObjectIdGetter {
 
     @Override
     protected void customInitializeServerOnlyComponents() {
-        addComponent(new CatalogComponent("none"));
+        if(!hasComponent(CatalogComponent.class))
+            addComponent(new CatalogComponent("none"));
     }
 
     /**

@@ -8,10 +8,8 @@ import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.shop.base.repository.RepositoryStorage;
 import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.RepoDefinition;
 import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.RepositoryManager;
-import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
 import dev.sixik.sdmshop2.libs.shop.events.ShopServerEvents;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
@@ -42,9 +40,6 @@ public final class ShopTable implements ShopServerGetter{
 
     private final ExecutorService ioExecutor;
     private RepositoryStorage<ResourceLocation, ShopInstance> shopsRepository;
-
-//    private volatile Object2ObjectMap<ResourceLocation, ShopInstance> shops = new Object2ObjectOpenHashMap<>();
-//    private final Object writeLock = new Object();
 
     /**
      * Путь к директории магазинов в папке сохранения мира.
@@ -85,19 +80,21 @@ public final class ShopTable implements ShopServerGetter{
         this.manager.setServerGetter(this);
         this.manager.init();
 
-        shopsRepository = new RepositoryStorage<>(
-                manager.createRepository(
-                        shopsDir,
-                        "shops",
-                        new RepoDefinition<>(
-                                ResourceLocation::toString,
-                                ResourceLocation::new,
-                                ShopInstance::getId,
-                                shop -> shop.serialize().getAsJsonObject(),
-                                ShopInstance::fromJson
-                        )
-                ), Object2ObjectOpenHashMap::new, ioExecutor
-        );
+        shopsRepository = new RepositoryStorage<>(manager.createRepository(
+            shopsDir,
+            "shops",
+            new RepoDefinition<>(
+                    ResourceLocation::toString,
+                    ResourceLocation::new,
+                    ShopInstance::getId,
+                    shop -> shop.serialize().getAsJsonObject(),
+                    json -> {
+                        ShopInstance instance = ShopInstance.fromJson(json);
+                        instance.setOnUpdate(() -> shopsRepository.update(instance.getId()));
+                        return instance;
+                    }
+            )
+        ), Object2ObjectOpenHashMap::new, ioExecutor);
 
 
         reload();
@@ -174,7 +171,6 @@ public final class ShopTable implements ShopServerGetter{
      * @param instance Экземпляр магазина
      */
     public void save(ShopInstance instance) {
-//        saveShopToFile(instance);
         shopsRepository.save(instance.getId(), instance);
     }
 

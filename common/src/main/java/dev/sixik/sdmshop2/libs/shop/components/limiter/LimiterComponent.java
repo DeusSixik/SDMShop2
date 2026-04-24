@@ -209,5 +209,20 @@ public class LimiterComponent extends ShopComponent {
         public LimiterComponent createDefault() {
             return new LimiterComponent();
         }
+
+        @Override
+        public LimiterComponent createFromBuilder(Object... args) {
+            if(args.length != 2 && args.length != 3)
+                throw new IllegalArgumentException("LimiterComponent.createFromBuilder() takes 2 or 3 arguments (LimiterType, int, (Optional) long)");
+
+            final String type = (String) args[0];
+            final int count = (int) args[1];
+
+            if(args.length == 2)
+                return new LimiterComponent(LimiterType.valueOf(type), count);
+
+            final long resetInterval = (long) args[2];
+            return new LimiterComponent(LimiterType.valueOf(type), count, resetInterval);
+        }
     }
 }

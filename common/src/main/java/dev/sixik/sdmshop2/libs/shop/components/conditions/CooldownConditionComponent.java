@@ -118,5 +118,15 @@ public class CooldownConditionComponent extends ConditionComponent {
         public CooldownConditionComponent createDefault() {
             return new CooldownConditionComponent();
         }
+
+        @Override
+        public CooldownConditionComponent createFromBuilder(Object... args) {
+            if(args.length != 2)
+                throw new IllegalArgumentException("CooldownConditionComponent.createFromBuilder() takes 2 arguments (long, String)");
+
+            final long cooldown = (long) args[0];
+            final String type = (String) args[1];
+            return new CooldownConditionComponent(cooldown, LimiterComponent.LimiterType.valueOf(type));
+        }
     }
 }
