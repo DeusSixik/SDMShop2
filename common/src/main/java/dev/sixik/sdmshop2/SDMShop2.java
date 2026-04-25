@@ -2,17 +2,27 @@ package dev.sixik.sdmshop2;
 
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.architectury.platform.Platform;
 import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.commands.SDMEconomyCommands;
 import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableServer;
+import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.JsonRepositoryManager;
+import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.MongoRepositoryManager;
+import dev.sixik.sdmshop2.libs.shop.base.repositoryManager.RepositoryManager;
 import dev.sixik.sdmshop2.libs.shop.commands.SDMShopCommands;
 import dev.sixik.sdmshop2.libs.shop.config.ShopConfig;
+import dev.sixik.sdmshop2.libs.shop.config.ShopDataStorageConfig;
 import dev.sixik.sdmshop2.libs.shop.network.SDMShopNetwork;
 import dev.sixik.sdmshop2.libs.shop.register.ShopRegister;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import dev.sixik.sdmshop2.tests.economy.EconomyTest;
+import lombok.Getter;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.shadowking21.shadowconfig.config.ConfigSide;
+import net.shadowking21.shadowconfig.config.exstensions.yaml.SCYamlConfig;
 import org.slf4j.Logger;
 
 public final class SDMShop2 {
@@ -22,6 +32,20 @@ public final class SDMShop2 {
     private static final ShopTable.Manager SHOP_TABLE_MANAGER = new ShopTable.Manager();
     private static final ShopLimiterTableServer.Manager SHOP_LIMITER_TABLE_MANAGER = new ShopLimiterTableServer.Manager();
     private static final ShopScriptEvents.Manager SHOP_SCRIPTS_CONTAINER_MANAGER = new ShopScriptEvents.Manager();
+
+    private static RepositoryManager instance;
+
+    public static RepositoryManager getRepositoryManager(MinecraftServer server) {
+        if(instance == null) {
+            final var config = SDMShop2.getDataStorageConfig().getCurrentConfig();
+            instance = switch (config.type) {
+                case JSON, CUSTOM -> new JsonRepositoryManager(server);
+                case MONGODB -> new MongoRepositoryManager(config.mongodb);
+            };
+        }
+
+        return instance;
+    }
 
     public static void init() {
         EconomyTest.init();
@@ -41,9 +65,20 @@ public final class SDMShop2 {
         });
 
         SDMPlatform.init();
+
+        dataStorageConfig = (SCYamlConfig<ShopDataStorageConfig>) SCYamlConfig.Builder.builder(ShopDataStorageConfig.class)
+                .defaults(new ShopDataStorageConfig())
+                .modId(MODID)
+                .side(ConfigSide.COMMON)
+                .path(SDMEconomyPlatform.resolveSdmDir(Platform.getConfigFolder(), "shop"))
+                .build();
+        dataStorageConfig.init();
     }
 
     private static final ShopConfig TEMP_CONFIG = new ShopConfig();
+
+    @Getter
+    private static SCYamlConfig<ShopDataStorageConfig> dataStorageConfig;
 
     public static ShopConfig getConfig() {
         return TEMP_CONFIG;

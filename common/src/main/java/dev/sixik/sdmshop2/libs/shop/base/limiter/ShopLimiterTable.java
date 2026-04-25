@@ -20,7 +20,7 @@ public interface ShopLimiterTable {
      * @param entityId UUID товара (сущности)
      * @return Объект данных лимита для указанного товара
      */
-    ShopLimiterEntityData getEntityData(UUID entityId);
+    ShopLimiterOfferData getOfferDatga(UUID entityId);
 
     /**
      * Возвращает персональные данные о лимитах указанного игрока.
@@ -38,23 +38,22 @@ public interface ShopLimiterTable {
      */
     ShopLimiterPlayerData getPlayerData(UUID playerId);
 
+    @Deprecated
     default void save() {
         throw new UnsupportedOperationException();
     }
 
+    @Deprecated
     default void saveAsync() {
         throw new UnsupportedOperationException();
     }
 
+    @Deprecated
     default void load() {
         throw new UnsupportedOperationException();
     }
 
     default void shutdown() { }
-
-    JsonObject toJson();
-
-    void fromJson(JsonObject json);
 
     void toNetwork(UUID player, FriendlyByteBuf buf);
 

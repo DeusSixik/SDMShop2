@@ -99,6 +99,14 @@ public class CommandRewardComponent extends RewardComponent {
         public CommandRewardComponent createDefault() {
             return new CommandRewardComponent();
         }
+
+        @Override
+        public CommandRewardComponent createFromBuilder(Object... args) {
+            if(args.length != 2)
+                throw new IllegalArgumentException("CommandRewardComponent.createFromBuilder() takes 2 arguments (String, String)");
+
+            return new CommandRewardComponent((String) args[0], (String) args[1]);
+        }
     }
 
     protected static String formatCommand(String command, ServerPlayer player) {

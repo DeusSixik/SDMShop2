@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import dev.sixik.sdmshop2.libs.shop.base.ShopEntity;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
-import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterEntityData;
+import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterOfferData;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTable;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
@@ -70,9 +70,9 @@ public class LimiterComponent extends ShopComponent {
         final ShopLimiterTable limiterTable = ShopUtils.getLimiterTable(player.isLocalPlayer()).orElse(null);
         if (limiterTable == null) return false;
 
-        ShopLimiterEntityData data = (limiterType == LimiterType.Player)
+        ShopLimiterOfferData data = (limiterType == LimiterType.Player)
                 ? limiterTable.getPlayerData(player).getData(this.rootId)
-                : limiterTable.getEntityData(this.rootId);
+                : limiterTable.getOfferDatga(this.rootId);
 
         int currentPurchases = data.getCount().get();
         long lastTime = data.getLastPurchaseTime().get();
@@ -95,9 +95,9 @@ public class LimiterComponent extends ShopComponent {
     public void addLimit(Player player, int amount) {
         final ShopLimiterTable limiterTable = ShopUtils.getLimiterTable(false).get();
 
-        ShopLimiterEntityData data = (limiterType == LimiterType.Player)
+        ShopLimiterOfferData data = (limiterType == LimiterType.Player)
                 ? limiterTable.getPlayerData(player).getData(this.rootId)
-                : limiterTable.getEntityData(this.rootId);
+                : limiterTable.getOfferDatga(this.rootId);
 
         long lastTime = data.getLastPurchaseTime().get();
 
@@ -118,7 +118,7 @@ public class LimiterComponent extends ShopComponent {
         if (limiterType == LimiterType.Player) {
             limiterTable.getPlayerData(player).getData(this.rootId).safeMinus(amount);
         } else {
-            limiterTable.getEntityData(this.rootId).safeMinus(amount);
+            limiterTable.getOfferDatga(this.rootId).safeMinus(amount);
         }
     }
 
@@ -131,7 +131,7 @@ public class LimiterComponent extends ShopComponent {
         if (limiterType == LimiterType.Player) {
             limiterTable.getPlayerData(player).getData(this.rootId).set(amount);
         } else {
-            limiterTable.getEntityData(this.rootId).set(amount);
+            limiterTable.getOfferDatga(this.rootId).set(amount);
         }
     }
 
@@ -208,6 +208,21 @@ public class LimiterComponent extends ShopComponent {
         @Override
         public LimiterComponent createDefault() {
             return new LimiterComponent();
+        }
+
+        @Override
+        public LimiterComponent createFromBuilder(Object... args) {
+            if(args.length != 2 && args.length != 3)
+                throw new IllegalArgumentException("LimiterComponent.createFromBuilder() takes 2 or 3 arguments (LimiterType, int, (Optional) long)");
+
+            final String type = (String) args[0];
+            final int count = (int) args[1];
+
+            if(args.length == 2)
+                return new LimiterComponent(LimiterType.valueOf(type), count);
+
+            final long resetInterval = (long) args[2];
+            return new LimiterComponent(LimiterType.valueOf(type), count, resetInterval);
         }
     }
 }

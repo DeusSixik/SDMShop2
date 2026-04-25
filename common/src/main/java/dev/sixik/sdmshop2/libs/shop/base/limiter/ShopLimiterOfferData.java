@@ -2,6 +2,7 @@ package dev.sixik.sdmshop2.libs.shop.base.limiter;
 
 import com.google.gson.JsonObject;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
@@ -14,13 +15,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * Использует потокобезопасный {@link AtomicInteger} для счетчика, что позволяет
  * безопасно изменять лимиты при конкурентных запросах.
  */
-public class ShopLimiterEntityData {
+public class ShopLimiterOfferData {
 
     /**
      * UUID товара, к которому относится данный лимит
      */
     @Getter
-    private final UUID entityId;
+    private final UUID offerId;
 
     /**
      * Потокобезопасный счетчик количества совершенных покупок
@@ -34,28 +35,31 @@ public class ShopLimiterEntityData {
     @Getter
     private final AtomicLong lastPurchaseTime;
 
-    public ShopLimiterEntityData(FriendlyByteBuf buf) {
+    @Setter
+    private ShopLimiterUpdate update = () -> {};
+
+    public ShopLimiterOfferData(FriendlyByteBuf buf) {
         this(buf.readUUID(), buf.readInt(), buf.readLong());
     }
 
-    public ShopLimiterEntityData(JsonObject jsonObject) {
+    public ShopLimiterOfferData(JsonObject jsonObject) {
         this(
-                UUID.fromString(jsonObject.get("entityId").getAsString()),
+                UUID.fromString(jsonObject.has("entityId") ?  jsonObject.get("entityId").getAsString() : jsonObject.get("offerId").getAsString()),
                 jsonObject.has("count") ? jsonObject.get("count").getAsInt() : 0,
                 jsonObject.has("lastPurchaseTime") ? jsonObject.get("lastPurchaseTime").getAsLong() : 0L
         );
     }
 
-    public ShopLimiterEntityData(UUID entityId) {
+    public ShopLimiterOfferData(UUID entityId) {
         this(entityId, 0, 0);
     }
 
-    public ShopLimiterEntityData(UUID entityId, int count) {
+    public ShopLimiterOfferData(UUID entityId, int count) {
         this(entityId, count, 0);
     }
 
-    public ShopLimiterEntityData(UUID entityId, int count, long lastPurchaseTime) {
-        this.entityId = entityId;
+    public ShopLimiterOfferData(UUID entityId, int count, long lastPurchaseTime) {
+        this.offerId = entityId;
         this.count = new AtomicInteger(count);
         this.lastPurchaseTime = new AtomicLong(lastPurchaseTime);
     }
@@ -69,6 +73,7 @@ public class ShopLimiterEntityData {
 
     public void markPurchased(long time) {
         this.lastPurchaseTime.set(time);
+        update.onUpdate();
     }
 
     /**
@@ -78,8 +83,9 @@ public class ShopLimiterEntityData {
      * @return Новое (обновленное) значение счетчика
      */
     public int add(int amount) {
+        int i = count.addAndGet(amount);
         markPurchased();
-        return count.addAndGet(amount);
+        return i;
     }
 
     /**
@@ -89,7 +95,9 @@ public class ShopLimiterEntityData {
      * @return Новое (обновленное) значение счетчика
      */
     public int minus(int amount) {
-        return count.addAndGet(-amount);
+        int i = count.addAndGet(-amount);
+        update.onUpdate();
+        return i;
     }
 
     /**
@@ -100,7 +108,9 @@ public class ShopLimiterEntityData {
      * @return Новое значение счетчика (>= 0)
      */
     public int safeMinus(int amount) {
-        return count.updateAndGet(current -> Math.max(0, current - amount));
+        int i = count.updateAndGet(current -> Math.max(0, current - amount));
+        update.onUpdate();
+        return i;
     }
 
     /**
@@ -110,6 +120,7 @@ public class ShopLimiterEntityData {
      */
     public void set(int newValue) {
         count.set(newValue);
+        update.onUpdate();
     }
 
     public int get() {
@@ -118,19 +129,17 @@ public class ShopLimiterEntityData {
 
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("entityId", entityId.toString());
+        json.addProperty("offerId", offerId.toString());
         json.addProperty("count", count.get());
-        json.addProperty("lastPurchaseTime", lastPurchaseTime.get());
+
+        long value = lastPurchaseTime.get();
+        if(value !=0)
+            json.addProperty("lastPurchaseTime", value);
         return json;
     }
 
-    public void fromJson(JsonObject json) {
-        count.set(json.has("count") ? json.get("count").getAsInt() : 0);
-        lastPurchaseTime.set(json.has("lastPurchaseTime") ? json.get("lastPurchaseTime").getAsLong() : 0L);
-    }
-
     public void toNetwork(FriendlyByteBuf buf) {
-        buf.writeUUID(entityId);
+        buf.writeUUID(offerId);
         buf.writeInt(count.get());
         buf.writeLong(lastPurchaseTime.get());
     }

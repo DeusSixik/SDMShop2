@@ -1,10 +1,11 @@
 package dev.sixik.sdmshop2.libs.shop.base.limiter;
 
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,14 +20,17 @@ public class ShopLimiterPlayerData {
     @Getter
     private final UUID userId;
 
-    private final Map<UUID, ShopLimiterEntityData> dataMap;
+    @Setter
+    private ShopLimiterUpdate update = () -> {};
+
+    private final Map<UUID, ShopLimiterOfferData> dataMap;
 
     public ShopLimiterPlayerData(UUID userId, FriendlyByteBuf buf) {
         this.userId = userId;
         int size = buf.readVarInt();
-        dataMap = new HashMap<>();
+        dataMap = new Object2ObjectOpenHashMap<>();
         for (int i = 0; i < size; i++) {
-            dataMap.put(buf.readUUID(), new ShopLimiterEntityData(buf));
+            dataMap.put(buf.readUUID(), new ShopLimiterOfferData(buf));
         }
     }
 
@@ -45,7 +49,7 @@ public class ShopLimiterPlayerData {
     }
 
     public boolean add(UUID entityId, int count) {
-        final ShopLimiterEntityData data = dataMap.putIfAbsent(entityId, new ShopLimiterEntityData(entityId, count));
+        final ShopLimiterOfferData data = dataMap.putIfAbsent(entityId, new ShopLimiterOfferData(entityId, count));
 
         if(data != null)
             data.markPurchased();
@@ -57,8 +61,12 @@ public class ShopLimiterPlayerData {
        return dataMap.remove(entityId) != null;
     }
 
-    public ShopLimiterEntityData getData(UUID entityId) {
-        return dataMap.computeIfAbsent(entityId, ShopLimiterEntityData::new);
+    public ShopLimiterOfferData getData(UUID entityId) {
+        return dataMap.computeIfAbsent(entityId, id -> {
+            ShopLimiterOfferData data = new ShopLimiterOfferData(id);
+            data.setUpdate(update);
+            return data;
+        });
     }
 
     /**
@@ -70,14 +78,14 @@ public class ShopLimiterPlayerData {
      * @return Количество покупок до выполнения операции
      */
     public int getAndUpdate(UUID userId, int count) {
-        final ShopLimiterEntityData data = dataMap.computeIfAbsent(userId, ShopLimiterEntityData::new);
+        final ShopLimiterOfferData data = getData(userId);
         int value = data.getCount().getAndUpdate(i -> i + count);
         data.markPurchased();
         return value;
     }
 
     public int getAndAdd(UUID userId, int count) {
-        final ShopLimiterEntityData data = dataMap.computeIfAbsent(userId, ShopLimiterEntityData::new);
+        final ShopLimiterOfferData data = getData(userId);
         int value = data.getCount().getAndAdd(count);
         data.markPurchased();
         return value;
@@ -90,11 +98,12 @@ public class ShopLimiterPlayerData {
      * @return Текущее количество покупок
      */
     public int get(UUID userId) {
-        return dataMap.computeIfAbsent(userId, ShopLimiterEntityData::new).getCount().get();
+        return getData(userId).getCount().get();
     }
 
     public void clear() {
         dataMap.clear();
+        update.onUpdate();
     }
 
     public JsonObject toJson() {
@@ -105,7 +114,7 @@ public class ShopLimiterPlayerData {
 
     public void fromJson(JsonObject json) {
         clear();
-        json.entrySet().forEach(entry -> dataMap.put(UUID.fromString(entry.getKey()), new ShopLimiterEntityData(entry.getValue().getAsJsonObject())));
+        json.entrySet().forEach(entry -> dataMap.put(UUID.fromString(entry.getKey()), new ShopLimiterOfferData(entry.getValue().getAsJsonObject())));
     }
 
     public void toNetwork(FriendlyByteBuf buf) {

@@ -4,7 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.*;
@@ -19,8 +26,8 @@ public class ShopEntity {
 
     private boolean initialized = false;
 
-    private final List<ShopComponent> components = new ArrayList<>();
-    private final Map<Class<?>, List<ShopComponent>> componentCache = new IdentityHashMap<>();
+    private final ObjectArrayList<ShopComponent> components = new ObjectArrayList<>();
+    private final Map<Class<?>, ObjectList<ShopComponent>> componentCache = new Reference2ObjectOpenHashMap<>();
 
     public ShopEntity() { }
 
@@ -29,9 +36,10 @@ public class ShopEntity {
      * Вызывает метод {@link ShopComponent#init()} для каждого компонента.
      */
     private void initComponents() {
-        final List<ShopComponent> array = components;
-        for (int i = 0; i < array.size(); i++) {
-            array.get(i).init();
+        final Object[] array = components.elements();
+        final int size = components.size();
+        for (int i = 0; i < size; i++) {
+            ((ShopComponent)array[i]).init();
         }
         initialized = true;
     }
@@ -47,17 +55,22 @@ public class ShopEntity {
      */
     public final <T extends ShopComponent> T addComponent(T component) {
         component.setRoot(this);
+
+        final Object[] primitiveArray = components.elements();
+        final int size = components.size();
+
         int i = 0;
-        while (i < components.size() && components.get(i).priority() <= component.priority()) {
+        while (i < size && ((ShopComponent) primitiveArray[i]).priority() <= component.priority()) {
             i++;
         }
-        components.add(i, component);
 
+        components.add(i, component);
         componentCache.clear();
 
         if(initialized)
             component.init();
 
+        onAddComponent(component);
         return component;
     }
 
@@ -76,8 +89,8 @@ public class ShopEntity {
      *
      * @return Список всех компонентов
      */
-    public final List<ShopComponent> getComponents() {
-        return Collections.unmodifiableList(components);
+    public final ObjectList<ShopComponent> getComponents() {
+        return ObjectLists.unmodifiable(components);
     }
 
     /**
@@ -90,14 +103,15 @@ public class ShopEntity {
      * @return Список компонентов, соответствующих указанному типу (или пустой список)
      */
     @SuppressWarnings("unchecked")
-    public final <T> List<T> getComponents(Class<T> type) {
+    public final <T> ObjectList<T> getComponents(Class<T> type) {
         /*
             Ленивое кэширование. Фильтруем только при первом запросе конкретного типа.
          */
-        return (List<T>) componentCache.computeIfAbsent(type, k -> {
-            List<ShopComponent> filtered = new ArrayList<>();
+        return (ObjectList<T>) componentCache.computeIfAbsent(type, k -> {
+            final ObjectArrayList<ShopComponent> filtered = new ObjectArrayList<>();
+            final Object[] primitiveComponents = components.elements();
             for (int i = 0; i < components.size(); i++) {
-                ShopComponent c = components.get(i);
+                ShopComponent c = (ShopComponent) primitiveComponents[i];
                 if (k.isInstance(c)) {
                     filtered.add(c);
                 }
@@ -106,7 +120,7 @@ public class ShopEntity {
             /*
                 Используем emptyList() для экономии памяти, если компонентов нет
              */
-            return filtered.isEmpty() ? Collections.emptyList() : Collections.unmodifiableList(filtered);
+            return filtered.isEmpty() ? ObjectLists.emptyList() : ObjectLists.unmodifiable(filtered);
         });
     }
 
@@ -131,10 +145,11 @@ public class ShopEntity {
     public final JsonArray serializeComponents() {
         JsonArray compArray = new JsonArray();
 
-        final List<ShopComponent> refArray = components;
+        final Object[] refArray = components.elements();
+        final int size = components.size();
 
-        for (int i = 0; i < refArray.size(); i++) {
-            compArray.add(ShopComponentRegistry.toJson(refArray.get(i)));
+        for (int i = 0; i < size; i++) {
+            compArray.add(ShopComponentRegistry.toJson((ShopComponent) refArray[i]));
         }
 
         return compArray;
@@ -194,19 +209,21 @@ public class ShopEntity {
      * @param buf Буфер сетевого пакета
      */
     public final void serializeComponentsNetwork(FriendlyByteBuf buf) {
-        final List<ShopComponent> syncList = new ArrayList<>();
-        final List<ShopComponent> comps = components;
-        for (int i = 0; i < comps.size(); i++) {
-            final ShopComponent component = comps.get(i);
+        final ObjectArrayList<ShopComponent> syncList = new ObjectArrayList<>();
+        final Object[] comps = components.elements();
+        final int compSize = components.size();
+        for (int i = 0; i < compSize; i++) {
+            final ShopComponent component = (ShopComponent) comps[i];
             if (component.shouldSync()) {
                 syncList.add(component);
             }
         }
 
-        final int size = syncList.size();
-        buf.writeVarInt(size);
-        for (int i = 0; i < size; i++) {
-            ShopComponentRegistry.toNetwork(buf, syncList.get(i));
+        final Object[] primitiveSyncList = syncList.elements();
+        final int syncSize = syncList.size();
+        buf.writeVarInt(syncSize);
+        for (int i = 0; i < syncSize; i++) {
+            ShopComponentRegistry.toNetwork(buf, (ShopComponent) primitiveSyncList[i]);
         }
     }
 
@@ -282,4 +299,7 @@ public class ShopEntity {
      * Используется для добавления компонентов, которые должны быть только на стороне сервера.
      */
     protected void customInitializeServerOnlyComponents() { }
+
+    protected void onAddComponent(ShopComponent component) { }
+
 }

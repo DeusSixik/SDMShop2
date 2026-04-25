@@ -51,7 +51,7 @@ public class PromoCooldownComponent extends PromoComponent {
         if (limiterType == LimiterComponent.LimiterType.Player) {
             lastTime = tableOpt.get().getPlayerData(player).getData(offerId).getLastPurchaseTime().get();
         } else {
-            lastTime = tableOpt.get().getEntityData(offerId).getLastPurchaseTime().get();
+            lastTime = tableOpt.get().getOfferDatga(offerId).getLastPurchaseTime().get();
         }
 
         return lastTime == 0 || (System.currentTimeMillis() - lastTime) >= cooldownMs;
@@ -98,6 +98,18 @@ public class PromoCooldownComponent extends PromoComponent {
         @Override
         public PromoCooldownComponent createDefault() {
             return new PromoCooldownComponent();
+        }
+
+        @Override
+        public PromoCooldownComponent createFromBuilder(Object... args) {
+            if(args.length != 2 && args.length != 3)
+                throw new IllegalArgumentException("PromoCooldownComponent.createFromBuilder() takes 2 or 3 arguments (long, String, (Optional) String)");
+
+            final var promo = new PromoCooldownComponent((long) args[0], LimiterComponent.LimiterType.valueOf((String) args[1]));
+            if(args.length == 3)
+                promo.setPromoId((String) args[2]);
+
+            return promo;
         }
     }
 }

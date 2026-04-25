@@ -2,10 +2,12 @@ package dev.sixik.sdmshop2.libs.shop.events;
 
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
+import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.processors.ShopTransactionProcessor;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 
 public class ShopServerEvents {

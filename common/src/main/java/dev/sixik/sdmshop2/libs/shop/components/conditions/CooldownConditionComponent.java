@@ -54,7 +54,7 @@ public class CooldownConditionComponent extends ConditionComponent {
         if (limiterType == LimiterComponent.LimiterType.Player) {
             lastTime = table.getPlayerData(player).getData(offerId).getLastPurchaseTime().get();
         } else {
-            lastTime = table.getEntityData(offerId).getLastPurchaseTime().get();
+            lastTime = table.getOfferDatga(offerId).getLastPurchaseTime().get();
         }
 
         return lastTime == 0 || (System.currentTimeMillis() - lastTime) >= cooldownMs;
@@ -117,6 +117,16 @@ public class CooldownConditionComponent extends ConditionComponent {
         @Override
         public CooldownConditionComponent createDefault() {
             return new CooldownConditionComponent();
+        }
+
+        @Override
+        public CooldownConditionComponent createFromBuilder(Object... args) {
+            if(args.length != 2)
+                throw new IllegalArgumentException("CooldownConditionComponent.createFromBuilder() takes 2 arguments (long, String)");
+
+            final long cooldown = (long) args[0];
+            final String type = (String) args[1];
+            return new CooldownConditionComponent(cooldown, LimiterComponent.LimiterType.valueOf(type));
         }
     }
 }

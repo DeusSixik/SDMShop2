@@ -83,5 +83,17 @@ public class CatalogComponent extends ShopComponent {
         public CatalogComponent createDefault() {
             return new CatalogComponent();
         }
+
+        @Override
+        public CatalogComponent createFromBuilder(Object... args) {
+            if(args.length != 1 && args.length != 2)
+                throw new IllegalArgumentException("CatalogComponent.createFromBuilder() takes 1 or 2 arguments (String, (Optional) UUID/String)");
+
+            if(args.length == 1)
+                return new CatalogComponent((String) args[0]);
+
+            Object obj = args[1];
+            return new CatalogComponent((String) args[0], obj instanceof UUID ? (UUID) obj : UUID.fromString((String) obj));
+        }
     }
 }

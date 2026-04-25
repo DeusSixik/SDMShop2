@@ -149,5 +149,17 @@ public class PromoTimeComponent extends PromoComponent {
         public PromoTimeComponent createDefault() {
             return new PromoTimeComponent();
         }
+
+        @Override
+        public PromoTimeComponent createFromBuilder(Object... args) {
+            if(args.length != 3 && args.length != 4)
+                throw new IllegalArgumentException("PromoTimeComponent.createFromBuilder() takes 3 or 4 arguments (String, long, long, (Optional) String)");
+
+            final var component = new PromoTimeComponent(TimeMode.valueOf((String) args[0]), (long) args[1], (long) args[2]);
+            if(args.length == 4)
+                component.setPromoId((String) args[3]);
+
+            return component;
+        }
     }
 }

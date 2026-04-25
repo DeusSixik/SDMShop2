@@ -7,6 +7,7 @@ import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class DiscountComponent extends PromoEffectComponent {
@@ -66,6 +67,32 @@ public class DiscountComponent extends PromoEffectComponent {
         @Override
         public DiscountComponent createDefault() {
             return new DiscountComponent();
+        }
+
+        @Override
+        public DiscountComponent createFromBuilder(Object... args) {
+            if (args.length < 1 || !(args[0] instanceof Number value)) {
+                throw new IllegalArgumentException("[DiscountComponent.createFromBuilder()] requires at least 1 number argument (discount amount).");
+            }
+
+            DiscountComponent component = new DiscountComponent(value.doubleValue());
+
+            if (args.length >= 2 && args[1] instanceof String promoId) {
+                component.setTargetPromoId(promoId);
+            }
+
+            for (int i = 2; i < args.length; i++) {
+                Object arg = args[i];
+                if (arg instanceof String groupId) {
+                    component.applyGroup(groupId);
+                } else if (arg instanceof Collection<?> groups) {
+                    groups.forEach(g -> component.applyGroup(String.valueOf(g)));
+                } else {
+                    throw new IllegalArgumentException("[DiscountComponent.createFromBuilder()] Invalid group format at index " + i);
+                }
+            }
+
+            return component;
         }
     }
 }

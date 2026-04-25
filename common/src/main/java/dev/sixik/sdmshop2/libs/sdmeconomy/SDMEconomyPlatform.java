@@ -96,7 +96,7 @@ public class SDMEconomyPlatform {
 
         SDMEconomyPlatform.loadConfigDir(Platform.getConfigFolder());
 
-        SDMEconomyCurrencyRegistry.registerType(ResourceLocation.tryBuild("minecraft", "item"), new ExternalItemCurrency.ExternalItemCurrencyType());
+        SDMEconomyCurrencyRegistry.registerType(ResourceLocation.tryBuild("minecraft", "item"), ExternalItemCurrency.TYPE);
         shutdownHook();
 
         SDMEconomyNetwork.init();

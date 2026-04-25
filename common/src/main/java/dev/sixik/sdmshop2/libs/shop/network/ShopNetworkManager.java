@@ -8,6 +8,7 @@ import dev.sixik.sdmshop2.libs.shop.components.api.CostComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,5 +82,15 @@ public class ShopNetworkManager {
     @Environment(EnvType.CLIENT)
     public static CompletableFuture<Map<UUID, Map<ConditionComponent, Boolean>>> fetchServerConditions(Collection<ShopOffer> shopOffers) {
         return ShopNetworkManagerNative.fetchServerConditions(shopOffers);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void requestShop(ResourceLocation shopId) {
+        ShopNetworkManagerNative.requestShop(shopId);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void requestShopAndOpen(ResourceLocation shopId) {
+        ShopNetworkManagerNative.requestShopAndOpen(shopId);
     }
 }

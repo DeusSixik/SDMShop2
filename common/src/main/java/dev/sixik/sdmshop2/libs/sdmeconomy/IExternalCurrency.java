@@ -25,4 +25,6 @@ public interface IExternalCurrency extends ICurrency {
     boolean deposit(ServerPlayer player, BigDecimal amount, boolean simulate);
 
     BigDecimal getBalance(Player player);
+
+    ICurrencyType<? extends IExternalCurrency> getType();
 }

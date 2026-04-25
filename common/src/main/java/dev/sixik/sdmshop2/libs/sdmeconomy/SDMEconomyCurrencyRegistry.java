@@ -1,18 +1,20 @@
 package dev.sixik.sdmshop2.libs.sdmeconomy;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,10 +25,10 @@ public class SDMEconomyCurrencyRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SDMEconomyCurrencyRegistry.class);
 
-    private static final Map<ResourceLocation, ICurrencyType<?>> TYPES = new HashMap<>();
-    private static final Map<Class<?>, ICurrencyType<?>> TYPES_BY_CLASS = new HashMap<>();
+    private static final Map<ResourceLocation, ICurrencyType<?>> TYPES = new Object2ObjectOpenHashMap<>();
+    private static final Map<Class<?>, ICurrencyType<?>> TYPES_BY_CLASS = new Object2ObjectOpenHashMap<>();
 
-    private static final Map<ResourceLocation, IExternalCurrency> CURRENCIES = new HashMap<>();
+    private static final Map<ResourceLocation, IExternalCurrency> CURRENCIES = new Object2ObjectOpenHashMap<>();
 
     /**
      * Регистрирует валюту которая имеет физическую валюту.
@@ -38,6 +40,42 @@ public class SDMEconomyCurrencyRegistry {
         TYPES_BY_CLASS.put(type.getOwnerClass(), type);
     }
 
+    /**
+     * Регистрирует новую валюту в памяти и сохраняет её в .json файл.
+     *
+     * @param currency Объект валюты для сохранения
+     * @param <T> Тип валюты
+     * @return true если сохранение прошло успешно, иначе false
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends IExternalCurrency> boolean registerAndSaveCurrency(T currency) {
+        ResourceLocation id = currency.getId();
+
+        CURRENCIES.put(id, currency);
+
+        ICurrencyType<T> type = (ICurrencyType<T>) TYPES_BY_CLASS.get(currency.getClass());
+        if (type == null) {
+            LOGGER.error("Cannot save currency {}: No ICurrencyType registered for class {}", id, currency.getClass().getName());
+            return false;
+        }
+
+        JsonObject json = type.serialize(currency);
+        Path configDir = SDMEconomyPlatform.getCurrenciesDir();
+        File file = configDir.resolve(id.getPath() + ".json").toFile();
+
+        try (FileWriter writer = new FileWriter(file)) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(json, writer);
+
+            LOGGER.info("Successfully saved currency {} to {}", id, file.getName());
+            return true;
+        } catch (IOException e) {
+            LOGGER.error("Failed to save currency {} to {}", id, file.getName(), e);
+            return false;
+        }
+    }
+
+    @Nullable
     public static IExternalCurrency getCurrency(String id) {
         return getCurrency(
                         id.contains(":") ?
@@ -46,12 +84,13 @@ public class SDMEconomyCurrencyRegistry {
         );
     }
 
+    @Nullable
     public static IExternalCurrency getCurrency(ResourceLocation id) {
         return CURRENCIES.get(id);
     }
 
     public static Map<ResourceLocation, IExternalCurrency> getCurrenciesMap() {
-        return new HashMap<>(CURRENCIES);
+        return new Object2ObjectOpenHashMap<>(CURRENCIES);
     }
 
     public static Collection<IExternalCurrency> getCurrencies() {

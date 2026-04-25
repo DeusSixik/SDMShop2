@@ -136,5 +136,18 @@ public class MoneyCostComponent extends CostComponent {
         public MoneyCostComponent createDefault() {
             return new MoneyCostComponent();
         }
+
+        @Override
+        public MoneyCostComponent createFromBuilder(Object... args) {
+            if(args.length != 2 && args.length != 3)
+                throw new IllegalArgumentException("MoneyCostComponent.createFromBuilder() takes 2 or 3 arguments (String/ResourceLocation, double, (Optional) String)");
+
+            Object obj = args[0];
+            final var component = new MoneyCostComponent(obj instanceof ResourceLocation ? (ResourceLocation) obj : ResourceLocation.tryParse((String) obj), (double) args[1]);
+            if(args.length == 3)
+                component.setGroupId((String) args[2]);
+
+            return component;
+        }
     }
 }
