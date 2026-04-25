@@ -19,15 +19,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class ExternalItemCurrency implements IExternalCurrency {
+
+    public static final ICurrencyType<ExternalItemCurrency> TYPE = new ExternalItemCurrencyType();
 
     private final ResourceLocation id;
     private final Component displayName;
     private final ItemStack itemType;
     private final CurrencyIcon currencyIcon;
 
+    public ExternalItemCurrency(String id, ItemStack itemType) {
+        this(id.contains(":") ? ResourceLocation.tryParse(id) : ResourceLocation.tryBuild("sdm", id), itemType);
+    }
+
     public ExternalItemCurrency(ResourceLocation id, ItemStack itemType) {
+        Objects.requireNonNull(id, "Id cannot be null!");
         this.id = id;
         this.displayName = Component.translatable(id.toString().replace(":", "_"));
         this.itemType = itemType;
@@ -60,6 +68,11 @@ public class ExternalItemCurrency implements IExternalCurrency {
     }
 
     @Override
+    public ICurrencyType<? extends IExternalCurrency> getType() {
+        return TYPE;
+    }
+
+    @Override
     public ResourceLocation getId() {
         return id;
     }
@@ -84,7 +97,7 @@ public class ExternalItemCurrency implements IExternalCurrency {
         return currencyIcon;
     }
 
-    public static class ExternalItemCurrencyType implements ICurrencyType<ExternalItemCurrency> {
+    private static class ExternalItemCurrencyType implements ICurrencyType<ExternalItemCurrency> {
 
         @Override
         public Class<ExternalItemCurrency> getOwnerClass() {
@@ -130,7 +143,7 @@ public class ExternalItemCurrency implements IExternalCurrency {
             final ItemStack item = currency.itemType;
 
             JsonObject json = new JsonObject();
-            serializeType(json, "item");
+            serializeType(json, "minecraft:item");
             json.addProperty("item", BuiltInRegistries.ITEM.getKey(item.getItem()).toString());
 
             if(item.getTag() != null) {

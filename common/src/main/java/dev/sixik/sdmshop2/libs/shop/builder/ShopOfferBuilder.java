@@ -8,12 +8,26 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
+/**
+ * Билдер для создания предложений (офферов) в магазине.
+ */
 public class ShopOfferBuilder implements ShopEntityBuilder<ShopOfferBuilder> {
 
+    /**
+     * Создает новый экземпляр билдера со случайным UUID.
+     * @param groupId ID группы (категории), к которой относится предложение.
+     * @return Новый экземпляр ShopOfferBuilder.
+     */
     public static ShopOfferBuilder builder(String groupId) {
         return new ShopOfferBuilder(UUID.randomUUID(), groupId);
     }
 
+    /**
+     * Создает новый экземпляр билдера с указанным UUID.
+     * @param offerId Уникальный идентификатор предложения.
+     * @param groupId ID группы (категории), к которой относится предложение.
+     * @return Новый экземпляр ShopOfferBuilder.
+     */
     public static ShopOfferBuilder builder(UUID offerId, String groupId) {
         return new ShopOfferBuilder(offerId, groupId);
     }
@@ -32,10 +46,23 @@ public class ShopOfferBuilder implements ShopEntityBuilder<ShopOfferBuilder> {
         this.groupId = groupId;
     }
 
+    /**
+     * Добавляет цену в указанной валюте.
+     * @param currencyId ID валюты.
+     * @param amount Количество.
+     * @return Текущий экземпляр билдера.
+     */
     public ShopOfferBuilder addPrice(String currencyId, double amount) {
         return addPrice(currencyId, amount, "");
     }
 
+    /**
+     * Добавляет цену в указанной валюте с привязкой к группе (например, для скидок или условий).
+     * @param currencyId ID валюты.
+     * @param amount Количество.
+     * @param groupId ID группы цены.
+     * @return Текущий экземпляр билдера.
+     */
     public ShopOfferBuilder addPrice(String currencyId, double amount, String groupId) {
         if (currencyId == null || currencyId.isEmpty()) {
             throw new IllegalArgumentException("Currency ID cannot be null or empty");
@@ -44,16 +71,17 @@ public class ShopOfferBuilder implements ShopEntityBuilder<ShopOfferBuilder> {
             throw new IllegalArgumentException("Amount must be positive");
         }
 
-        ResourceLocation id = ResourceLocation.tryParse(currencyId);
-        if(id == null)
-            id = ResourceLocation.tryBuild("sdm", currencyId);
-
+        final ResourceLocation id = currencyId.contains(":") ? ResourceLocation.tryParse(currencyId) : ResourceLocation.tryBuild("sdm", currencyId);
         final MoneyCostComponent component = new MoneyCostComponent(id, amount);
         component.setGroupId(groupId);
         components.add(component);
         return this;
     }
 
+    /**
+     * Завершает настройку предложения (используется для цепочки вызовов).
+     * @return Текущий экземпляр билдера.
+     */
     public ShopOfferBuilder end() {
         return this;
     }

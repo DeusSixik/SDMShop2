@@ -147,6 +147,10 @@ public final class ShopTable implements ShopServerGetter{
         return shopsRepository.getAllKeys().stream().toList();
     }
 
+    public int getShopsCount() {
+        return shopsRepository.size();
+    }
+
     /**
      * Удаляет магазин и его файл.
      *

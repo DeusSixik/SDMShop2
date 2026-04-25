@@ -30,8 +30,12 @@ public class ItemRewardComponent extends RewardComponent {
         this(ItemStack.EMPTY, 1);
     }
 
+    public ItemRewardComponent(Item item, int amount) {
+        this(item.getDefaultInstance(), amount);
+    }
+
     public ItemRewardComponent(ItemStack rewardItem, int amount) {
-        this.rewardItem = rewardItem;
+        this.rewardItem = rewardItem.getCount() > 1 ? rewardItem.copyWithCount(1) : rewardItem;
         this.amount = amount;
     }
 

@@ -19,6 +19,7 @@ import dev.sixik.sdmshop2.libs.shop.register.ShopRegister;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import dev.sixik.sdmshop2.tests.economy.EconomyTest;
 import lombok.Getter;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.shadowking21.shadowconfig.config.ConfigSide;
 import net.shadowking21.shadowconfig.config.exstensions.yaml.SCYamlConfig;

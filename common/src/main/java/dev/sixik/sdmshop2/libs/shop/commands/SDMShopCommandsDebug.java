@@ -7,6 +7,7 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableServer;
 import dev.sixik.sdmshop2.libs.shop.commands.builder.CommandBuilder;
 import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
+import dev.sixik.sdmshop2.libs.shop.generator.DefaultShopGenerator;
 import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
 import dev.sixik.sdmshop2.libs.shop.scripting.ScriptConditionComponent;
 import net.minecraft.commands.CommandSourceStack;
@@ -57,6 +58,12 @@ public class SDMShopCommandsDebug {
 
 //                    final var component = shopOffer.addComponent(new CommandRewardComponent());
 //                    ShopNetworkManager.sendNewComponent(debugShop, shopOffer, component, ctx.getSource().getPlayerOrException());
+                })
+                .register(dispatcher);
+        CommandBuilder.create("sdm_shop tests generate_default")
+                .requires(2)
+                .executesVoid((ctx) -> {
+                    DefaultShopGenerator.registerDefault();
                 })
                 .register(dispatcher);
     }
