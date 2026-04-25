@@ -14,6 +14,11 @@ public class ExternTextFieldWidget extends TextFieldWidget {
         ((EditBoxAccessor)this.textField).setHeight(h);
     }
 
+    @Override
+    public boolean isRemote() {
+        return true;
+    }
+
     public TextFieldWidget setUuidOnly() {
         setMaxStringLength(36); // Жесткий лимит UUID
         setValidator(s -> {

@@ -23,5 +23,10 @@
   "shop.component.reward.command.display_name": "Display Name",
   "shop.component.reward.command.command": "Command",
   "shop.component.reward.item.reward_item": "Item",
-  "shop.component.reward.item.amount": "Amount"
+  "shop.component.reward.item.amount": "Amount",
+  "shop.component.condition.script.scrip_id" : "Script ID",
+  "shop.component.reward.script.scrip_id" : "Script ID",
+
+  "client.shop.component.editor.json.preivew" : "§eCurrent JSON (Preview):",
+  "client.shop.component.editor.json.generation_error" : "§cError JSON generation"
 }

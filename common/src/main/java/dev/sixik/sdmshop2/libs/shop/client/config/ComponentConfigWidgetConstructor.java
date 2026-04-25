@@ -2,9 +2,13 @@ package dev.sixik.sdmshop2.libs.shop.client.config;
 
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import dev.sixik.sdmshop2.SDMShop2;
+import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
+import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.CollapsedGroupWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ExternTextFieldWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMBlockSelectorWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMItemStackSelectorWidget;
+import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +25,18 @@ public class ComponentConfigWidgetConstructor {
 
     private static int DEFAULT_W = 60;
     private static int DEFAULT_H = 15;
+
+    public static void createShopOfferWidget(WidgetGroup root, ShopOffer offer, int w) {
+        final var components = offer.getComponents();
+
+        for (int i = 0; i < components.size(); i++) {
+            ShopComponent component = components.get(i);
+
+            CollapsedGroupWidget widget = new CollapsedGroupWidget(Component.literal(component.getType().getId().toString()), w);
+            widget.addWidget(new ComponentConfigurationWidget(component));
+            root.addWidget(widget);
+        }
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static Widget createWidget(Object targetComponent, ComponentConfigAccess.CachedField cachedField) {
@@ -116,7 +132,7 @@ public class ComponentConfigWidgetConstructor {
 
             return widget;
         } else if(cachedField.type() == BlockState.class) {
-            SDMBlockSelectorWidget widget = new SDMBlockSelectorWidget(0, 0, DEFAULT_W + 22, true);
+            SDMBlockSelectorWidget widget = new SDMBlockSelectorWidget(0, 0, DEFAULT_W + 22, false);
             widget.setOnBlockStateUpdate(((blockState) -> {
                 try {
                     cachedField.setter().invoke(targetComponent, blockState);

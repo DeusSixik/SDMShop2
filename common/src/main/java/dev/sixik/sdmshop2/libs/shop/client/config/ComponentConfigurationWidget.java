@@ -3,14 +3,14 @@ package dev.sixik.sdmshop2.libs.shop.client.config;
 import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.texture.TransformTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
-import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.CollapsedGroupWidget;
+import com.lowdragmc.lowdraglib.utils.Size;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ExternTextFieldWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMTextLabel;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
-import dev.sixik.sdmshop2.tests.TestComponent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +21,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 
 public class ComponentConfigurationWidget extends WidgetGroup {
 
@@ -30,49 +31,112 @@ public class ComponentConfigurationWidget extends WidgetGroup {
 
     @Getter
     @Nullable
-    protected ShopComponent selectedComponent;
+    protected ShopComponent component;
 
     @Setter
-    protected Consumer<SwitchWidget> modifySwitchWidgetCallback = (widget) -> {
-        widget.setTexture(new GuiTextureGroup(texture, new TextTexture("off")), new GuiTextureGroup(texture, new TextTexture("on")));
+    protected BiConsumer<Integer, SwitchWidget> modifySwitchWidgetCallback = (index, widget) -> {
+        widget.setTexture(new GuiTextureGroup(getTexture(), new TextTexture("off")), new GuiTextureGroup(getTexture(), new TextTexture("on")));
     };
 
     @Setter
-    protected Consumer<ExternTextFieldWidget> modifyExternTextFieldWidgetCallback = (widget) -> {
+    protected BiConsumer<Integer, ExternTextFieldWidget> modifyExternTextFieldWidgetCallback = (index, widget) -> {
         widget.setTextFieldHeight(20);
     };
 
-    public ComponentConfigurationWidget() {
-        super(0, 0, 180, 0);
+    @Setter
+    protected BiConsumer<Integer, SDMTextLabel> modifyTextLabelCreateCallback = (index, widget) -> {
+        widget.setBackground(getTexture());
+    };
+
+    @Setter
+    protected ModifyElements modifyInitElementsCallback = ((main, label, editor, font, editorWidth, editorX, currentY) -> {
+        editor.setSizeWidth(editorWidth);
+        editor.setSelfPosition(editorX, currentY);
+
+        int maxLabelWidth = editorX - 10 - 5;
+        int originalTextWidth = font.width(label.getText());
+
+        /*
+            Считаем Scale
+         */
+        float scale = 1.0f;
+        if (originalTextWidth > maxLabelWidth && originalTextWidth > 0) {
+            /*
+                Если текст шире, чем доступное место, считаем коэффициент сжатия.
+             */
+            scale = (float) maxLabelWidth / originalTextWidth;
+            scale = Math.max(scale, 0.4f);
+        }
+
+        label.setScale(scale);
+
+        int editorHeight = editor.getSizeHeight();
+        float visualTextHeight = font.lineHeight * scale;
+
+        int labelY = currentY + (int)((editorHeight - visualTextHeight) / 2f);
+
+        label.setSelfPosition(10, labelY);
+
+        /*
+            Возвращаем шаг по Y для следующего элемента (высота виджета + отступ)
+         */
+        return editorHeight + 5;
+    });
+
+    @Getter @Setter
+    protected int fixedWidth;
+
+    public ComponentConfigurationWidget(@Nullable ShopComponent component) {
+        this(60, component);
+    }
+
+    public ComponentConfigurationWidget(int width, @Nullable ShopComponent component) {
+        super(0, 0, width, 0);
+        this.fixedWidth = width;
+        this.component = component;
         this.setDynamicSized(true);
         this.setLayout(Layout.NONE);
+
+        setBackground(getTexture());
     }
 
     @Override
     public void initWidget() {
-        var targetComponent = new TestComponent();
+        updateConfiguration();
+        super.initWidget();
+    }
+
+    public void setComponent(ShopComponent component) {
+        if(Objects.equals(component, this.component)) return;
+        this.component = component;
+        updateConfiguration();
+    }
+
+    public void updateConfiguration() {
+        clearAllWidgets();
+        if(component == null) return;
 
         ObjectArrayList<ComponentConfigAccess.CachedField> fieldsList =
-                ComponentConfigAccess.getCachedFields(targetComponent.getClass());
+                ComponentConfigAccess.getCachedFields(component.getClass());
 
         List<Widget[]> uiPairs = new ArrayList<>();
 
         for (int i = 0; i < fieldsList.size(); i++) {
             final var datum = fieldsList.get(i);
-            Widget editorWidget = ComponentConfigWidgetConstructor.createWidget(targetComponent, datum);
+            Widget editorWidget = ComponentConfigWidgetConstructor.createWidget(component, datum);
             if (editorWidget == null) continue;
             if(editorWidget instanceof SwitchWidget switchWidget) {
-                modifySwitchWidgetCallback.accept(switchWidget);
+                modifySwitchWidgetCallback.accept(i, switchWidget);
             } else if(editorWidget instanceof ExternTextFieldWidget textFieldWidget) {
-                modifyExternTextFieldWidgetCallback.accept(textFieldWidget);
+                modifyExternTextFieldWidgetCallback.accept(i, textFieldWidget);
             }
 
-            editorWidget.setHoverTexture(hoverTexture);
+            editorWidget.setHoverTexture(getHoverTexture());
             editorWidget.setSizeHeight(20);
 
             SDMTextLabel textLabel = new SDMTextLabel(Component.translatable(datum.translationKey()));
-            editorWidget.setBackground(texture);
-            textLabel.setBackground(texture);
+            editorWidget.setBackground(getTexture());
+            modifyTextLabelCreateCallback.accept(i, textLabel);
 
             uiPairs.add(new Widget[]{textLabel, editorWidget});
         }
@@ -90,25 +154,50 @@ public class ComponentConfigurationWidget extends WidgetGroup {
 
         super.initWidget();
 
-        final Font font = Minecraft.getInstance().font;
         int currentY = 10;
 
-        /*
-            Идем по нашему правильному списку
-         */
+        int editorWidth = 85;
+        int paddingRight = 10;
+        int editorX = getSizeWidth() - editorWidth - paddingRight;
+        Font font = Minecraft.getInstance().font;
         for (Widget[] pair : uiPairs) {
             SDMTextLabel label = (SDMTextLabel) pair[0];
             Widget editor = pair[1];
 
-            label.setSelfPosition(10, currentY + 7);
-            editor.setSelfPosition(14 + font.width(label.getText()), currentY);
-
-            currentY += 25;
+            currentY += modifyInitElementsCallback.accept(this, label, editor, font, editorWidth, editorX, currentY);
         }
     }
 
-    public ComponentConfigurationWidget setSelectedComponent(@Nullable ShopComponent component) {
-        this.selectedComponent = component;
-        return this;
+    public TransformTexture getTexture() {
+        return texture;
+    }
+
+    public TransformTexture getHoverTexture() {
+        return hoverTexture;
+    }
+
+    //////////////////////////////////////////////////////
+    ///             FIX SIZE WIDTH                     ///
+    //////////////////////////////////////////////////////
+    @Override
+    public void setSize(Size size) {
+        super.setSize(size);
+        this.fixedWidth = size.width;
+    }
+
+    @Override
+    public Size getSize() {
+        return new Size(fixedWidth, super.getSize().height);
+    }
+
+    @Override
+    protected Size computeDynamicSize() {
+        Size wrappedSize = super.computeDynamicSize();
+        return new Size(fixedWidth, wrappedSize.height);
+    }
+
+    public interface ModifyElements {
+
+        int accept(ComponentConfigurationWidget main, SDMTextLabel label, Widget editor, Font font, int editorWidth, int editorX, int currentY);
     }
 }
