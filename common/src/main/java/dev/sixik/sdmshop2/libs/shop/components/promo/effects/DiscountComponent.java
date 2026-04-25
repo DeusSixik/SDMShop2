@@ -3,6 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.components.promo.effects;
 import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.PromoEffectComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +16,7 @@ public class DiscountComponent extends PromoEffectComponent {
     public static final IComponentType<DiscountComponent> TYPE = new Type();
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.promo.effects.discount.discount")
     private double discount;
 
     public DiscountComponent() {}

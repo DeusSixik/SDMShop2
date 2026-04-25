@@ -1,6 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop.components.api;
 
 import com.google.gson.JsonObject;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,6 +12,7 @@ public abstract class PromoComponent extends ShopComponent {
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.promo.conditions.promo_id")
     private String promoId = "";
 
     /**

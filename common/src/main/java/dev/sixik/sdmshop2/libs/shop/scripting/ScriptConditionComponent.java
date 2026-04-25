@@ -3,6 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.scripting;
 import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.components.api.ConditionComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
 import dev.sixik.sdmshop2.libs.shop.scripting.events.ShopScriptEvents;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,7 @@ public class ScriptConditionComponent extends ConditionComponent {
      */
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.condition.script.scrip_id")
     private String scripId = "";
 
     /**

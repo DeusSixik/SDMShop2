@@ -8,6 +8,7 @@ import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterOfferData;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTable;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
 import dev.sixik.sdmshop2.utils.ShopUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,14 +32,17 @@ public class LimiterComponent extends ShopComponent {
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.limiter.limiter.limiter_type")
     private LimiterType limiterType;
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.limiter.limiter.count")
     private int count;
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.limiter.limiter.reset_interval_ms")
     private long resetIntervalMs;
 
     public LimiterComponent() {

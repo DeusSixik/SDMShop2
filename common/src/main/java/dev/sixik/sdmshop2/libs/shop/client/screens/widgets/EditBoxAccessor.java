@@ -23,5 +23,6 @@ public interface EditBoxAccessor {
     String suggestion();
     int maxLength();
     boolean isbBordered();
+    void setHeight(int height);
 
 }

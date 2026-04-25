@@ -3,6 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.components.misc;
 import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,10 +19,12 @@ public class CatalogComponent extends ShopComponent {
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.misc.catalog.id")
     private String id;
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.misc.catalog.uuid")
     private UUID uuid;
 
     public CatalogComponent() {

@@ -1,14 +1,11 @@
 package dev.sixik.sdmshop2.libs.shop.components.api;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Абстрактный компонент, представляющий стоимость покупки.
@@ -21,6 +18,7 @@ public abstract class CostComponent extends ShopComponent {
      */
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.cost.group_id")
     private String groupId = "";
 
     /**

@@ -2,6 +2,7 @@ package dev.sixik.sdmshop2.mixin.minecraft;
 
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.EditBoxAccessor;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -13,7 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.function.BiFunction;
 
 @Mixin(EditBox.class)
-public abstract class MixinEditBox implements EditBoxAccessor {
+public abstract class MixinEditBox extends AbstractWidget implements EditBoxAccessor {
 
     @Shadow private boolean isEditable;
 
@@ -42,6 +43,10 @@ public abstract class MixinEditBox implements EditBoxAccessor {
     @Shadow @Nullable private String suggestion;
 
     @Shadow private int maxLength;
+
+    public MixinEditBox(int i, int j, int k, int l, Component component) {
+        super(i, j, k, l, component);
+    }
 
     @Shadow protected abstract boolean isBordered();
 
@@ -118,6 +123,11 @@ public abstract class MixinEditBox implements EditBoxAccessor {
     @Override
     public boolean isbBordered() {
         return bordered;
+    }
+
+    @Override
+    public void setHeight(int height) {
+        this.height = height;
     }
 
 

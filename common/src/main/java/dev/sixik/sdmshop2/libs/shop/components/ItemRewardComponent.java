@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.RewardComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
 import dev.sixik.sdmshop2.utils.ShopItemHelper;
 import lombok.Getter;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,9 +22,11 @@ public class ItemRewardComponent extends RewardComponent {
     public static final IComponentType<ItemRewardComponent> TYPE = new Type();
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.reward.item.reward_item")
     private ItemStack rewardItem;
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.reward.item.amount")
     private int amount;
 
     public ItemRewardComponent() {

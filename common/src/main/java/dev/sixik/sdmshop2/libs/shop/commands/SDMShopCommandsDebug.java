@@ -5,12 +5,19 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableServer;
+import dev.sixik.sdmshop2.libs.shop.client.config.ComponentConfigAccess;
+import dev.sixik.sdmshop2.libs.shop.client.config.ComponentConfigWidgetConstructor;
+import dev.sixik.sdmshop2.libs.shop.client.config.ComponentConfigurationGroup;
+import dev.sixik.sdmshop2.libs.shop.client.config.ComponentConfigurationWidget;
+import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
 import dev.sixik.sdmshop2.libs.shop.commands.builder.CommandBuilder;
 import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
+import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
 import dev.sixik.sdmshop2.libs.shop.generator.DefaultShopGenerator;
 import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
 import dev.sixik.sdmshop2.libs.shop.scripting.ScriptConditionComponent;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
@@ -64,6 +71,12 @@ public class SDMShopCommandsDebug {
                 .requires(2)
                 .executesVoid((ctx) -> {
                     DefaultShopGenerator.registerDefault();
+                })
+                .register(dispatcher);
+        CommandBuilder.create("sdm_shop tests config")
+                .requires(2)
+                .executesVoid((ctx) -> {
+                    ShopScreenManager.INSTANCE.openGui(new ComponentConfigurationGroup());
                 })
                 .register(dispatcher);
     }
