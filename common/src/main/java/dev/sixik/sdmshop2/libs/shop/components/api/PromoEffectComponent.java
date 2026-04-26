@@ -2,6 +2,8 @@ package dev.sixik.sdmshop2.libs.shop.components.api;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,10 +15,12 @@ public abstract class PromoEffectComponent extends ShopComponent {
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.promo.effects.target_promo_id")
     private String targetPromoId;
 
     @Getter
-    private final Set<String> applyGroups = new HashSet<>();
+    @ComponentConfig(translationKey = "shop.component.promo.apply_groups")
+    private final Set<String> applyGroups = new ObjectOpenHashSet<>();
 
     /**
      * Проверяет, применим ли данный эффект при текущих активных акциях и выбранной группе оплаты.

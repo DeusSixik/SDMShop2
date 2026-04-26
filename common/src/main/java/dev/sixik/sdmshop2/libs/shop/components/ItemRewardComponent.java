@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.RewardComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentNumberRange;
 import dev.sixik.sdmshop2.utils.ShopItemHelper;
 import lombok.Getter;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,9 +23,12 @@ public class ItemRewardComponent extends RewardComponent {
     public static final IComponentType<ItemRewardComponent> TYPE = new Type();
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.reward.item.reward_item")
     private ItemStack rewardItem;
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.reward.item.amount")
+    @ComponentNumberRange(intMin = 1)
     private int amount;
 
     public ItemRewardComponent() {
@@ -36,7 +41,7 @@ public class ItemRewardComponent extends RewardComponent {
 
     public ItemRewardComponent(ItemStack rewardItem, int amount) {
         this.rewardItem = rewardItem.getCount() > 1 ? rewardItem.copyWithCount(1) : rewardItem;
-        this.amount = amount;
+        this.amount = Math.max(1, amount);
     }
 
     @Override

@@ -82,14 +82,6 @@ public abstract class ShopComponent {
     }
 
     /**
-     * Проверяет валидность данных компонента.
-     * @deprecated Используйте более современные механизмы валидации, если они предусмотрены.
-     * @throws ValidationException если данные некорректны
-     */
-    @Deprecated
-    public void validate() throws ValidationException {}
-
-    /**
      * Проверяет, является ли переданный идентификатор идентификатором пустого компонента.
      *
      * @param id Идентификатор типа компонента
@@ -97,6 +89,15 @@ public abstract class ShopComponent {
      */
     public static boolean isEmpty(ResourceLocation id) {
         return EMPTY.equals(id);
+    }
+
+    /**
+     * Оповещает родителя что компонент был изменён и нужно обновить данные
+     */
+    public final void invokeUpdate() {
+        ShopEntity root = getRoot();
+        if(root == null) return;
+        root.invokeUpdateComponent(root, this);
     }
 
     public void additionalSerialize(JsonObject json) { }

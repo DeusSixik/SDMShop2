@@ -1,5 +1,7 @@
 package dev.sixik.sdmshop2;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.platform.Platform;
@@ -28,6 +30,8 @@ import org.slf4j.Logger;
 public final class SDMShop2 {
     public static final String MODID = "sdmshop2";
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private static final ShopTable.Manager SHOP_TABLE_MANAGER = new ShopTable.Manager();
     private static final ShopLimiterTableServer.Manager SHOP_LIMITER_TABLE_MANAGER = new ShopLimiterTableServer.Manager();

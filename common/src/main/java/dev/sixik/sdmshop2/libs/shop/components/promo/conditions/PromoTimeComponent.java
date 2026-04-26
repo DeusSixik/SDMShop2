@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.PromoComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentNumberRange;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
@@ -26,15 +28,20 @@ public class PromoTimeComponent extends PromoComponent {
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.promo.conditions.promo_timer.mode")
     private TimeMode mode;
 
     // Начало и конец акции (в зависимости от режима это мс или тики)
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.promo.conditions.promo_timer.start_time")
+    @ComponentNumberRange(longMin = 0)
     private long startTime;
 
     @Getter
     @Setter
+    @ComponentConfig(translationKey = "shop.component.promo.conditions.promo_timer.end_time")
+    @ComponentNumberRange(longMin = 0)
     private long endTime;
 
     public PromoTimeComponent() {

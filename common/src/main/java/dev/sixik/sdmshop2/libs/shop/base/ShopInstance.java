@@ -170,7 +170,7 @@ public class ShopInstance extends ShopEntity {
     }
 
     @Override
-    protected void onAddComponent(ShopComponent component) {
+    protected void onUpdate() {
         setDirty();
     }
 

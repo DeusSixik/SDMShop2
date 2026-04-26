@@ -8,7 +8,7 @@ import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyService;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.RewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
-import dev.sixik.sdmshop2.tests.economy.TestSDMCoin;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentNumberRange;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -22,9 +22,12 @@ public class MoneyRewardComponent extends RewardComponent {
     public static final IComponentType<MoneyRewardComponent> TYPE = new Type();
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.reward.money.money_id")
     private ResourceLocation moneyId;
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.reward.money.amount")
+    @ComponentNumberRange(doubleMin = 0)
     private double amount;
 
     public MoneyRewardComponent() {

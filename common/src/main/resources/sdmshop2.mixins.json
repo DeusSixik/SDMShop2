@@ -9,7 +9,8 @@
     "minecraft.MixinEditBox"
   ],
   "mixins": [
-    "MixinReloadableServerResources"
+    "MixinReloadableServerResources",
+    "ldlib.MixinWidgetGroup$access"
   ],
   "injectors": {
     "defaultRequire": 1

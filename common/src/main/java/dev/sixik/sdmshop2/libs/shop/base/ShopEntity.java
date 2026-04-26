@@ -2,16 +2,14 @@ package dev.sixik.sdmshop2.libs.shop.base;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import dev.sixik.sdmshop2.libs.shop.base.callbacks.ShopEntityCallbacks;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.*;
@@ -22,14 +20,24 @@ import java.util.*;
  * определяют логику и свойства объекта. Управляет инициализацией, хранением,
  * кэшированием и сериализацией компонентов.
  */
-public class ShopEntity {
+public class ShopEntity implements ShopEntityCallbackSupport {
 
     private boolean initialized = false;
 
     private final ObjectArrayList<ShopComponent> components = new ObjectArrayList<>();
     private final Map<Class<?>, ObjectList<ShopComponent>> componentCache = new Reference2ObjectOpenHashMap<>();
 
-    public ShopEntity() { }
+    @Getter
+    private ObjectArrayList<ShopEntityCallbacks.OnAddComponent> addComponentListeners;
+    @Getter
+    private ObjectArrayList<ShopEntityCallbacks.OnRemoveComponent> removeComponentListeners;
+    @Getter
+    private ObjectArrayList<ShopEntityCallbacks.OnUpdate> updateListeners;
+    @Getter
+    private ObjectArrayList<ShopEntityCallbacks.OnComponentUpdate> updateComponentListeners;
+
+    public ShopEntity() {
+    }
 
     /**
      * Инициализирует все текущие компоненты сущности.
@@ -39,7 +47,7 @@ public class ShopEntity {
         final Object[] array = components.elements();
         final int size = components.size();
         for (int i = 0; i < size; i++) {
-            ((ShopComponent)array[i]).init();
+            ((ShopComponent) array[i]).init();
         }
         initialized = true;
     }
@@ -67,11 +75,55 @@ public class ShopEntity {
         components.add(i, component);
         componentCache.clear();
 
-        if(initialized)
+        if (initialized)
             component.init();
 
-        onAddComponent(component);
+        invokeAddComponent(this, component);
         return component;
+    }
+
+    /**
+     * Удаляет конкретный экземпляр компонента из сущности.
+     * Очищает кэш компонентов и вызывает события удаления.
+     *
+     * @param component Компонент, который нужно удалить
+     * @return true, если компонент был найден и удален, иначе false
+     */
+    public final boolean removeComponent(ShopComponent component) {
+        if (components.remove(component)) {
+            componentCache.clear();
+            component.setRoot(null);
+
+            onRemoveComponent(component);
+            invokeRemoveComponent(this, component);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Удаляет все компоненты указанного типа.
+     * Очищает кэш компонентов и вызывает события удаления для каждого удаленного компонента.
+     *
+     * @param type Класс компонентов, которые нужно удалить
+     * @return true, если хотя бы один компонент был удален, иначе false
+     */
+    public final boolean removeComponent(Class<?> type) {
+        boolean removed = false;
+        final Object[] array = components.elements();
+
+        for (int i = components.size() - 1; i >= 0; i--) {
+            ShopComponent c = (ShopComponent) array[i];
+            if (type.isInstance(c)) {
+                components.remove(i);
+                componentCache.clear();
+                c.setRoot(null);
+
+                invokeRemoveComponent(this, c);
+                removed = true;
+            }
+        }
+        return removed;
     }
 
     /**
@@ -81,7 +133,7 @@ public class ShopEntity {
      * @return true, если компонент найден, иначе false
      */
     public final boolean hasComponent(Class<?> type) {
-       return !getComponents(type).isEmpty();
+        return !getComponents(type).isEmpty();
     }
 
     /**
@@ -282,7 +334,8 @@ public class ShopEntity {
      * Метод для переопределения в наследниках.
      * Используется для добавления компонентов, которые должны быть только на стороне клиента.
      */
-    protected void customInitializeClientOnlyComponents() { }
+    protected void customInitializeClientOnlyComponents() {
+    }
 
     /**
      * Выполняет инициализацию компонентов, специфичных для сервера.
@@ -298,8 +351,129 @@ public class ShopEntity {
      * Метод для переопределения в наследниках.
      * Используется для добавления компонентов, которые должны быть только на стороне сервера.
      */
-    protected void customInitializeServerOnlyComponents() { }
+    protected void customInitializeServerOnlyComponents() {
+    }
 
-    protected void onAddComponent(ShopComponent component) { }
+    /**
+     * Хук для переопределения в наследниках.
+     * Вызывается при успешном добавлении компонента.
+     *
+     * @param component Добавленный компонент
+     */
+    protected void onAddComponent(ShopComponent component) {
+    }
 
+    /**
+     * Хук для переопределения в наследниках.
+     * Вызывается при успешном удалении компонента.
+     *
+     * @param component Удаленный компонент
+     */
+    protected void onRemoveComponent(ShopComponent component) {
+    }
+
+    /**
+     * Хук для переопределения в наследниках.
+     * Вызывается при обновлении компонента.
+     *
+     * @param component Компонент который обновился
+     */
+    protected void onUpdateComponent(ShopComponent component) {
+    }
+
+    /**
+     * Хук для переопределения в наследниках.
+     * Вызывается при обновлении {@link ShopEntity}
+     */
+    protected void onUpdate() {
+    }
+
+    @Override
+    public void subscribeAddComponent(ShopEntityCallbacks.OnAddComponent callback) {
+        if (addComponentListeners == null) {
+            addComponentListeners = new ObjectArrayList<>();
+        }
+        addComponentListeners.add(callback);
+    }
+
+    @Override
+    public void subscribeRemoveComponent(ShopEntityCallbacks.OnRemoveComponent callback) {
+        if (removeComponentListeners == null) {
+            removeComponentListeners = new ObjectArrayList<>();
+        }
+        removeComponentListeners.add(callback);
+    }
+
+    @Override
+    public void subscribeUpdateComponent(ShopEntityCallbacks.OnComponentUpdate callback) {
+        if (updateComponentListeners == null) {
+            updateComponentListeners = new ObjectArrayList<>();
+        }
+        updateComponentListeners.add(callback);
+    }
+
+    @Override
+    public void subscribeUpdate(ShopEntityCallbacks.OnUpdate callback) {
+        if (updateListeners == null) {
+            updateListeners = new ObjectArrayList<>();
+        }
+        updateListeners.add(callback);
+    }
+
+    @Override
+    public void unsubscribeAddComponent(ShopEntityCallbacks.OnAddComponent callback) {
+        if (addComponentListeners == null) return;
+        addComponentListeners.remove(callback);
+        if (addComponentListeners.isEmpty()) {
+            addComponentListeners = null;
+        }
+    }
+
+    @Override
+    public void unsubscribeRemoveComponent(ShopEntityCallbacks.OnRemoveComponent callback) {
+        if (removeComponentListeners == null) return;
+        removeComponentListeners.remove(callback);
+        if (removeComponentListeners.isEmpty()) {
+            removeComponentListeners = null;
+        }
+    }
+
+    @Override
+    public void unsubscribeUpdateComponent(ShopEntityCallbacks.OnComponentUpdate callback) {
+        if (updateComponentListeners == null) return;
+        updateComponentListeners.remove(callback);
+        if (updateComponentListeners.isEmpty()) {
+            updateComponentListeners = null;
+        }
+    }
+
+    @Override
+    public void unsubscribeUpdate(ShopEntityCallbacks.OnUpdate callback) {
+        if (updateListeners == null) return;
+        updateListeners.remove(callback);
+        if (updateListeners.isEmpty()) {
+            updateListeners = null;
+        }
+    }
+
+    @Override
+    public void invokeUpdateComponent(ShopEntity entity, ShopComponent component) {
+        onUpdateComponent(component);
+        ShopEntityCallbackSupport.super.invokeUpdateComponent(entity, component);
+        invokeUpdate(entity);
+    }
+
+    @Override
+    public void invokeAddComponent(ShopEntity entity, ShopComponent component) {
+        onAddComponent(component);
+        ShopEntityCallbackSupport.super.invokeAddComponent(entity, component);
+        invokeUpdate(entity);
+    }
+
+    @Override
+    public void invokeRemoveComponent(ShopEntity entity, ShopComponent component) {
+        onRemoveComponent(component);
+        ShopEntityCallbackSupport.super.invokeRemoveComponent(entity, component);
+        invokeUpdate(entity);
+    }
 }

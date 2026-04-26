@@ -1,10 +1,15 @@
 package dev.sixik.sdmshop2.libs.shop.client;
 
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
-import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
+import dev.sixik.sdmshop2.libs.shop.client.config.constructors.ComponentConfigWidgetConstructor;
+import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncClientTasks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public class SDMShopClient {
 
@@ -33,6 +38,13 @@ public class SDMShopClient {
     public static final Event<SDMShopClientEvents.AcceptNewComponentDataEvent> ACCEPT_NEW_COMPONENT_DATA_EVENT =
             EventFactory.createLoop(SDMShopClientEvents.AcceptNewComponentDataEvent.class);
 
+    /**
+     * Вызываеться когда компонент был изменён. Обычно вызывает {@link ComponentConfigWidgetConstructor#invokeUpdate(ShopComponent)}
+     * когда значение были изменены в редакторе
+     */
+    public static final Event<SDMShopClientEvents.UpdateComponentEvent> UPDATE_COMPONENT_EVENT =
+            EventFactory.createLoop(SDMShopClientEvents.UpdateComponentEvent.class);
+
     public static ShopInstance Shop = ShopInstance.createManager(ShopInstance.NULL_MANAGER, false);
 
     public static void init() {
@@ -41,5 +53,22 @@ public class SDMShopClient {
 
     public static void openShopGui() {
         System.out.println("Open Shop");
+    }
+
+    /**
+     * Template !
+     */
+    @Environment(EnvType.CLIENT)
+    @Deprecated
+    public static boolean openContextMenu(Widget current, WidgetGroup context) {
+        Widget root = current;
+        while (root.getParent() != null) {
+            root = root.getParent();
+        }
+
+        if (!(root instanceof WidgetGroup mainGroup)) return false;
+
+        mainGroup.addWidget(root);
+        return true;
     }
 }

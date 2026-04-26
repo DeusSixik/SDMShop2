@@ -3,6 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.components;
 import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.RewardComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
 import lombok.Getter;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,9 +18,11 @@ public class CommandRewardComponent extends RewardComponent {
     public static final IComponentType<CommandRewardComponent> TYPE = new Type();
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.reward.command.display_name")
     private String displayName;
 
     @Getter
+    @ComponentConfig(translationKey = "shop.component.reward.command.command")
     private String command;
 
     public CommandRewardComponent() {
