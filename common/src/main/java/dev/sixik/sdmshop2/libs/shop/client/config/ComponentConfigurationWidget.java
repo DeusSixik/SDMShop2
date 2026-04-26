@@ -8,6 +8,8 @@ import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import com.lowdragmc.lowdraglib.utils.Size;
 import dev.sixik.sdmshop2.libs.shop.client.WidgetGroupAccessor;
+import dev.sixik.sdmshop2.libs.shop.client.config.constructors.ComponentConfigAccess;
+import dev.sixik.sdmshop2.libs.shop.client.config.constructors.ComponentConfigWidgetConstructor;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ExternTextFieldWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMTextLabel;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;

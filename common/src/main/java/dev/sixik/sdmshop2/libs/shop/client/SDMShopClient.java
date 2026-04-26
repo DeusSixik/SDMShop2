@@ -4,15 +4,12 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
-import dev.sixik.sdmshop2.libs.shop.base.ShopEntity;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
-import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
+import dev.sixik.sdmshop2.libs.shop.client.config.constructors.ComponentConfigWidgetConstructor;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncClientTasks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import java.util.function.Consumer;
 
 public class SDMShopClient {
 
@@ -42,7 +39,7 @@ public class SDMShopClient {
             EventFactory.createLoop(SDMShopClientEvents.AcceptNewComponentDataEvent.class);
 
     /**
-     * Вызываеться когда компонент был изменён. Обычно вызывает {@link dev.sixik.sdmshop2.libs.shop.client.config.ComponentConfigWidgetConstructor#invokeUpdate(ShopComponent)}
+     * Вызываеться когда компонент был изменён. Обычно вызывает {@link ComponentConfigWidgetConstructor#invokeUpdate(ShopComponent)}
      * когда значение были изменены в редакторе
      */
     public static final Event<SDMShopClientEvents.UpdateComponentEvent> UPDATE_COMPONENT_EVENT =

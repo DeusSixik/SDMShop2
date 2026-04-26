@@ -1,4 +1,4 @@
-package dev.sixik.sdmshop2.libs.shop.client.config;
+package dev.sixik.sdmshop2.libs.shop.client.config.constructors;
 
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;

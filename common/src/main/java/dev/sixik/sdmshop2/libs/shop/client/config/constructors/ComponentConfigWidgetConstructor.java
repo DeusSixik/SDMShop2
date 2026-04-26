@@ -1,4 +1,4 @@
-package dev.sixik.sdmshop2.libs.shop.client.config;
+package dev.sixik.sdmshop2.libs.shop.client.config.constructors;
 
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
@@ -7,6 +7,8 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import dev.sixik.sdmshop2.SDMShop2;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
+import dev.sixik.sdmshop2.libs.shop.client.config.ComponentCollapsedGroupWidget;
+import dev.sixik.sdmshop2.libs.shop.client.config.ComponentConfigurationWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.CollapsedGroupWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ExternTextFieldWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMBlockSelectorWidget;
@@ -16,7 +18,6 @@ import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentNumberRan
 import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentStringRegex;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

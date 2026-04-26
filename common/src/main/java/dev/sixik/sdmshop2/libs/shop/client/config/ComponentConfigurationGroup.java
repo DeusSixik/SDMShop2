@@ -7,10 +7,12 @@ import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import dev.sixik.sdmshop2.libs.shop.base.ShopEntity;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
+import dev.sixik.sdmshop2.libs.shop.client.config.constructors.ComponentConfigWidgetConstructor;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.promo.effects.DiscountComponent;
 import dev.sixik.sdmshop2.libs.shop.scripting.ScriptConditionComponent;
 import dev.sixik.sdmshop2.libs.shop.scripting.ScriptRewardComponent;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -32,7 +34,8 @@ public class ComponentConfigurationGroup extends WidgetGroup {
 
     @Override
     public void initWidget() {
-        setSize(400, 400);
+        final var window = Minecraft.getInstance().getWindow();
+        setSize(window.getGuiScaledWidth(), window.getGuiScaledHeight());
 
         DraggableScrollableWidgetGroup scrollPanel = new DraggableScrollableWidgetGroup(10, 10, 200, 250);
         scrollPanel.setScrollWheelDirection(DraggableScrollableWidgetGroup.ScrollWheelDirection.VERTICAL);
