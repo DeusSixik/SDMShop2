@@ -1,34 +1,22 @@
 package dev.sixik.sdmshop2.libs.shop.client.screens.widgets;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import dev.sixik.sdmshop2.SDMShop2;
-import dev.sixik.sdmshop2.libs.shop.client.config.ComponentConfigurationWidget;
-import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
-import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
-import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NonNull;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CollapsedGroupWidget extends WidgetGroup {
 
     // Палитра цветов для разных уровней глубины (Стиль IDE)
-    private static final int[] DEPTH_COLORS = new int[]{
+    protected static final int[] DEPTH_COLORS = new int[]{
             0xFF5555FF, // Синий
             0xFF55FF55, // Зеленый
             0xFFFFFF55, // Желтый
@@ -53,6 +41,8 @@ public class CollapsedGroupWidget extends WidgetGroup {
     @Getter @Setter
     protected int indentSize = 12;
 
+    protected boolean useTabulation = false;
+
     public CollapsedGroupWidget(Component title, int width) {
         super(0, 0, width, 16);
         this.title = title;
@@ -62,7 +52,10 @@ public class CollapsedGroupWidget extends WidgetGroup {
         this.setLayoutPadding(4);
     }
 
-
+    public CollapsedGroupWidget useTabulation() {
+        useTabulation = true;
+        return this;
+    }
 
     /**
      * Меняем состояние и обновляем видимость дочерних элементов
@@ -99,7 +92,7 @@ public class CollapsedGroupWidget extends WidgetGroup {
      */
     @Override
     public WidgetGroup addWidget(int index, Widget widget) {
-        int availableWidth = this.getSizeWidth() - this.indentSize;
+        int availableWidth = this.getSizeWidth() - (useTabulation ? this.indentSize : 0);
         widget.setSizeWidth(availableWidth);
 
         super.addWidget(index, widget);
@@ -130,7 +123,7 @@ public class CollapsedGroupWidget extends WidgetGroup {
         String arrow = isCollapsed ? "▶" : "▼";
         graphics.drawString(font, arrow, x + width - 12, textY, 0xAAAAAA, false);
 
-        if (!isCollapsed && !widgets.isEmpty()) {
+        if (useTabulation && !isCollapsed && !widgets.isEmpty()) {
             int depth = calculateDepth();
             int color = DEPTH_COLORS[depth % DEPTH_COLORS.length];
 
@@ -139,7 +132,9 @@ public class CollapsedGroupWidget extends WidgetGroup {
             int startY = y + headerHeight;
             int endY = y + getSizeHeight() - 5;
 
-            // Вертикальная линия
+            /*
+                Вертикальная линия
+             */
             graphics.fill(lineX, startY, lineX + 1, endY, color);
 
             for (Widget widget : widgets) {
@@ -160,10 +155,12 @@ public class CollapsedGroupWidget extends WidgetGroup {
         int x = getPositionX();
         int y = getPositionY();
 
-        if (canCollapse && button == 0 && isMouseOver(x, y, getSizeWidth(), headerHeight, mouseX, mouseY)) {
-            setCollapsed(!isCollapsed);
-            Widget.playButtonClickSound();
-            return true;
+        if (isMouseOver(x, y, getSizeWidth(), headerHeight, mouseX, mouseY)) {
+            if (canCollapse && button == 0) {
+                setCollapsed(!isCollapsed);
+                Widget.playButtonClickSound();
+                return true;
+            }
         }
 
         if (isCollapsed) return false;
@@ -182,7 +179,7 @@ public class CollapsedGroupWidget extends WidgetGroup {
             /*
                 Начинаем расставлять виджеты НЕ с 0, а под шапкой!
              */
-            var lastPosition = new Position(indentSize, headerHeight);
+            var lastPosition = new Position(useTabulation ? indentSize : 0, headerHeight);
             int padding = getLayoutPadding();
 
             /*
@@ -214,14 +211,18 @@ public class CollapsedGroupWidget extends WidgetGroup {
         }
 
         Position selfPosition = getPosition();
-        // Начинаем с высоты шапки
+        /*
+            Начинаем с высоты шапки
+         */
         int currentHeight = headerHeight;
 
         for (Widget widget : widgets) {
             if (!widget.isVisible()) continue;
 
             Position childEnd = widget.getPosition().add(widget.getSize()).subtract(selfPosition);
-            // Ищем только самую нижнюю точку по Y
+            /*
+                Ищем только самую нижнюю точку по Y
+             */
             if (childEnd.y > currentHeight) {
                 currentHeight = childEnd.y;
             }
@@ -234,45 +235,10 @@ public class CollapsedGroupWidget extends WidgetGroup {
     public void setSize(Size size) {
         super.setSize(size);
 
-        int availableWidth = size.width - this.indentSize;
+        int availableWidth = size.width - (useTabulation ? this.indentSize : 0);
 
         for (Widget widget : widgets) {
             widget.setSizeWidth(availableWidth);
-        }
-    }
-
-    @Override
-    public void drawInForeground(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
-
-        int x = getPositionX();
-        int y = getPositionY();
-
-        if (isMouseOver(x, y, getSizeWidth(), headerHeight, mouseX, mouseY) && gui != null && gui.getModularUIGui() != null) {
-
-            for (Widget widget : widgets) {
-                if (widget instanceof ComponentConfigurationWidget configWidget) {
-                    ShopComponent component = configWidget.getComponent();
-
-                    if (component != null) {
-                        List<Component> tooltip = new ArrayList<>();
-                        tooltip.add(Component.translatable("client.shop.component.editor.json.preivew")); // §e - желтый цвет
-
-                        try {
-                            JsonObject json = ShopComponentRegistry.toJson(component);
-                            String formattedJson = SDMShop2.GSON.toJson(json);
-                            for (String line : formattedJson.split("\n")) {
-                                tooltip.add(Component.literal("§7" + line.replace("  ", " ")));
-                            }
-                        } catch (Exception e) {
-                            tooltip.add(Component.translatable("client.shop.component.editor.json.generation_error"));
-                        }
-
-                        gui.getModularUIGui().setHoverTooltip(tooltip, ItemStack.EMPTY, null, null);
-                    }
-                    break;
-                }
-            }
         }
     }
 }

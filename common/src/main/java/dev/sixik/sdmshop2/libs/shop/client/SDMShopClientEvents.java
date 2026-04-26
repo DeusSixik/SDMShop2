@@ -28,4 +28,9 @@ public class SDMShopClientEvents {
 
         void onAcceptNewComponentDataEvent(@NotNull ShopInstance shop, @NotNull ShopEntity entity, @NotNull ShopComponent newComponent);
     }
+
+    public interface UpdateComponentEvent {
+
+        void onUpdateComponentEvent(@NotNull ShopEntity root, @NotNull ShopComponent component);
+    }
 }

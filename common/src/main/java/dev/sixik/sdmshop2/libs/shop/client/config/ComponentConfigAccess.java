@@ -2,6 +2,8 @@ package dev.sixik.sdmshop2.libs.shop.client.config;
 
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentNumberRange;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentStringRegex;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
@@ -58,7 +60,9 @@ public class ComponentConfigAccess {
                                 innerType,
                                 meta.tips(),
                                 getter,
-                                setter
+                                setter,
+                                field.isAnnotationPresent(ComponentNumberRange.class) ? field.getAnnotation(ComponentNumberRange.class) : null,
+                                field.isAnnotationPresent(ComponentStringRegex.class) ? field.getAnnotation(ComponentStringRegex.class) : null
                         ));
 
                     } catch (IllegalAccessException e) {
@@ -73,5 +77,11 @@ public class ComponentConfigAccess {
         return syncableFields;
     }
 
-    public record CachedField(String translationKey, Class<?> type, @Nullable Class<?> innerType, String[] tips, MethodHandle getter, MethodHandle setter) {}
+    public record CachedField(
+            String translationKey, Class<?> type,
+            @Nullable Class<?> innerType, String[] tips,
+            MethodHandle getter, MethodHandle setter,
+            @Nullable ComponentNumberRange numberRange,
+            @Nullable ComponentStringRegex stringRegex
+    ) {}
 }

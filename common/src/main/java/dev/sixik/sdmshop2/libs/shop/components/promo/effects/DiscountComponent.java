@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.PromoEffectComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentNumberRange;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +18,7 @@ public class DiscountComponent extends PromoEffectComponent {
 
     @Getter
     @ComponentConfig(translationKey = "shop.component.promo.effects.discount.discount")
+    @ComponentNumberRange(doubleMin = 0)
     private double discount;
 
     public DiscountComponent() {}

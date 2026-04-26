@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.gui.texture.TransformTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import com.lowdragmc.lowdraglib.utils.Size;
+import dev.sixik.sdmshop2.libs.shop.client.WidgetGroupAccessor;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ExternTextFieldWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMTextLabel;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
@@ -28,6 +29,8 @@ public class ComponentConfigurationWidget extends WidgetGroup {
 
     public static final ColorRectAndBorderTexture texture = new ColorRectAndBorderTexture();
     public static final ColorBorderTexture hoverTexture = new ColorBorderTexture(1, -1);
+
+    protected final List<Widget[]> uiPairs = new ArrayList<>();
 
     @Getter
     @Nullable
@@ -114,12 +117,11 @@ public class ComponentConfigurationWidget extends WidgetGroup {
 
     public void updateConfiguration() {
         clearAllWidgets();
+        uiPairs.clear();
         if(component == null) return;
 
         ObjectArrayList<ComponentConfigAccess.CachedField> fieldsList =
                 ComponentConfigAccess.getCachedFields(component.getClass());
-
-        List<Widget[]> uiPairs = new ArrayList<>();
 
         for (int i = 0; i < fieldsList.size(); i++) {
             final var datum = fieldsList.get(i);
@@ -133,6 +135,10 @@ public class ComponentConfigurationWidget extends WidgetGroup {
 
             editorWidget.setHoverTexture(getHoverTexture());
             editorWidget.setSizeHeight(20);
+
+            if (!(editorWidget instanceof WidgetGroup)) {
+                editorWidget.setSizeHeight(20);
+            }
 
             SDMTextLabel textLabel = new SDMTextLabel(Component.translatable(datum.translationKey()));
             editorWidget.setBackground(getTexture());
@@ -153,18 +159,46 @@ public class ComponentConfigurationWidget extends WidgetGroup {
         }
 
         super.initWidget();
+        repositionWidgets();
+    }
 
+    /**
+     * Тот самый метод, который двигает всё "в прямом эфире"
+     */
+    public void repositionWidgets() {
         int currentY = 10;
-
         int editorWidth = 85;
         int paddingRight = 10;
         int editorX = getSizeWidth() - editorWidth - paddingRight;
         Font font = Minecraft.getInstance().font;
+
         for (Widget[] pair : uiPairs) {
             SDMTextLabel label = (SDMTextLabel) pair[0];
             Widget editor = pair[1];
-
             currentY += modifyInitElementsCallback.accept(this, label, editor, font, editorWidth, editorX, currentY);
+        }
+
+        /*
+            Заставляем саму группу пересчитать свою высоту
+         */
+        this.recomputeSize();
+    }
+
+    /**
+     * Твой переопределенный метод из setSize теперь прилетит сюда
+     */
+    @Override
+    public void onChildSizeUpdate(Widget child) {
+        /*
+            Пересчитываем координаты существующих виджетов
+         */
+        repositionWidgets();
+
+        /*
+             Пробрасываем уведомление дальше вверх к CollapsedGroupWidget
+         */
+        if (parent != null) {
+            ((WidgetGroupAccessor)parent).sdm$onChildSizeUpdate(this);
         }
     }
 

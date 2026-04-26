@@ -7,6 +7,7 @@ import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTable;
 import dev.sixik.sdmshop2.libs.shop.components.api.ConditionComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentNumberRange;
 import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
 import dev.sixik.sdmshop2.utils.ShopUtils;
 import lombok.Getter;
@@ -26,6 +27,7 @@ public class CooldownConditionComponent extends ConditionComponent {
     @Getter
     @Setter
     @ComponentConfig(translationKey = "shop.component.condition.cooldown.cooldown_ms")
+    @ComponentNumberRange(longMin = 0)
     private long cooldownMs;
 
     @Getter

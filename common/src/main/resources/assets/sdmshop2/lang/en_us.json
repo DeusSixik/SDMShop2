@@ -28,5 +28,6 @@
   "shop.component.reward.script.scrip_id" : "Script ID",
 
   "client.shop.component.editor.json.preivew" : "§eCurrent JSON (Preview):",
-  "client.shop.component.editor.json.generation_error" : "§cError JSON generation"
+  "client.shop.component.editor.json.generation_error" : "§cError JSON generation",
+  "client.shop.component.editor.arrays.button.add_element" : "§a+ Add"
 }

@@ -1,0 +1,147 @@
+package dev.sixik.sdmshop2.libs.shop.client.config;
+
+import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
+import dev.sixik.sdmshop2.SDMShop2;
+import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
+import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.CollapsedGroupWidget;
+import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
+import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
+import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ComponentCollapsedGroupWidget extends CollapsedGroupWidget {
+
+    protected ShopComponent component;
+
+    public ComponentCollapsedGroupWidget(ShopComponent component, int width) {
+        super(Component.literal(component.getType().getId().toString()), width);
+        this.component = component;
+    }
+
+    /**
+     * Обработка клика по шапке
+     */
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int x = getPositionX();
+        int y = getPositionY();
+
+
+        if (isMouseOver(x, y, getSizeWidth(), headerHeight, mouseX, mouseY)) {
+            if (canCollapse && button == 0) {
+                setCollapsed(!isCollapsed);
+                Widget.playButtonClickSound();
+                return true;
+            }
+
+            if (button == 1) {
+                openContextMenu((int) mouseX, (int) mouseY);
+                Widget.playButtonClickSound();
+                return true;
+            }
+        }
+
+        if (isCollapsed) return false;
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public void drawInForeground(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
+
+        int x = getPositionX();
+        int y = getPositionY();
+
+        if (isMouseOver(x, y, getSizeWidth(), headerHeight, mouseX, mouseY) && gui != null && gui.getModularUIGui() != null) {
+
+            for (Widget widget : widgets) {
+                if (widget instanceof ComponentConfigurationWidget configWidget) {
+                    ShopComponent component = configWidget.getComponent();
+
+                    if (component != null) {
+                        List<Component> tooltip = new ArrayList<>();
+                        tooltip.add(Component.translatable("client.shop.component.editor.json.preivew")); // §e - желтый цвет
+
+                        try {
+                            JsonObject json = ShopComponentRegistry.toJson(component);
+                            String formattedJson = SDMShop2.GSON.toJson(json);
+                            for (String line : formattedJson.split("\n")) {
+                                tooltip.add(Component.literal("§7" + line.replace("  ", " ")));
+                            }
+                        } catch (Exception e) {
+                            tooltip.add(Component.translatable("client.shop.component.editor.json.generation_error"));
+                        }
+
+                        gui.getModularUIGui().setHoverTooltip(tooltip, ItemStack.EMPTY, null, null);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    protected void openContextMenu(int mouseX, int mouseY) {
+        if (this.gui == null) return;
+
+        Widget root = this;
+        while (root.getParent() != null) {
+            root = root.getParent();
+        }
+
+        if (!(root instanceof WidgetGroup mainGroup)) return;
+
+        WidgetGroup contextMenu = new WidgetGroup(mouseX, mouseY, 120, 0) {
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                boolean handled = super.mouseClicked(mouseX, mouseY, button);
+                /*
+                    Если кликнули по кнопке в меню - handled будет true.
+                    Если кликнули мимо кнопок, но внутри меню - мы тоже не закрываемся.
+                 */
+                if (!isMouseOverElement(mouseX, mouseY)) {
+                    mainGroup.removeWidget(this);
+                }
+                return handled;
+            }
+
+            @Override
+            public void onFocusChanged(Widget lastFocus, Widget focus) {
+                /*
+                    Если фокус ушел с меню и его детей - удаляем меню
+                 */
+                if (!isFocus()) {
+                    mainGroup.removeWidget(this);
+                }
+            }
+        };
+
+        contextMenu.setDynamicSized(true);
+        contextMenu.setLayout(Layout.VERTICAL_LEFT);
+        contextMenu.setBackground(new ColorRectAndBorderTexture(0xFF1E1E1E, 1, 0xFF555555));
+
+        contextMenu.addWidget(new ButtonWidget(0, 0, 120, 20, new TextTexture("Копировать JSON"), (s) -> {
+            System.out.println("JSON Скопирован!");
+            mainGroup.removeWidget(contextMenu);
+        }));
+
+        contextMenu.addWidget(new ButtonWidget(0, 0, 120, 20, new TextTexture("§cОчистить настройки"), (s) -> {
+            System.out.println("Очищено!");
+            mainGroup.removeWidget(contextMenu);
+        }));
+
+        mainGroup.addWidget(contextMenu);
+        contextMenu.setFocus(true);
+    }
+}

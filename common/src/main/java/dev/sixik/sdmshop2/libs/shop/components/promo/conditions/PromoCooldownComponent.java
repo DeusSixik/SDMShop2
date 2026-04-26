@@ -6,6 +6,7 @@ import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTable;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.PromoComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentConfig;
+import dev.sixik.sdmshop2.libs.shop.components.api.annotation.ComponentNumberRange;
 import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
 import dev.sixik.sdmshop2.utils.ShopUtils;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class PromoCooldownComponent extends PromoComponent {
     @Getter
     @Setter
     @ComponentConfig(translationKey = "shop.component.promo.conditions.promo_cooldown.cooldown_ms")
+    @ComponentNumberRange(longMin = 0)
     private long cooldownMs;
 
     @Getter
