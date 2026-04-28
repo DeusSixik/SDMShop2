@@ -49,9 +49,7 @@ public class ComponentConfigurationWidget extends WidgetGroup {
     };
 
     @Setter
-    protected BiConsumer<Integer, SDMTextLabel> modifyTextLabelCreateCallback = (index, widget) -> {
-        widget.setBackground(getTexture());
-    };
+    protected BiConsumer<Integer, SDMTextLabel> modifyTextLabelCreateCallback = (index, widget) -> { };
 
     @Setter
     protected ModifyElements modifyInitElementsCallback = ((main, label, editor, font, editorWidth, editorX, currentY) -> {
@@ -143,7 +141,6 @@ public class ComponentConfigurationWidget extends WidgetGroup {
             }
 
             SDMTextLabel textLabel = new SDMTextLabel(Component.translatable(datum.translationKey()));
-            editorWidget.setBackground(getTexture());
             modifyTextLabelCreateCallback.accept(i, textLabel);
 
             uiPairs.add(new Widget[]{textLabel, editorWidget});
