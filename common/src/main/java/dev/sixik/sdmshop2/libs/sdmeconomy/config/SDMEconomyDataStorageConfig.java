@@ -1,4 +1,4 @@
-package dev.sixik.sdmshop2.libs.sdmeconomy;
+package dev.sixik.sdmshop2.libs.sdmeconomy.config;
 
 import net.shadowking21.shadowconfig.annotation.ConfigComment;
 
@@ -22,8 +22,7 @@ public class SDMEconomyDataStorageConfig {
         @ConfigComment("Data base name")
         public String database = "sdm_economy";
 
-        @ConfigComment("Collection name for shops")
-        public String collection = "currencies";
+        public String accountsCollection = "accounts";
 
         @ConfigComment("A unique name for this server (eg: \"survival_1\", \"lobby\").\nUsed for echo protection (to prevent the server from updating itself).\nIf left blank, a random UUID will be generated.")
         public String serverName = "server_1";

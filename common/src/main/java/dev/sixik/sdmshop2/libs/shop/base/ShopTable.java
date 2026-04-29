@@ -5,7 +5,6 @@ import dev.sixik.sdmshop2.SDMShop2;
 import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
 import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.ThreadingOperationTimeSave;
-import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.platform.utils.repository.RepositoryStorage;
 import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.RepoDefinition;
 import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.RepositoryManager;
@@ -83,7 +82,7 @@ public final class ShopTable implements ShopServerGetter{
 
         shopsRepository = new RepositoryStorage<>(manager.createRepository(
             shopsDir,
-            "shops",
+            SDMShop2.getDataStorageConfig().getDefaultConfig().mongodb.shopsCollection,
             new RepoDefinition<>(
                     ResourceLocation::toString,
                     ResourceLocation::new,

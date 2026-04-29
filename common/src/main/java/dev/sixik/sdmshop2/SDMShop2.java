@@ -71,7 +71,7 @@ public final class SDMShop2 {
 
         dataStorageConfig = (SCYamlConfig<ShopDataStorageConfig>) SCYamlConfig.Builder.builder(ShopDataStorageConfig.class)
                 .defaults(new ShopDataStorageConfig())
-                .modId(MODID)
+                .modId("sdmshop")
                 .side(ConfigSide.COMMON)
                 .path(SDMPlatform.resolveSdmDir(Platform.getConfigFolder(), "shop"))
                 .build();

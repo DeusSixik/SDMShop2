@@ -66,7 +66,7 @@ public class SDMEconomyService implements ShopServerGetter {
         this.dataFolder = SDMPlatform.resolveSdmDir(Platform.getConfigFolder(), "economy/accounts");
         this.accountRepository = new RepositoryStorage<>(manager.createRepository(
                 dataFolder,
-                "accounts",
+                SDMEconomyPlatform.getDataStorageConfig().getCurrentConfig().mongodb.accountsCollection,
                 new RepoDefinition<>(
                         UUID::toString,
                         UUID::fromString,

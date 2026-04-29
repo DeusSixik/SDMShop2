@@ -23,8 +23,13 @@ public class ShopDataStorageConfig {
         @ConfigComment("Data base name")
         public String database = "sdm_shop";
 
-        @ConfigComment("Collection name for shops")
-        public String collection = "shops";
+        public String shopsCollection = "shops";
+
+        public String limiterOffersCollection = "limiter_offers";
+
+        public String limiterPlayersCollection = "limiter_players";
+
+        public String dailyStatsCollection = "daily_stats";
 
         @ConfigComment("A unique name for this server (eg: \"survival_1\", \"lobby\").\nUsed for echo protection (to prevent the server from updating itself).\nIf left blank, a random UUID will be generated.")
         public String serverName = "server_1";

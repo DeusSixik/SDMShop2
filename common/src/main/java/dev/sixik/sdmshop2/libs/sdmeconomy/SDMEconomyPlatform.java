@@ -7,6 +7,7 @@ import dev.sixik.sdmshop2.libs.platform.ServerOperation;
 import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.JsonRepositoryManager;
 import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.MongoRepositoryManager;
 import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.RepositoryManager;
+import dev.sixik.sdmshop2.libs.sdmeconomy.config.SDMEconomyDataStorageConfig;
 import dev.sixik.sdmshop2.libs.sdmeconomy.custom_currency.ExternalItemCurrency;
 import dev.sixik.sdmshop2.libs.sdmeconomy.network.SDMEconomyNetwork;
 import dev.sixik.sdmshop2.libs.sdmeconomy.network.packets.SendDynamicCurrencyS2C;
@@ -87,7 +88,7 @@ public class SDMEconomyPlatform {
                 .defaults(new SDMEconomyDataStorageConfig())
                 .modId(MODID)
                 .side(ConfigSide.COMMON)
-                .path(SDMPlatform.resolveSdmDir(Platform.getConfigFolder(), "shop"))
+                .path(SDMPlatform.resolveSdmDir(Platform.getConfigFolder(), "economy"))
                 .build();
         dataStorageConfig.init();
 
