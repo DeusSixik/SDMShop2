@@ -74,12 +74,13 @@ public class CatalogComponent extends ShopComponent {
 
         @Override
         public CatalogComponent fromNetwork(FriendlyByteBuf buf) {
-            return new CatalogComponent(buf.readUtf());
+            return new CatalogComponent(buf.readUtf(), buf.readUUID());
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf buf, CatalogComponent component) {
             buf.writeUtf(component.getId());
+            buf.writeUUID(component.getUuid());
         }
 
         @Override

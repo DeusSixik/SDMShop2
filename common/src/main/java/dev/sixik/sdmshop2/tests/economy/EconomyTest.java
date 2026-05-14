@@ -12,7 +12,7 @@ import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyService;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
-import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
+import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
 import dev.sixik.sdmshop2.libs.shop.components.CommandRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ItemRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.misc.CatalogComponent;
@@ -21,6 +21,8 @@ import dev.sixik.sdmshop2.libs.shop.components.misc.ShopOffersContainerComponent
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
 import dev.sixik.sdmshop2.libs.shop.components.promo.conditions.PromoTimeComponent;
 import dev.sixik.sdmshop2.libs.shop.components.promo.effects.DiscountComponent;
+import dev.sixik.sdmshop2.libs.shop.generator.DefaultShopGenerator;
+import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncBridge;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
 import dev.sixik.sdmshop2.libs.shop.processors.ShopTransactionProcessor;
@@ -49,7 +51,13 @@ public class EconomyTest {
 
     private static EventResult drop(Player player, ItemEntity itemEntity) {
 
-        new ShopScreenManager().openGui();
+        ShopInstance shop = ShopTable.Instance.getShop(DefaultShopGenerator.ID);
+        if(shop == null) {
+            DefaultShopGenerator.registerDefault();
+            shop = ShopTable.Instance.getShop(DefaultShopGenerator.ID);
+        }
+
+        ShopNetworkManager.sendShopDataAndOpen(shop, (ServerPlayer) player);
         return EventResult.interruptDefault();
     }
 
@@ -113,7 +121,7 @@ public class EconomyTest {
         ShopCategoriesContainerComponent categoryManager = manager.getComponent(ShopCategoriesContainerComponent.class).get();
 //        categoryManager.reindex();
 
-        System.out.println("Categorise Entries: " + categoryManager.getCategoriesEntry(categoryId).size());
+        System.out.println("Categorise Entries: " + categoryManager.getCatalogsEntry(categoryId).size());
 
 
 

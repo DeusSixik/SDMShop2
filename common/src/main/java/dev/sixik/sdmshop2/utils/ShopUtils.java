@@ -1,5 +1,10 @@
 package dev.sixik.sdmshop2.utils;
 
+import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTable;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableClient;
 import dev.sixik.sdmshop2.libs.shop.base.limiter.ShopLimiterTableServer;
@@ -7,7 +12,12 @@ import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -52,5 +62,31 @@ public class ShopUtils {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         writer.accept(buf);
         return buf;
+    }
+
+    public static Component getTranslation(String txt) {
+        return getTranslation(txt, txt);
+    }
+
+    public static Component getTranslation(String txt, String or) {
+        if(I18n.exists(txt))
+            return Component.translatable(txt);
+        return Component.literal(or);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void openWidget(WidgetGroup panel) {
+        RenderSystem.recordRenderCall(() -> {
+            final var minecraft = Minecraft.getInstance();
+            final var entityPlayer = minecraft.player;
+
+            ModularUI ui = new ModularUI(panel, IUIHolder.EMPTY, entityPlayer);
+            ui.setFullScreen();
+            ui.initWidgets();
+            ModularUIGuiContainer ModularUIGuiContainer = new ModularUIGuiContainer(ui, entityPlayer.containerMenu.containerId);
+
+            minecraft.setScreen(ModularUIGuiContainer);
+            entityPlayer.containerMenu = ModularUIGuiContainer.getMenu();
+        });
     }
 }

@@ -6,6 +6,7 @@ import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopEntryPanel;
 import dev.sixik.sdmshop2.libs.shop.client.screens.ShopScreenManager;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
+import dev.sixik.sdmshop2.utils.ShopUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -102,7 +103,7 @@ public class ShopMainPanel extends WidgetGroup {
         //Кнопка создания оффера
         ButtonWidget createOffer = new ButtonWidget(topBar.getSizeWidth() - 152,2,28,28, clickData ->{
             WidgetGroup offerPanel = new CreateOfferPanel();
-            ShopScreenManager.INSTANCE.openGui(offerPanel);
+            ShopUtils.openWidget(offerPanel);
         });
 
         ResourceLocation skin = Minecraft.getInstance().player.getSkinTextureLocation();

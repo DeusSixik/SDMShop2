@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.components.api.IComponentType;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
@@ -15,6 +17,8 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
     public static final IComponentType<ShopCategoriesContainerComponent> TYPE = new Type();
 
     protected final Map<UUID, List<ShopOffer>> indexedEntries = new ConcurrentHashMap<>();
+
+    protected final Map<UUID, CatalogComponent> catalogComponentMap = new Object2ObjectOpenHashMap<>();
 
     @Override
     public IComponentType<?> getType() {
@@ -48,22 +52,28 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
             if(opt2.isEmpty()) throw new NullPointerException("ShopEntry didn't have 'CategoryComponent'!");
 
             CatalogComponent categoryComponent = opt2.get();
+
             indexedEntries.computeIfAbsent(categoryComponent.getUuid(), (id) -> new ArrayList<>())
                     .add(entry);
+            catalogComponentMap.computeIfAbsent(categoryComponent.getUuid(), (id) -> categoryComponent);
         }
     }
 
     /**
      * Возвращает копию массива UUID ключей категорий
      */
-    public List<UUID> getCategorise() {
+    public List<UUID> getCatalogsEntry() {
         return new ArrayList<>(indexedEntries.keySet());
+    }
+
+    public ObjectArrayList<CatalogComponent> getCatalogsComponents() {
+        return new ObjectArrayList<>(catalogComponentMap.values());
     }
 
     /**
      * Возвращает копию массива Товаров категории
      */
-    public List<ShopOffer> getCategoriesEntry(UUID categoryId) {
+    public List<ShopOffer> getCatalogsEntry(UUID categoryId) {
         return new ArrayList<>(indexedEntries.getOrDefault(categoryId, new ArrayList<>()));
     }
 

@@ -16,6 +16,8 @@ import net.minecraft.world.item.Items;
 
 public class DefaultShopGenerator {
 
+    public static final ResourceLocation ID = ResourceLocation.tryBuild("sdm", "default");
+
     private static final String EMERALD_MONEY = "emerald";
     private static final String GOLD_MONEY = "gold";
     private static final String DIAMOND_MONEY = "diamond";
@@ -33,7 +35,7 @@ public class DefaultShopGenerator {
             throw new IllegalStateException("ShopTable is not initialized");
         }
 
-        if(ShopTable.Instance.getShop(ResourceLocation.tryBuild("sdm", "default")) != null) {
+        if(ShopTable.Instance.getShop(ID) != null) {
             return;
         }
 

@@ -6,6 +6,7 @@ import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.client.config.constructors.ComponentConfigWidgetConstructor;
+import dev.sixik.sdmshop2.libs.shop.client.screens_2.ShopScreenController;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponent;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncClientTasks;
 import net.fabricmc.api.EnvType;
@@ -52,7 +53,7 @@ public class SDMShopClient {
     }
 
     public static void openShopGui() {
-        System.out.println("Open Shop");
+        ShopScreenController.openShop();
     }
 
     /**

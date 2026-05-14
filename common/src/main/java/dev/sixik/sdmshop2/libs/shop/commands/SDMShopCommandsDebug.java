@@ -11,6 +11,7 @@ import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
 import dev.sixik.sdmshop2.libs.shop.generator.DefaultShopGenerator;
 import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
 import dev.sixik.sdmshop2.libs.shop.scripting.ScriptConditionComponent;
+import dev.sixik.sdmshop2.utils.ShopUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceLocation;
 
@@ -70,7 +71,7 @@ public class SDMShopCommandsDebug {
         CommandBuilder.create("sdm_shop tests config")
                 .requires(2)
                 .executesVoid((ctx) -> {
-                    ShopScreenManager.INSTANCE.openGui(new ComponentConfigurationGroup());
+                    ShopUtils.openWidget(new ComponentConfigurationGroup());
                 })
                 .register(dispatcher);
     }
