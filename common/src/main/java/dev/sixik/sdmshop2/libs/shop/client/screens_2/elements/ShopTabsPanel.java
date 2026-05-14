@@ -1,5 +1,6 @@
 package dev.sixik.sdmshop2.libs.shop.client.screens_2.elements;
 
+import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens_2.elements.base.ShopDraggableScrollableWidgetGroup;
 import dev.sixik.sdmshop2.libs.shop.client.screens_2.elements.tabs.ShopTabElement;
@@ -34,7 +35,7 @@ public class ShopTabsPanel extends ShopDraggableScrollableWidgetGroup implements
     @Override
     public void initWidget() {
         setBackground(new ColorRectAndBorderTexture(0x66000000, ShopColors.BORDER, 1).setRadius(6));
-        setYScrollBarWidth(SCROLLBAR_WIDTH);
+        setYScrollBarWidth(SCROLLBAR_WIDTH).setYBarStyle(null, new ColorRectTexture(-1));
         super.initWidget();
     }
 
@@ -42,10 +43,10 @@ public class ShopTabsPanel extends ShopDraggableScrollableWidgetGroup implements
     public void alightWidget() {
         rebuildCatalogs();
 
-        if(!initialized) return;
+        if (!initialized) return;
 
         for (int i = 0; i < widgets.size(); i++) {
-            if(widgets.get(i) instanceof ShopUiElement element)
+            if (widgets.get(i) instanceof ShopUiElement element)
                 element.alightWidget();
         }
     }

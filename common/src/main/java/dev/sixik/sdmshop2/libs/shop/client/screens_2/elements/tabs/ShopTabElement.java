@@ -1,6 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop.client.screens_2.elements.tabs;
 
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.sixik.sdmshop2.libs.shop.client.ShopColors;
 import dev.sixik.sdmshop2.libs.shop.client.screens_2.elements.ShopUiElement;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMTextLabel;
@@ -45,6 +46,18 @@ public class ShopTabElement extends WidgetGroup implements ShopUiElement {
         setHoverTexture(new ColorRectAndBorderTexture(0x555C6BC0, 0xAA7986CB, 1).setRadius(5));
         setDrawBackgroundWhenHover(false);
         addWidget(textLabel);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        boolean isClick = super.mouseClicked(mouseX, mouseY, button);
+        if(isClick && button == InputConstants.MOUSE_BUTTON_LEFT) {
+
+
+            return true;
+        }
+
+        return false;
     }
 
     @Override
