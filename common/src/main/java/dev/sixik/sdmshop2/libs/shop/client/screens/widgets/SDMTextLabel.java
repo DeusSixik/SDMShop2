@@ -20,13 +20,16 @@ public class SDMTextLabel extends Widget {
 
     public int color = 0xFFFFFFFF;
 
-    // Флаг, определяющий, должен ли текст сжиматься под размеры виджета
     protected boolean autoScale = false;
 
-    // Вспомогательные переменные для авто-скейлинга
     protected float currentRenderScale = 1.0f;
     protected int renderX = 0;
     protected int renderY = 0;
+
+    protected int paddingLeft = 0;
+    protected int paddingRight = 0;
+    protected int paddingTop = 0;
+    protected int paddingBottom = 0;
 
     public SDMTextLabel(Component text) {
         this(0, 0, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, text);
@@ -39,13 +42,28 @@ public class SDMTextLabel extends Widget {
     public SDMTextLabel(Position selfPosition, Size size, Component text) {
         super(selfPosition, size);
         this.text = text;
-        recalculateAutoScale(); // Считаем масштаб при создании, если задан жесткий размер
+        recalculateAutoScale();
     }
 
     public SDMTextLabel(int x, int y, int width, int height, Component text) {
         super(x, y, width, height);
         this.text = text;
         recalculateAutoScale();
+    }
+
+    public SDMTextLabel setPadding(int padding) {
+        return setPadding(padding, padding, padding, padding);
+    }
+
+    public SDMTextLabel setPadding(int left, int right, int top, int bottom) {
+        this.paddingLeft = left;
+        this.paddingRight = right;
+        this.paddingTop = top;
+        this.paddingBottom = bottom;
+        if (autoScale) {
+            recalculateAutoScale();
+        }
+        return this;
     }
 
     /**
@@ -61,12 +79,10 @@ public class SDMTextLabel extends Widget {
     public void setText(Component text) {
         this.text = text;
         if (!autoScale) {
-            // Если авто-масштабирование выключено, меняем размер виджета под текст
             int newWidth = (int) (Minecraft.getInstance().font.width(text) * scale);
             int newHeight = (int) (Minecraft.getInstance().font.lineHeight * scale);
             this.setSize(newWidth, newHeight);
         } else {
-            // Если включено, пересчитываем масштаб, чтобы текст влез в текущие размеры виджета
             recalculateAutoScale();
         }
     }
@@ -100,34 +116,29 @@ public class SDMTextLabel extends Widget {
     protected void recalculateAutoScale() {
         if (!autoScale || text == null) {
             currentRenderScale = this.scale;
+            renderX = paddingLeft;
+            renderY = paddingTop;
             return;
         }
 
-        int textWidth = Minecraft.getInstance().font.width(text);
-        int textHeight = Minecraft.getInstance().font.lineHeight;
+        int textWidth = getTextWidth();
+        int textHeight = getTextHeight();
 
         if (textWidth == 0 || textHeight == 0) return;
 
-        // Вычисляем максимально возможный масштаб по X и Y
-        float scaleX = (float) this.getSizeWidth() / textWidth;
-        float scaleY = (float) this.getSizeHeight() / textHeight;
+        float availableW = Math.max(0f, this.getSizeWidth() - paddingLeft - paddingRight);
+        float availableH = Math.max(0f, this.getSizeHeight() - paddingTop - paddingBottom);
 
-        // Берем минимальный масштаб, чтобы текст не обрезался ни по одной из осей.
-        // Ограничиваем сверху заданным scale (или 1.0f), чтобы текст не увеличивался,
-        // если коробка слишком большая, а только сжимался, если не влезает.
+        float scaleX = availableW / textWidth;
+        float scaleY = availableH / textHeight;
+
         currentRenderScale = Math.min(this.scale, Math.min(scaleX, scaleY));
 
-        // Вычисляем смещение для центрирования текста по вертикали (опционально)
-        // Если хочешь выравнивание по левому верхнему краю, просто оставь 0
+        float scaledWidth = textWidth * currentRenderScale;
         float scaledHeight = textHeight * currentRenderScale;
-        renderY = (int) ((this.getSizeHeight() - scaledHeight) / 2.0f);
 
-        // Для выравнивания по левому краю:
-        renderX = 0;
-
-        // Если нужно выравнивание по центру по горизонтали, раскомментируй эту строку:
-        // float scaledWidth = textWidth * currentRenderScale;
-        // renderX = (int) ((this.getSizeWidth() - scaledWidth) / 2.0f);
+        renderX = (int) (paddingLeft + (availableW - scaledWidth) * .5f);
+        renderY = (int) (paddingTop + (availableH - scaledHeight) * .5f);
     }
 
     @Override
@@ -145,14 +156,20 @@ public class SDMTextLabel extends Widget {
 
         poseStack.pushPose();
 
-        // Сдвигаемся к позиции виджета + смещение для выравнивания (renderX/Y)
         poseStack.translate(position.getX() + renderX, position.getY() + renderY, 0);
 
-        // Применяем вычисленный масштаб
         poseStack.scale(currentRenderScale, currentRenderScale, 1.0f);
 
         graphics.drawString(Minecraft.getInstance().font, text, 0, 0, color, false);
 
         poseStack.popPose();
+    }
+
+    public int getTextWidth() {
+        return Minecraft.getInstance().font.width(this.text);
+    }
+
+    public int getTextHeight() {
+        return Minecraft.getInstance().font.lineHeight;
     }
 }

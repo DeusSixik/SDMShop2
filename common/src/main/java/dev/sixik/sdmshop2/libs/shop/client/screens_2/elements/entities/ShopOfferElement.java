@@ -3,6 +3,7 @@ package dev.sixik.sdmshop2.libs.shop.client.screens_2.elements.entities;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import dev.sixik.sdmshop2.libs.platform.render.RenderHelpUtils;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMTextLabel;
 import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.SDMZoneTextLabel;
@@ -10,10 +11,13 @@ import dev.sixik.sdmshop2.libs.shop.client.screens.widgets.ShopEmptyWidget;
 import dev.sixik.sdmshop2.libs.shop.client.screens_2.elements.ShopUiElement;
 import dev.sixik.sdmshop2.libs.shop.client.textures.ColorRectAndBorderTexture;
 import dev.sixik.sdmshop2.libs.shop.components.misc.NameComponent;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
 
 public class ShopOfferElement extends WidgetGroup implements ShopUiElement {
@@ -49,8 +53,8 @@ public class ShopOfferElement extends WidgetGroup implements ShopUiElement {
         addWidget(badgeBackground = new ShopEmptyWidget());
         badgeBackground.setBackground(new ColorRectTexture(0xFFAA0000).setRadius(2)); // Темно-красный
 
+
         addWidget(badgeText = new SDMTextLabel(Component.literal("Лим. 1")));
-        badgeText.setScale(0.6f); // Делаем текст бейджа маленьким
 
         // 4. Название (Zone Label)
         NameComponent nameComponent = shopEntity.getComponent(NameComponent.class).orElse(null);
@@ -80,32 +84,29 @@ public class ShopOfferElement extends WidgetGroup implements ShopUiElement {
         iconWidget.setSelfPosition(space_x + iconPadding, space_y + iconPadding);
         iconWidget.setSize(iconSize, iconSize);
 
-        // --- 3. ВЫРАВНИВАНИЕ БЕЙДЖА (Якорь справа) ---
-        int badgeWidth = 26; // Ширина плашки бейджа
+        int badgeWidth = 26;
         int badgeHeight = 10;
-        // Координата X бейджа = край хэдера - ширина бейджа - отступ
         int badgeX = (space_x + headerWidth) - badgeWidth - iconPadding;
         int badgeY = space_y + iconPadding;
 
         badgeBackground.setSelfPosition(badgeX, badgeY);
         badgeBackground.setSize(badgeWidth, badgeHeight);
 
-        // Центрируем текст внутри бейджа (приблизительно)
-        badgeText.setSelfPosition(badgeX + 2, badgeY + 2);
+        badgeText.setSize(badgeWidth, badgeHeight);
+        badgeText.setSelfPosition(badgeX, badgeY);
 
-        // --- 4. ВЫРАВНИВАНИЕ НАЗВАНИЯ (Заполняет пространство посередине) ---
+        badgeText.setScale(1.0f);
+        badgeText.setAutoScale(true);
+        badgeText.setPadding(2);
+
         if(nameLabel != null) {
-            // Начинаем текст сразу после иконки
             int titleX = iconWidget.getSelfPositionX() + iconSize + 4;
             int titleY = space_y + iconPadding;
-
-            // Ширина текста = пространство между иконкой и бейджем
             int titleWidth = badgeX - titleX - 4;
             int titleHeight = headerHeight - iconPadding * 2;
 
             nameLabel.setSelfPosition(titleX, titleY);
             nameLabel.setSize(titleWidth, titleHeight);
-            // Метод setSize внутри SDMZoneTextLabel автоматически пересчитает масштаб!
         }
     }
 }
