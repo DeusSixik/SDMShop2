@@ -7,7 +7,7 @@ import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;
 import dev.sixik.sdmshop2.libs.shop.components.api.*;
-import dev.sixik.sdmshop2.libs.shop.network.async.AsyncBridge;
+import dev.sixik.sdmshop2.libs.platform.utils.network.async.AsyncBridge;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncClientTasks;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
 import dev.sixik.sdmshop2.utils.NetworkExtern;

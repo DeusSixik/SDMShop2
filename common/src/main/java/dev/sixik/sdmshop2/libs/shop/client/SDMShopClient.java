@@ -48,10 +48,6 @@ public class SDMShopClient {
 
     public static ShopInstance Shop = ShopInstance.createManager(ShopInstance.NULL_MANAGER, false);
 
-    public static void init() {
-        AsyncClientTasks.init();
-    }
-
     public static void openShopGui() {
         ShopScreenController.openShop();
     }

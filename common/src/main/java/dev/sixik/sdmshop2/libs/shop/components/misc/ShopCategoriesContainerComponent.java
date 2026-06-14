@@ -62,8 +62,8 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
     /**
      * Возвращает копию массива UUID ключей категорий
      */
-    public List<UUID> getCatalogsEntry() {
-        return new ArrayList<>(indexedEntries.keySet());
+    public ObjectArrayList<UUID> getCatalogsEntry() {
+        return new ObjectArrayList<>(indexedEntries.keySet());
     }
 
     public ObjectArrayList<CatalogComponent> getCatalogsComponents() {
@@ -73,8 +73,8 @@ public class ShopCategoriesContainerComponent extends ShopComponent {
     /**
      * Возвращает копию массива Товаров категории
      */
-    public List<ShopOffer> getCatalogsEntry(UUID categoryId) {
-        return new ArrayList<>(indexedEntries.getOrDefault(categoryId, new ArrayList<>()));
+    public ObjectArrayList<ShopOffer> getCatalogsEntry(UUID categoryId) {
+        return new ObjectArrayList<>(indexedEntries.getOrDefault(categoryId, new ObjectArrayList<>()));
     }
 
     private static class Type implements IComponentType<ShopCategoriesContainerComponent> {

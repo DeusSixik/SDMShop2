@@ -1,8 +1,14 @@
 package dev.sixik.sdmshop2.libs.platform;
 
 import dev.architectury.event.events.common.LifecycleEvent;
-import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
+import dev.architectury.platform.Platform;
+import dev.sixik.sdmshop2.libs.platform.utils.repository.RepositoryType;
+import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.RepositoryManager;
+import dev.sixik.sdmshop2.libs.shop.network.async.AsyncClientTasks;
+import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
+import net.fabricmc.api.EnvType;
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +32,9 @@ public class SDMPlatform {
     }
 
     public static void addTask(Object o) {
-        if(o instanceof ServerOperation serverOperation)
+        if (o instanceof ServerOperation serverOperation)
             addOperation(serverOperation);
-        if(o instanceof ThreadingOperationTimeSave timeSaveTask)
+        if (o instanceof ThreadingOperationTimeSave timeSaveTask)
             addTimeSaveTask(timeSaveTask);
     }
 
@@ -55,6 +61,11 @@ public class SDMPlatform {
     }
 
     public static void init() {
+        AsyncServerTasks.init();
+
+        if (Platform.getEnv() == EnvType.CLIENT)
+            AsyncClientTasks.init();
+
         addOperation(AUTO_SAVE_MANAGER);
         LifecycleEvent.SERVER_BEFORE_START.register(SDMPlatform::onServerOperationLoad);
         LifecycleEvent.SERVER_STOPPED.register(SDMPlatform::onServerOperationUnload);
@@ -78,5 +89,12 @@ public class SDMPlatform {
         }
 
         return targetDir;
+    }
+
+    @Nullable
+    public static RepositoryManager invokeCreateManagerEvent(String name, RepositoryType type, @Nullable RepositoryManager defaultManager) {
+        final var event = new SDMPlatformEvents.RepositoryEvent(name, type, defaultManager);
+        SDMPlatformEvents.REPOSITORY_CREATION.invoker().invoke(event);
+        return event.getManager();
     }
 }

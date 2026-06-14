@@ -30,15 +30,19 @@ public class ShopDraggableScrollableWidgetGroup extends DraggableScrollableWidge
 
     @Override
     public void alightWidget() {
+        invokeAlightWidgets();
+    }
+
+    protected void alightWidgets() {
+
+    }
+
+    public final void invokeAlightWidgets() {
         if(!initialized) return;
 
         for (int i = 0; i < widgets.size(); i++) {
             if(widgets.get(i) instanceof ShopUiElement element)
                 element.alightWidget();
         }
-    }
-
-    protected void alightWidgets() {
-
     }
 }

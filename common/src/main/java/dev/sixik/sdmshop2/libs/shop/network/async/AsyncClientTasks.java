@@ -1,5 +1,7 @@
 package dev.sixik.sdmshop2.libs.shop.network.async;
 
+import dev.sixik.sdmshop2.libs.platform.utils.network.async.AsyncBridge;
+import dev.sixik.sdmshop2.libs.platform.utils.network.async.BlobTransfer;
 import dev.sixik.sdmshop2.libs.shop.base.ShopInstance;
 import dev.sixik.sdmshop2.libs.shop.base.ShopOffer;
 import dev.sixik.sdmshop2.libs.shop.client.SDMShopClient;

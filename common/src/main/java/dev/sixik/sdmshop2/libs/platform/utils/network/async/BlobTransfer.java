@@ -1,4 +1,4 @@
-package dev.sixik.sdmshop2.libs.shop.network.async;
+package dev.sixik.sdmshop2.libs.platform.utils.network.async;
 
 import dev.architectury.networking.NetworkManager;
 import dev.sixik.sdmshop2.SDMShop2;
@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 public class BlobTransfer {
 
-    public static final ResourceLocation CHANNEL = new ResourceLocation(SDMShop2.MODID, "blob_channel");
+    public static final ResourceLocation CHANNEL = new ResourceLocation("sdm_platform_mod", "blob_channel");
 
     /**
      * Optimal chunk size: 50 KB.

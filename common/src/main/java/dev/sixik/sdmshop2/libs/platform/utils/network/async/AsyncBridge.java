@@ -1,4 +1,4 @@
-package dev.sixik.sdmshop2.libs.shop.network.async;
+package dev.sixik.sdmshop2.libs.platform.utils.network.async;
 
 import dev.architectury.networking.NetworkManager;
 import dev.sixik.sdmshop2.SDMShop2;
@@ -16,7 +16,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class AsyncBridge {
-    public static final ResourceLocation CHANNEL = new ResourceLocation(SDMShop2.MODID, "async_bridge");
+    public static final ResourceLocation CHANNEL = new ResourceLocation("sdm_platform_mod", "async_bridge");
 
     private static final Map<Long, CompletableFuture<FriendlyByteBuf>> PENDING = new ConcurrentHashMap<>();
     private static final Map<String, BiFunction<FriendlyByteBuf, NetworkManager.PacketContext, FriendlyByteBuf>> HANDLERS = new ConcurrentHashMap<>();

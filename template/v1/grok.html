@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Плашка набора</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            padding: 40px;
+        }
+
+        .offer-card {
+            width: 340px;
+            background: linear-gradient(145deg, #2c2c2c, #1f1f1f);
+            border: 3px solid #555;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+            color: #eee;
+            transition: all 0.25s;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-6px);
+            border-color: #888;
+        }
+
+        .card-header {
+            background: linear-gradient(#3a3a3a, #2a2a2a);
+            padding: 14px;
+            text-align: center;
+            border-bottom: 3px solid #666;
+        }
+
+        .item-icon {
+            width: 80px;
+            height: 80px;
+            background: #444;
+            border: 3px solid #aaa;
+            margin: 0 auto 10px;
+            image-rendering: pixelated;
+            border-radius: 4px;
+        }
+
+        .item-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffdd88;
+            text-shadow: 0 2px 4px #000;
+        }
+
+        .bundle-tag {
+            display: inline-block;
+            background: #d97706;
+            color: #000;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin-top: 6px;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .price {
+            background: rgba(0,0,0,0.5);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .price-current {
+            font-size: 26px;
+            font-weight: bold;
+            color: #55ff99;
+        }
+
+        .section {
+            margin-bottom: 18px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            color: #bbb;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 4px;
+        }
+
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .reward-item {
+            background: rgba(255,255,255,0.05);
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reward-command {
+            background: #2a1f3d;
+            border-left: 4px solid #c084fc;
+        }
+
+        .reward-prefix {
+            background: #1f2a1f;
+            border-left: 4px solid #4ade80;
+        }
+    </style>
+</head>
+<body>
+
+<div class="offer-card">
+    <div class="card-header">
+        <div class="item-icon"></div>
+        <div class="item-name">Набор «Воин Рассвета»</div>
+        <div class="bundle-tag">НАБОР</div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Цена -->
+        <div class="price">
+            <div class="price-current">850 <span style="color:#ffdd77">монет</span></div>
+        </div>
+
+        <!-- Что входит в набор -->
+        <div class="section">
+            <div class="section-title">Содержимое набора:</div>
+            <div class="rewards-grid">
+
+                <div class="reward-item">
+                    🗡️ <strong>Алмазный меч</strong><br>
+                    <small>Sharpness V, Knockback II</small>
+                </div>
+
+                <div class="reward-item">
+                    💎 <strong>32 Алмаза</strong>
+                </div>
+
+                <div class="reward-item reward-prefix">
+                    ⭐ <strong>Префикс</strong><br>
+                    <small><span style="color:#4ade80">[Воин]</span></small>
+                </div>
+
+                <div class="reward-item reward-command">
+                    ⚡ <strong>Команда</strong><br>
+                    <small>/time set day</small>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Дополнительная информация -->
+        <div class="section">
+            <div class="section-title">Ограничения:</div>
+            <div style="font-size:14px; color:#ffcc77;">
+                • 2 покупки на игрока<br>
+                • Раз в 14 дней
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

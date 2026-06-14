@@ -1,19 +1,14 @@
 package dev.sixik.sdmshop2.libs.shop.config;
 
+import dev.sixik.sdmshop2.libs.platform.utils.repository.RepositoryType;
 import net.shadowking21.shadowconfig.annotation.ConfigComment;
 
 public class ShopDataStorageConfig {
 
 //    @ConfigComment("Values: JSON - The data will be saved in the folder \"config/sdm/shop/shops/*\", MONGODB - The data will be stored in a database that automatically synchronizes data between multiple servers., CUSTOM - Self-written save type \n\nDefault Value: JSON")
-    public StorageType type = StorageType.JSON;
+    public RepositoryType type = RepositoryType.JSON;
 
     public MongoConfig mongodb = new MongoConfig();
-
-    public enum StorageType {
-        JSON,
-        MONGODB,
-        CUSTOM
-    }
 
     public static class MongoConfig {
 

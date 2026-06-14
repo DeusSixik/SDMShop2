@@ -23,7 +23,7 @@ import dev.sixik.sdmshop2.libs.shop.components.promo.conditions.PromoTimeCompone
 import dev.sixik.sdmshop2.libs.shop.components.promo.effects.DiscountComponent;
 import dev.sixik.sdmshop2.libs.shop.generator.DefaultShopGenerator;
 import dev.sixik.sdmshop2.libs.shop.network.ShopNetworkManager;
-import dev.sixik.sdmshop2.libs.shop.network.async.AsyncBridge;
+import dev.sixik.sdmshop2.libs.platform.utils.network.async.AsyncBridge;
 import dev.sixik.sdmshop2.libs.shop.network.async.AsyncServerTasks;
 import dev.sixik.sdmshop2.libs.shop.processors.ShopTransactionProcessor;
 import dev.sixik.sdmshop2.libs.shop.scripting.ScriptConditionComponent;

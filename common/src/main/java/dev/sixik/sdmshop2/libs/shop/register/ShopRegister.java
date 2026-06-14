@@ -4,10 +4,7 @@ import dev.sixik.sdmshop2.libs.shop.components.CommandRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.ItemRewardComponent;
 import dev.sixik.sdmshop2.libs.shop.components.conditions.CooldownConditionComponent;
 import dev.sixik.sdmshop2.libs.shop.components.limiter.LimiterComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.RenderHideComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.CatalogComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.ShopCategoriesContainerComponent;
-import dev.sixik.sdmshop2.libs.shop.components.misc.ShopOffersContainerComponent;
+import dev.sixik.sdmshop2.libs.shop.components.misc.*;
 import dev.sixik.sdmshop2.libs.shop.components.api.ShopComponentRegistry;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyCostComponent;
 import dev.sixik.sdmshop2.libs.shop.components.money.MoneyRewardComponent;
@@ -35,6 +32,7 @@ public class ShopRegister {
         ShopComponentRegistry.register(DiscountComponent.TYPE);
         ShopComponentRegistry.register(PromoCooldownComponent.TYPE);
         ShopComponentRegistry.register(CooldownConditionComponent.TYPE);
+        ShopComponentRegistry.register(NameComponent.TYPE);
 
         ShopComponentRegistry.register(ScriptRewardComponent.TYPE);
         ShopComponentRegistry.register(ScriptConditionComponent.TYPE);

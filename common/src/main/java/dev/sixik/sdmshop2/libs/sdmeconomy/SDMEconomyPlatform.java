@@ -4,6 +4,7 @@ import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.platform.Platform;
 import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
 import dev.sixik.sdmshop2.libs.platform.ServerOperation;
+import dev.sixik.sdmshop2.libs.platform.utils.repository.RepositoryType;
 import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.JsonRepositoryManager;
 import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.MongoRepositoryManager;
 import dev.sixik.sdmshop2.libs.platform.utils.repositoryManager.RepositoryManager;
@@ -45,8 +46,13 @@ public class SDMEconomyPlatform {
         if (instance == null) {
             final var config = SDMEconomyPlatform.getDataStorageConfig().getCurrentConfig();
             instance = switch (config.type) {
-                case JSON, CUSTOM -> new JsonRepositoryManager(server);
+                case JSON -> new JsonRepositoryManager(server);
                 case MONGODB -> new MongoRepositoryManager(config.mongodb.uri, config.mongodb.database, config.mongodb.serverName);
+                case CUSTOM -> SDMPlatform.invokeCreateManagerEvent(
+                        "sdm_economy",
+                        RepositoryType.CUSTOM,
+                        new JsonRepositoryManager(server)
+                );
             };
         }
 

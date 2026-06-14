@@ -4,6 +4,8 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import dev.sixik.sdmshop2.libs.shop.client.screens_2.elements.ShopUiElement;
 
+import java.util.List;
+
 public class ShopWidgetGroup extends WidgetGroup implements ShopUiElement {
 
     @Override
@@ -30,6 +32,12 @@ public class ShopWidgetGroup extends WidgetGroup implements ShopUiElement {
 
     @Override
     public void alightWidget() {
+        invokeAlightWidgets();
+    }
+
+    protected void alightWidgets() { }
+
+    public final void invokeAlightWidgets() {
         if(!initialized) return;
 
         for (int i = 0; i < widgets.size(); i++) {
@@ -38,7 +46,7 @@ public class ShopWidgetGroup extends WidgetGroup implements ShopUiElement {
         }
     }
 
-    protected void alightWidgets() {
-
+    public List<Widget> getWidgets() {
+        return widgets;
     }
 }

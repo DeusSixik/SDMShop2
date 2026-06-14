@@ -6,6 +6,7 @@ import com.mojang.logging.LogUtils;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.platform.Platform;
 import dev.sixik.sdmshop2.libs.platform.SDMPlatform;
+import dev.sixik.sdmshop2.libs.platform.utils.repository.RepositoryType;
 import dev.sixik.sdmshop2.libs.sdmeconomy.SDMEconomyPlatform;
 import dev.sixik.sdmshop2.libs.sdmeconomy.commands.SDMEconomyCommands;
 import dev.sixik.sdmshop2.libs.shop.base.ShopTable;
@@ -42,8 +43,13 @@ public final class SDMShop2 {
         if(instance == null) {
             final var config = SDMShop2.getDataStorageConfig().getCurrentConfig();
             instance = switch (config.type) {
-                case JSON, CUSTOM -> new JsonRepositoryManager(server);
+                case JSON -> new JsonRepositoryManager(server);
                 case MONGODB -> new MongoRepositoryManager(config.mongodb);
+                case CUSTOM -> SDMPlatform.invokeCreateManagerEvent(
+                        "sdm_shop",
+                        RepositoryType.CUSTOM,
+                        new JsonRepositoryManager(server)
+                );
             };
         }
 
@@ -51,6 +57,8 @@ public final class SDMShop2 {
     }
 
     public static void init() {
+        SDMPlatform.init();
+
         EconomyTest.init();
 
         SDMPlatform.addTask(SHOP_TABLE_MANAGER);
@@ -66,8 +74,6 @@ public final class SDMShop2 {
             SDMEconomyCommands.registerCommands(s1, s2, s3);
             SDMShopCommands.registerCommands(s1, s2, s3);
         });
-
-        SDMPlatform.init();
 
         dataStorageConfig = (SCYamlConfig<ShopDataStorageConfig>) SCYamlConfig.Builder.builder(ShopDataStorageConfig.class)
                 .defaults(new ShopDataStorageConfig())

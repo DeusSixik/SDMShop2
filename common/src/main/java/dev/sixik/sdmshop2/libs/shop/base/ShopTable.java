@@ -116,6 +116,7 @@ public final class ShopTable implements ShopServerGetter{
      */
     public void addShop(ShopInstance instance) {
         shopsRepository.putValue(instance.getId(), instance);
+        SDMShop2.LOGGER.info("Create new shop with id: {}", instance.getId());
     }
 
     /**

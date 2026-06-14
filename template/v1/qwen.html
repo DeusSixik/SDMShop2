@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>SDM Shop 2 - Offer UI Concept</title>
+    <style>
+        :root {
+            --mc-bg: #c6c6c6;
+            --mc-light: #ffffff;
+            --mc-dark: #555555;
+            --mc-shadow: #373737;
+            --mc-green: #55ff55;
+            --mc-red: #ff5555;
+            --mc-gold: #ffaa00;
+            --mc-yellow: #ffff55;
+        }
+
+        body {
+            background: #2c2c2c;
+            font-family: 'Courier New', monospace;
+            color: var(--mc-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        h1 {
+            color: var(--mc-yellow);
+            text-shadow: 2px 2px 0 var(--mc-shadow);
+            letter-spacing: 2px;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Базовый стиль плашки товара */
+        .offer-card {
+            background: #8b8b8b;
+            border: 4px solid;
+            border-color: var(--mc-light) var(--mc-shadow) var(--mc-shadow) var(--mc-light);
+            padding: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.1s;
+            image-rendering: pixelated;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Заголовок и главный предмет */
+        .offer-header {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: #555555;
+            padding: 10px;
+            border: 2px solid;
+            border-color: var(--mc-shadow) var(--mc-light) var(--mc-light) var(--mc-shadow);
+        }
+
+        .offer-icon {
+            width: 48px;
+            height: 48px;
+            background: #373737;
+            border: 2px solid;
+            border-color: var(--mc-shadow) var(--mc-light) var(--mc-light) var(--mc-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .offer-title {
+            flex: 1;
+        }
+
+        .offer-title h3 {
+            margin: 0;
+            color: var(--mc-light);
+            text-shadow: 2px 2px 0 var(--mc-shadow);
+            font-size: 16px;
+        }
+
+        .offer-subtitle {
+            font-size: 11px;
+            color: #aaaaaa;
+            margin-top: 2px;
+        }
+
+        /* Разделитель */
+        .divider {
+            height: 2px;
+            background: var(--mc-shadow);
+            opacity: 0.5;
+        }
+
+        /* Блок Наград (Reward) */
+        .reward-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label {
+            font-size: 10px;
+            color: var(--mc-yellow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 55px;
+            text-shadow: 1px 1px 0 var(--mc-shadow);
+        }
+
+        .reward-items {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .reward-chip {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #373737;
+            padding: 4px 8px;
+            border: 2px solid;
+            border-color: var(--mc-shadow) var(--mc-light) var(--mc-light) var(--mc-shadow);
+            font-size: 12px;
+            color: var(--mc-light);
+        }
+
+        /* Блок Цен (Costs) - альтернативные варианты */
+        .cost-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .cost-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #555555;
+            padding: 6px 10px;
+            border: 2px solid;
+            border-color: var(--mc-shadow) var(--mc-light) var(--mc-light) var(--mc-shadow);
+            font-size: 13px;
+            justify-content: space-between;
+        }
+
+        .cost-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .price-original {
+            text-decoration: line-through;
+            color: #888;
+            margin-right: 4px;
+        }
+
+        .price-discounted {
+            color: var(--mc-green);
+            font-weight: bold;
+            text-shadow: 1px 1px 0 var(--mc-shadow);
+        }
+
+        .price-normal {
+            color: var(--mc-red);
+            font-weight: bold;
+            text-shadow: 1px 1px 0 var(--mc-shadow);
+        }
+
+        /* Бейджи (Условия и акции) */
+        .badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border: 2px solid;
+            border-color: var(--mc-light) var(--mc-shadow) var(--mc-shadow) var(--mc-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 var(--mc-shadow);
+        }
+
+        .badge-limit { background: #aa0000; color: #ffaaaa; }
+        .badge-cooldown { background: #0000aa; color: #aaaaff; }
+        .badge-promo { background: #ffaa00; color: #553300; text-shadow: none; animation: pulse 1s infinite; }
+        .badge-command { background: #00aa00; color: #aaffaa; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Кнопка покупки */
+        .buy-btn {
+            margin-top: auto;
+            padding: 8px;
+            background: #55aa55;
+            border: 4px solid;
+            border-color: var(--mc-light) var(--mc-shadow) var(--mc-shadow) var(--mc-light);
+            color: var(--mc-light);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 var(--mc-shadow);
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+        .buy-btn:hover { background: #66bb66; }
+        .buy-btn:active {
+            border-color: var(--mc-shadow) var(--mc-light) var(--mc-light) var(--mc-shadow);
+        }
+
+        /* Tooltip при наведении */
+        .tooltip {
+            position: absolute;
+            background: #100010;
+            border: 2px solid #2d002d;
+            padding: 8px;
+            font-size: 11px;
+            color: var(--mc-light);
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .offer-card:hover .tooltip { opacity: 1; }
+
+        .tooltip-line { margin: 2px 0; }
+        .tooltip-grey { color: #aaaaaa; }
+        .tooltip-green { color: var(--mc-green); }
+        .tooltip-red { color: var(--mc-red); }
+        .tooltip-gold { color: var(--mc-gold); }
+
+        .legend {
+            background: #1a1a1a;
+            padding: 20px;
+            border: 2px solid #444;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .legend h2 { color: var(--mc-gold); margin-top: 0; }
+        .legend ul { line-height: 1.8; }
+        .legend code {
+            background: #333;
+            padding: 2px 6px;
+            color: var(--mc-green);
+            border-radius: 2px;
+        }
+
+        /* Дополнительные стили для больших наборов */
+        .reward-preview {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .hero-reward {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .hero-reward .item-slot.large {
+            width: 56px;
+            height: 56px;
+            font-size: 40px;
+            border-width: 3px;
+        }
+
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .mini-grid .item-slot {
+            width: 28px;
+            height: 28px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #373737;
+            border: 2px solid;
+            border-color: var(--mc-shadow) var(--mc-light) var(--mc-light) var(--mc-shadow);
+        }
+
+        .mini-grid .more-indicator {
+            font-size: 10px;
+            color: var(--mc-yellow);
+            font-weight: bold;
+        }
+
+        .tooltip-large {
+            width: 280px;
+            white-space: normal;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .tooltip-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 8px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>⚒ SDM SHOP 2 ⚒</h1>
+
+<div class="shop-grid">
+
+    <!-- Вариант 1: Простой товар (1 награда + 1 цена) -->
+    <div class="offer-card">
+        <div class="tooltip">
+            <div class="tooltip-line tooltip-green">Алмазный меч</div>
+            <div class="tooltip-line tooltip-grey">Острый клинок из алмазов</div>
+            <div class="tooltip-line tooltip-gold">Стоимость: 150.5 монет</div>
+        </div>
+        <div class="offer-header">
+            <div class="offer-icon">⚔</div>
+            <div class="offer-title">
+                <h3>Алмазный меч</h3>
+                <div class="offer-subtitle">Простое оружие ближнего боя</div>
+            </div>
+        </div>
+
+        <div class="reward-section">
+            <div class="section-label">Получишь:</div>
+            <div class="reward-items">
+                <div class="reward-chip">⚔ x1</div>
+            </div>
+        </div>
+
+        <div class="cost-section">
+            <div class="section-label">Цена:</div>
+            <div class="cost-option">
+                <div class="cost-left">
+                    <span>🪙</span>
+                    <span class="price-normal">150.5</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="buy-btn">КУПИТЬ</button>
+    </div>
+
+    <!-- Вариант 2: Сложный товар (лимит + несколько наград + кулдаун) -->
+    <div class="offer-card">
+        <div class="tooltip">
+            <div class="tooltip-line tooltip-green">Эпический меч</div>
+            <div class="tooltip-line tooltip-grey">+ 64 алмаза</div>
+            <div class="tooltip-line tooltip-grey">Лимит: 1 покупка на игрока</div>
+        </div>
+        <div class="offer-header">
+            <div class="offer-icon">🗡</div>
+            <div class="offer-title">
+                <h3>Эпический набор</h3>
+                <div class="offer-subtitle">Легендарное снаряжение</div>
+            </div>
+            <div class="badges">
+                <div class="badge badge-limit">Лимит 1</div>
+                <div class="badge badge-cooldown">1 час</div>
+            </div>
+        </div>
+
+        <div class="reward-section">
+            <div class="section-label">Получишь:</div>
+            <div class="reward-items">
+                <div class="reward-chip">🗡 x1</div>
+                <div class="reward-chip">💎 x64</div>
+            </div>
+        </div>
+
+        <div class="cost-section">
+            <div class="section-label">Цена:</div>
+            <div class="cost-option">
+                <div class="cost-left">
+                    <span>🪙</span>
+                    <span class="price-normal">1000</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="buy-btn">КУПИТЬ</button>
+    </div>
+
+    <!-- Вариант 3: Со скидкой (Promo + Discount) -->
+    <div class="offer-card">
+        <div class="tooltip">
+            <div class="tooltip-line tooltip-green">VIP Статус</div>
+            <div class="tooltip-line tooltip-gold">Скидка 50% действует!</div>
+            <div class="tooltip-line tooltip-grey">Команда: /lp user ...</div>
+        </div>
+        <div class="offer-header">
+            <div class="offer-icon">👑</div>
+            <div class="offer-title">
+                <h3>VIP Статус</h3>
+                <div class="offer-subtitle">Привилегии на сервере</div>
+            </div>
+            <div class="badges">
+                <div class="badge badge-promo">-50%</div>
+                <div class="badge badge-command">Cmd</div>
+            </div>
+        </div>
+
+        <div class="reward-section">
+            <div class="section-label">Получишь:</div>
+            <div class="reward-items">
+                <div class="reward-chip">👑 VIP</div>
+            </div>
+        </div>
+
+        <div class="cost-section">
+            <div class="section-label">Цена:</div>
+            <div class="cost-option">
+                <div class="cost-left">
+                    <span>🪙</span>
+                    <span class="price-original">2000</span>
+                    <span class="price-discounted">1000</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="buy-btn">КУПИТЬ СО СКИДКОЙ</button>
+    </div>
+
+    <!-- Вариант 4: Альтернативные способы оплаты (group_id) -->
+    <div class="offer-card">
+        <div class="tooltip">
+            <div class="tooltip-line tooltip-green">Зелье Силы</div>
+            <div class="tooltip-line tooltip-grey">Выберите способ оплаты:</div>
+            <div class="tooltip-line tooltip-grey">- 500 монет</div>
+            <div class="tooltip-line tooltip-grey">- 10 алмазов</div>
+        </div>
+        <div class="offer-header">
+            <div class="offer-icon">🧪</div>
+            <div class="offer-title">
+                <h3>Зелье Силы II</h3>
+                <div class="offer-subtitle">Усиливает атаку на 5 мин</div>
+            </div>
+        </div>
+
+        <div class="reward-section">
+            <div class="section-label">Получишь:</div>
+            <div class="reward-items">
+                <div class="reward-chip">🧪 x1</div>
+            </div>
+        </div>
+
+        <div class="cost-section">
+            <div class="section-label">Цена (ИЛИ):</div>
+            <div class="cost-option">
+                <div class="cost-left">
+                    <span>🪙</span>
+                    <span class="price-normal">500</span>
+                </div>
+            </div>
+            <div class="cost-option">
+                <div class="cost-left">
+                    <span>💎</span>
+                    <span class="price-normal">10</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="buy-btn">КУПИТЬ</button>
+    </div>
+
+    <!-- Вариант 5: Товар-обменник (reward_money + cost_money) -->
+    <div class="offer-card">
+        <div class="tooltip">
+            <div class="tooltip-line tooltip-green">Обмен валюты</div>
+            <div class="tooltip-line tooltip-grey">Меняем алмазы на изумруды</div>
+        </div>
+        <div class="offer-header">
+            <div class="offer-icon">💱</div>
+            <div class="offer-title">
+                <h3>Обменник</h3>
+                <div class="offer-subtitle">Алмазы → Изумруды</div>
+            </div>
+        </div>
+
+        <div class="reward-section">
+            <div class="section-label">Получишь:</div>
+            <div class="reward-items">
+                <div class="reward-chip">🟢 10</div>
+            </div>
+        </div>
+
+        <div class="cost-section">
+            <div class="section-label">Отдашь:</div>
+            <div class="cost-option">
+                <div class="cost-left">
+                    <span>💎</span>
+                    <span class="price-normal">5</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="buy-btn">ОБМЕНЯТЬ</button>
+    </div>
+
+    <!-- Пример HTML-структуры для большого набора -->
+    <div class="offer-card large-bundle">
+        <div class="offer-header">
+            <div class="hero-icon">🗡️</div>
+            <div class="offer-title">
+                <h3>Набор выживания</h3>
+                <div class="offer-subtitle">40 предметов • Редкий</div>
+            </div>
+            <div class="badges">
+                <div class="badge badge-promo">NEW</div>
+            </div>
+        </div>
+
+        <!-- Превью наград: герой + мини-сетка -->
+        <div class="reward-preview">
+            <div class="hero-reward">
+                <div class="item-slot large">🗡️</div>
+                <span class="item-name">Алмазный меч</span>
+            </div>
+            <div class="mini-grid">
+                <div class="item-slot">💎</div>
+                <div class="item-slot">🍖</div>
+                <div class="item-slot">⛏️</div>
+                <div class="item-slot">🛡️</div>
+                <div class="item-slot more-indicator">+36</div>
+            </div>
+        </div>
+
+        <!-- Цена -->
+        <div class="cost-section">
+            <span class="section-label">Цена:</span>
+            <div class="cost-option">
+                <span>🪙</span>
+                <span class="price-normal">2500</span>
+            </div>
+        </div>
+
+        <!-- Кнопка -->
+        <button class="buy-btn">КУПИТЬ НАБОР</button>
+
+        <!-- Tooltip с полным списком -->
+        <div class="tooltip tooltip-large">
+            <div class="tooltip-title">🎁 Полный состав набора:</div>
+            <div class="tooltip-grid">
+                <!-- Генерируется динамически из всех reward_item -->
+                <div class="tooltip-item">🗡️ Алмазный меч (Острота V)</div>
+                <div class="tooltip-item">💎 Алмаз ×64</div>
+                <div class="tooltip-item">🍖 Стейк ×32</div>
+                <!-- ... ещё 37 предметов -->
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="legend">
+    <h2>💡 Концепция дизайна</h2>
+    <ul>
+        <li><b>Компактность:</b> Плашка имеет фиксированный размер и не растёт в зависимости от количества компонентов.</li>
+        <li><b>Главная информация сверху:</b> Иконка предмета + название (генерируется из <code>reward_item</code> или задается вручную).</li>
+        <li><b>Бейджи справа:</b> Короткие индикаторы условий (<code>condition_limiter</code>, <code>condition_cooldown</code>) и акций (<code>promo_*</code>).</li>
+        <li><b>Секция "Получишь":</b> Все <code>reward_*</code> компоненты (иконки + количество). Если наград много - показываем только первые N с "...</li>
+        <li><b>Секция "Цена":</b> Все <code>cost_*</code> компоненты. Если указан <code>group_id</code> - показываем списком как альтернативы ("ИЛИ").</li>
+        <li><b>Скидки:</b> При сработавшем <code>discount</code> зачеркиваем старую цену и показываем новую зеленым цветом.</li>
+        <li><b>Tooltip (подсказка):</b> При наведении мыши на плашку показываем детальный список всех NBT-тегов, полные тексты команд и т.д.</li>
+        <li><b>Автогенерация имени:</b> Если в JSON не указан <code>display_name</code>, парсим первую награду и берем имя предмета.</li>
+    </ul>
+
+    <h2>🔧 Рекомендации по реализации в Java</h2>
+    <ul>
+        <li>Создай класс <code>OfferDisplayData</code>, который принимает список компонентов и собирает их в плоскую структуру для рендера.</li>
+        <li>Используй паттерн <b>Visitor</b> для компонентов, чтобы каждый компонент сам решал, как ему отобразиться.</li>
+        <li>Раздели UI на 2 части: <b>Grid View</b> (эта плашка для списка) и <b>Detail View</b> (полная страница товара по клику).</li>
+        <li>Добавь в JSON товара опциональное поле <code>"display"</code> с кастомными параметрами UI (иконка, цвет фона, название), чтобы можно было переопределить автогенерацию.</li>
+    </ul>
+</div>
+
+</body>
+</html>
